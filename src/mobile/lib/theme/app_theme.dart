@@ -10,6 +10,19 @@ class AppTheme {
   static const Color darkBackground = Color(0xFF0f172a);
   static const Color lightBackground = Colors.white;
   
+  // Light Mode Gradient Colors
+  static const Color lightGradientStart = Color(0xFF5B9BF3); // Xanh dương
+  static const Color lightGradientMid = Color(0xFF6B7FE8);   // Xanh tím
+  static const Color lightGradientEnd = Color(0xFF9B7FE8);   // Tím nhạt
+
+  // Light Mode Orb Colors
+  static const Color lightOrbBlue1 = Color(0xFF3b82f6);
+  static const Color lightOrbBlue2 = Color(0xFF6366f1);
+  static const Color lightOrbBlue3 = Color(0xFF4f46e5);
+  static const Color lightOrbPurple1 = Color(0xFF8b5cf6);
+  static const Color lightOrbPurple2 = Color(0xFFa855f7);
+  static const Color lightOrbPurple3 = Color(0xFF9333ea);
+
   // Card & Surface Colors
   static const Color darkCard = Color(0xFF1e293b);
   static const Color lightCard = Color(0xFFF8FAFC);

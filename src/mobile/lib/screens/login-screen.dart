@@ -197,24 +197,24 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                             if (!widget.testMode)
                               SvgPicture.asset(
                                 'assets/icons/logo-uit.svg',
-                                height: 70,
+                                height: 60, // Reduced from 70 to 60 to fix overflow
                                 colorFilter: const ColorFilter.mode(AppColors.bluePrimary, BlendMode.srcIn),
                               )
                             else
-                              const Icon(Icons.school, size: 70, color: Colors.white54),
-                            const SizedBox(height: 12),
+                              const Icon(Icons.school, size: 60, color: Colors.white54),
+                            const SizedBox(height: 10), // Reduced from 12 to 10
                             Text(
                               'TRƯỜNG ĐẠI HỌC CÔNG NGHỆ THÔNG TIN', // TODO: Localize this string
                               textAlign: TextAlign.center,
                               style: TextStyle(
-                                color: primaryTextColor,
-                                fontSize: 14,
+                                color: isDark ? primaryTextColor : Colors.black, // Changed to black in light mode
+                                fontSize: 13, // Reduced from 14 to 13
                                 letterSpacing: 0.5,
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 50),
+                        const SizedBox(height: 40), // Reduced from 50 to 40
                         Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
@@ -226,13 +226,17 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                             ),
                           ),
                         ),
-                        const SizedBox(height: 30),
-                        // Username Field (TextFormField + validator)
+                        const SizedBox(height: 24), // Reduced from 30 to 24
+                        // Username Field - Press Enter to go to password
                         TextField(
                           key: const Key('login_username_field'),
                           focusNode: _usernameFocus,
                           controller: _usernameController,
-                          onSubmitted: (_) => _onLoginPressed(loc),
+                          textInputAction: TextInputAction.next, // Added: go to next field
+                          onSubmitted: (_) {
+                            // When Enter pressed, move to password field
+                            FocusScope.of(context).requestFocus(_passwordFocus);
+                          },
                           style: TextStyle(color: primaryTextColor),
                           cursorColor: focusedBorderColor,
                           decoration: _inputDecoration(
@@ -244,8 +248,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                             focusedBorderColor: focusedBorderColor,
                           ),
                         ),
-                        const SizedBox(height: 20),
-                        // Password Field (TextFormField + validator)
+                        const SizedBox(height: 18), // Reduced from 20 to 18
+                        // Password Field - Press Enter to login
                         ValueListenableBuilder<bool>(
                           valueListenable: _obscurePasswordNotifier,
                           builder: (context, obscure, _) {
@@ -253,7 +257,11 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                               key: const Key('login_password_field'),
                               focusNode: _passwordFocus,
                               controller: _passwordController,
-                              onSubmitted: (_) => _onLoginPressed(loc),
+                              textInputAction: TextInputAction.done, // Added: indicate this is the last field
+                              onSubmitted: (_) {
+                                // When Enter pressed, trigger login
+                                _onLoginPressed(loc);
+                              },
                               style: TextStyle(color: primaryTextColor),
                               cursorColor: focusedBorderColor,
                               obscureText: obscure,
@@ -274,13 +282,13 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                           },
                         ),
                         if (_errorMessage != null) ...[
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 10), // Reduced from 12 to 10
                           Text(
                             _errorMessage!,
                             style: const TextStyle(color: Colors.redAccent, fontSize: 14, fontWeight: FontWeight.w600),
                           ),
                         ],
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 14), // Reduced from 16 to 14
                         Row(
                           children: [
                             Checkbox(
@@ -294,7 +302,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                             ),
                           ],
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 20), // Reduced from 24 to 20
                         SizedBox(
                           width: double.infinity,
                           height: 50,
@@ -336,7 +344,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                             ),
                           ),
                         ),
-                        const SizedBox(height: 15),
+                        const SizedBox(height: 12), // Reduced from 15 to 12
                         TextButton(
                           onPressed: _isLoading ? null : _launchForgotPasswordUrl,
                           style: TextButton.styleFrom(
@@ -363,7 +371,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                       return Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          // Language toggle
+                          // Language toggle with flag icons
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                             decoration: BoxDecoration(
@@ -387,20 +395,24 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Text(
-                                      'VI',
-                                      style: TextStyle(
-                                        color: langCtrl.locale.languageCode == 'vi' ? AppColors.bluePrimary : secondaryTextColor,
-                                        fontWeight: FontWeight.bold,
+                                    // VN Flag - doubled size (40px)
+                                    if (!widget.testMode && langCtrl.locale.languageCode == 'vi')
+                                      SvgPicture.asset(
+                                        'assets/icons/vn-flag-circle.svg',
+                                        width: 40, // Doubled from 20 to 40
+                                        height: 40, // Doubled from 20 to 40
+                                      )
+                                    else if (!widget.testMode && langCtrl.locale.languageCode == 'en')
+                                      SvgPicture.asset(
+                                        'assets/icons/en-flag-circle.svg',
+                                        width: 20,
+                                        height: 20,
                                       ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Container(width: 1, height: 16, color: Colors.grey.shade400),
                                     const SizedBox(width: 8),
                                     Text(
-                                      'EN',
+                                      langCtrl.locale.languageCode == 'vi' ? 'VI' : 'EN',
                                       style: TextStyle(
-                                        color: langCtrl.locale.languageCode == 'en' ? AppColors.bluePrimary : secondaryTextColor,
+                                        color: AppColors.bluePrimary,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),

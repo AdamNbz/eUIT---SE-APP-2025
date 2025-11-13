@@ -1,8 +1,7 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../providers/home_provider.dart';
 import '../utils/app_localizations.dart';
-import '../theme/app_colors.dart';
+import '../theme/app_theme.dart';
 import 'home_screen.dart';
 
 class MainScreen extends StatefulWidget {
@@ -32,38 +31,209 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
-    final provider = context.watch<HomeProvider>();
-    // TODO: Implement skeleton loading here while provider is fetching data from API.
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      body: _pages[_selectedIndex],
-      bottomNavigationBar: _buildBottomNav(loc),
+      backgroundColor: isDark
+          ? AppTheme.darkBackground
+          : const Color(0xFFF7F8FC),
+      body: Stack(
+        children: [
+          // Main content
+          _pages[_selectedIndex],
+
+          // Custom Bottom Navigation Bar
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: _buildCustomBottomNav(loc, isDark),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildBottomNav(AppLocalizations loc) {
-    return BottomNavigationBar(
-      currentIndex: _selectedIndex,
-      onTap: (i) => setState(() => _selectedIndex = i),
-      type: BottomNavigationBarType.fixed,
-      backgroundColor: AppColorsTheme.cardBackground,
-      selectedItemColor: Colors.white,
-      unselectedItemColor: Colors.grey.shade500,
-      showUnselectedLabels: true,
-      items: [
-        BottomNavigationBarItem(icon: const Icon(Icons.apps), label: loc.t('services')),
-        BottomNavigationBarItem(icon: const Icon(Icons.search), label: loc.t('search')),
-        BottomNavigationBarItem(
-          icon: Container(
-            padding: const EdgeInsets.all(10),
-            decoration: const BoxDecoration(color: AppColorsTheme.primaryAccent, shape: BoxShape.circle),
-            child: const Icon(Icons.home, color: Colors.black, size: 28),
+  Widget _buildCustomBottomNav(AppLocalizations loc, bool isDark) {
+    return ClipRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+        child: Container(
+          height: 80,
+          decoration: BoxDecoration(
+            color: isDark
+                ? AppTheme.darkBackground.withAlpha(249) // 0.98 opacity
+                : Colors.white.withAlpha(249), // 0.98 opacity
+            border: Border(
+              top: BorderSide(
+                color: isDark
+                    ? Colors.white.withAlpha(26) // 0.1 opacity
+                    : Colors.grey.shade200,
+                width: 1,
+              ),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: isDark
+                    ? Colors.black.withAlpha(76) // 0.3 opacity
+                    : Colors.black.withAlpha(26), // 0.1 opacity
+                blurRadius: 20,
+                offset: const Offset(0, -10),
+              ),
+            ],
           ),
-          label: loc.t('home'),
+          child: SafeArea(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                _NavItem(
+                  iconData: Icons.apps_rounded,
+                  label: loc.t('services'),
+                  isActive: _selectedIndex == 0,
+                  isDark: isDark,
+                  onTap: () => setState(() => _selectedIndex = 0),
+                ),
+                _NavItem(
+                  iconData: Icons.search_rounded,
+                  label: loc.t('search'),
+                  isActive: _selectedIndex == 1,
+                  isDark: isDark,
+                  onTap: () => setState(() => _selectedIndex = 1),
+                ),
+                _NavItem(
+                  iconData: Icons.home_rounded,
+                  label: loc.t('home'),
+                  isActive: _selectedIndex == 2,
+                  isDark: isDark,
+                  onTap: () => setState(() => _selectedIndex = 2),
+                ),
+                _NavItem(
+                  iconData: Icons.calendar_month_rounded,
+                  label: loc.t('schedule'),
+                  isActive: _selectedIndex == 3,
+                  isDark: isDark,
+                  onTap: () => setState(() => _selectedIndex = 3),
+                ),
+                _NavItem(
+                  iconData: Icons.settings_rounded,
+                  label: loc.t('settings'),
+                  isActive: _selectedIndex == 4,
+                  isDark: isDark,
+                  onTap: () => setState(() => _selectedIndex = 4),
+                ),
+              ],
+            ),
+          ),
         ),
-        BottomNavigationBarItem(icon: const Icon(Icons.calendar_month), label: loc.t('schedule')),
-        BottomNavigationBarItem(icon: const Icon(Icons.settings), label: loc.t('settings')),
-      ],
+      ),
+    );
+  }
+}
+
+// Custom Nav Item Widget
+class _NavItem extends StatelessWidget {
+  final IconData iconData;
+  final String label;
+  final bool isActive;
+  final bool isDark;
+  final VoidCallback onTap;
+
+  const _NavItem({
+    required this.iconData,
+    required this.label,
+    required this.isActive,
+    required this.isDark,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: TweenAnimationBuilder<double>(
+        duration: const Duration(milliseconds: 200),
+        tween: Tween(begin: 1.0, end: isActive ? 1.05 : 1.0),
+        curve: Curves.easeInOut,
+        builder: (context, scale, child) {
+          return Transform.scale(
+            scale: scale,
+            child: child,
+          );
+        },
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Icon with active dot
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    TweenAnimationBuilder<Color?>(
+                      duration: const Duration(milliseconds: 200),
+                      tween: ColorTween(
+                        begin: Colors.grey.shade600,
+                        end: isActive
+                            ? (isDark ? Colors.blue.shade300 : AppTheme.bluePrimary)
+                            : Colors.grey.shade600,
+                      ),
+                      builder: (context, color, child) {
+                        return Icon(
+                          iconData,
+                          size: 24,
+                          color: color,
+                        );
+                      },
+                    ),
+                    if (isActive)
+                      Positioned(
+                        top: -8,
+                        left: 0,
+                        right: 0,
+                        child: Center(
+                          child: Container(
+                            width: 4,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? Colors.blue.shade300
+                                  : AppTheme.bluePrimary,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                // Label
+                TweenAnimationBuilder<Color?>(
+                  duration: const Duration(milliseconds: 200),
+                  tween: ColorTween(
+                    begin: Colors.grey.shade600,
+                    end: isActive
+                        ? (isDark ? Colors.blue.shade300 : AppTheme.bluePrimary)
+                        : Colors.grey.shade600,
+                  ),
+                  builder: (context, color, child) {
+                    return Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
+                        color: color,
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -71,13 +241,47 @@ class _MainScreenState extends State<MainScreen> {
 class _PlaceholderPage extends StatelessWidget {
   final String label;
   const _PlaceholderPage({required this.label});
+
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
-      color: AppColorsTheme.background,
+      color: isDark ? AppTheme.darkBackground : const Color(0xFFF7F8FC),
       alignment: Alignment.center,
-      child: Text(loc.t(label), style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+      padding: const EdgeInsets.only(bottom: 80), // Space for bottom nav
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.construction_rounded,
+            size: 64,
+            color: isDark
+                ? AppTheme.darkTextSecondary
+                : AppTheme.lightTextSecondary,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            loc.t(label),
+            style: TextStyle(
+              color: isDark ? AppTheme.darkText : AppTheme.lightText,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Đang phát triển...',
+            style: TextStyle(
+              color: isDark
+                  ? AppTheme.darkTextSecondary
+                  : AppTheme.lightTextSecondary,
+              fontSize: 16,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
