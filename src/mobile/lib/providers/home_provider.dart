@@ -4,6 +4,8 @@ import '../models/notification_item.dart';
 import '../models/quick_action.dart';
 
 class HomeProvider extends ChangeNotifier {
+  bool _isLoading = false;
+
   HomeProvider() {
     _loadMock();
   }
@@ -12,6 +14,7 @@ class HomeProvider extends ChangeNotifier {
   List<NotificationItem> _notifications = [];
   List<QuickAction> _quickActions = [];
 
+  bool get isLoading => _isLoading;
   ScheduleItem get nextSchedule => _nextSchedule;
   List<NotificationItem> get notifications => _notifications;
   List<QuickAction> get quickActions => _quickActions;
@@ -26,7 +29,24 @@ class HomeProvider extends ChangeNotifier {
       countdown: '2h 15m',
     );
     _notifications = [
-      NotificationItem(title: 'New Quantum Computing Lab Opens on Campus', isUnread: true),
+      NotificationItem(
+        title: 'New Quantum Computing Lab Opens on Campus',
+        body: 'Thông báo quan trọng từ nhà trường',
+        time: '2 giờ trước',
+        isUnread: true,
+      ),
+      NotificationItem(
+        title: 'Thông báo lịch thi cuối kỳ',
+        body: 'Lịch thi đã được cập nhật',
+        time: '5 giờ trước',
+        isUnread: true,
+      ),
+      NotificationItem(
+        title: 'Kết quả học tập đã được cập nhật',
+        body: 'Xem điểm học kỳ mới nhất',
+        time: '1 ngày trước',
+        isUnread: false,
+      ),
     ];
     _quickActions = [
       QuickAction(label: 'Kết quả học tập', type: 'results', iconName: 'school_outlined'),

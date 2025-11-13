@@ -58,27 +58,49 @@ class _AnimatedBackgroundState extends State<AnimatedBackground>
   Widget build(BuildContext context) {
     return Stack(
       children: [
+        // Gradient Background Layer (Light Mode only)
+        if (!widget.isDark)
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  AppTheme.lightGradientStart,
+                  AppTheme.lightGradientMid,
+                  AppTheme.lightGradientEnd,
+                ],
+              ),
+            ),
+          ),
+
         // Gradient Orbs Layer
         _buildOrb(
           controller: _orb1Controller,
           top: -100,
           left: -100,
           size: 300,
-          colors: [AppTheme.bluePrimary, AppTheme.blueLight],
+          colors: widget.isDark
+              ? [AppTheme.bluePrimary, AppTheme.blueLight]
+              : [AppTheme.lightOrbBlue1, AppTheme.lightOrbBlue2],
         ),
         _buildOrb(
           controller: _orb2Controller,
           top: 100,
           right: -50,
           size: 250,
-          colors: [AppTheme.blueLight, AppTheme.blueDark],
+          colors: widget.isDark
+              ? [AppTheme.blueLight, AppTheme.blueDark]
+              : [AppTheme.lightOrbBlue3, AppTheme.lightOrbPurple1],
         ),
         _buildOrb(
           controller: _orb3Controller,
           bottom: -80,
           left: 50,
           size: 280,
-          colors: [AppTheme.blueDark, AppTheme.bluePrimary],
+          colors: widget.isDark
+              ? [AppTheme.blueDark, AppTheme.bluePrimary]
+              : [AppTheme.lightOrbPurple2, AppTheme.lightOrbPurple3],
         ),
 
         // Grid Pattern Layer
@@ -149,7 +171,9 @@ class GridPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = (isDark ? Colors.white : Colors.black).withAlpha(8)
+      ..color = isDark
+          ? Colors.white.withAlpha(8)
+          : Colors.white.withAlpha(13) // 0.05 opacity for light mode
       ..strokeWidth = 1
       ..style = PaintingStyle.stroke;
 
@@ -181,7 +205,9 @@ class ParticlesPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = (isDark ? Colors.white : AppTheme.bluePrimary).withAlpha(102)
+      ..color = isDark
+          ? Colors.white.withAlpha(102)
+          : Colors.white.withAlpha(76) // 0.3 opacity for light mode
       ..style = PaintingStyle.fill;
 
     for (var particle in particles) {
