@@ -21,24 +21,14 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
   bool get wantKeepAlive => true;
 
   late ScrollController _scrollController;
-  bool _bubbleVisible = true;
-  double _lastOffset = 0;
+  bool _bubbleClosed = false;
 
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController();
 
-    _scrollController.addListener(() {
-      if (_scrollController.offset > _lastOffset) {
-        // scroll xuống → ẩn bubble
-        if (_bubbleVisible) setState(() => _bubbleVisible = false);
-      } else {
-        // scroll lên → hiện bubble
-        if (!_bubbleVisible) setState(() => _bubbleVisible = true);
-      }
-      _lastOffset = _scrollController.offset;
-    });
+
   }
 
   @override
@@ -69,104 +59,142 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
             child: provider.isLoading
                 ? _buildShimmerLoading(isDark)
                 : RefreshIndicator(
-                    onRefresh: () async {
-                      await Future.delayed(const Duration(seconds: 1));
-                    },
-                    color: AppTheme.bluePrimary,
-                    backgroundColor: isDark ? AppTheme.darkCard : Colors.white,
-                    child: SingleChildScrollView(
-                      controller: _scrollController,
-                      physics: const AlwaysScrollableScrollPhysics(
-                        parent: BouncingScrollPhysics(),
-                      ),
-                      padding: const EdgeInsets.only(
-                        left: 20,
-                        right: 20,
-                        top: 20,
-                        bottom: 84, // Updated from 88 to match new bottom nav height (68 + 16)
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Header mới (Scrollable)
-                          _buildScrollableHeader(provider, isDark),
-                          const SizedBox(height: 24),
+              onRefresh: () async {
+                await Future.delayed(const Duration(seconds: 1));
+              },
+              color: AppTheme.bluePrimary,
+              backgroundColor: isDark ? AppTheme.darkCard : Colors.white,
+              child: SingleChildScrollView(
+                controller: _scrollController,
+                physics: const AlwaysScrollableScrollPhysics(
+                  parent: BouncingScrollPhysics(),
+                ),
+                padding: const EdgeInsets.only(
+                  left: 20,
+                  right: 20,
+                  top: 20,
+                  bottom: 84, // Updated from 88 to match new bottom nav height (68 + 16)
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Header mới (Scrollable)
+                    _buildScrollableHeader(provider, isDark),
+                    const SizedBox(height: 24),
 
-                          // Next Schedule Section
-                          _buildSectionTitle(loc.t('next_schedule'), isDark),
-                          const SizedBox(height: 12),
-                          _buildNextScheduleCard(provider, loc, isDark),
-                          const SizedBox(height: 24),
+                    // Next Schedule Section
+                    _buildSectionTitle(loc.t('next_schedule'), isDark),
+                    const SizedBox(height: 12),
+                    _buildNextScheduleCard(provider, loc, isDark),
+                    const SizedBox(height: 24),
 
-                          // Quick Actions Section (SQUIRCLE)
-                          _buildSectionTitle(loc.t('quick_actions'), isDark),
-                          const SizedBox(height: 12),
-                          _buildQuickActionsGrid(provider, isDark),
-                          const SizedBox(height: 24),
+                    // Quick Actions Section (SQUIRCLE)
+                    _buildSectionTitle(loc.t('quick_actions'), isDark),
+                    const SizedBox(height: 12),
+                    _buildQuickActionsGrid(provider, isDark),
+                    const SizedBox(height: 24),
 
-                          // Notifications Section
-                          _buildSectionTitle(loc.t('new_notifications'), isDark),
-                          const SizedBox(height: 12),
-                          _buildNotificationsList(provider, isDark),
-                          const SizedBox(height: 20),
-                        ],
-                      ),
-                    ),
-                  ),
-          ),
-          // 🔥🔥 Chatbot Bubble Button (đã thêm vào đúng vị trí)
-          Positioned(
-              bottom: 90, // nằm trên bottom nav bar
-              right: 20,
-              child: AnimatedOpacity(
-                    duration: const Duration(milliseconds: 250),
-                    opacity: _bubbleVisible ? 1 : 0,
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const ChatbotScreen()),
-                        );
-                      },
-              child: Container(
-                    width: 62,
-                    height: 62,
-                    decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    gradient: LinearGradient(
-                    colors: isDark
-                    ? [AppTheme.bluePrimary, AppTheme.blueLight]
-                        : [Colors.white, Colors.white70],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    ),
-                    boxShadow: [
-              BoxShadow(
-                    color: isDark
-                    ? AppTheme.bluePrimary.withOpacity(0.3)
-                        : Colors.black12,
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                    ),
-                    ],
-                    ),
-              child: ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
-                    child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-              child: const Center(
-                    child: Icon(
-                    Icons.chat_bubble_outline_rounded,
-                    color: Colors.black,
-                    size: 28,
-                        ),
-                      ),
-                    ),
-                  ),
+                    // Notifications Section
+                    _buildSectionTitle(loc.t('new_notifications'), isDark),
+                    const SizedBox(height: 12),
+                    _buildNotificationsList(provider, isDark),
+                    const SizedBox(height: 20),
+                  ],
                 ),
               ),
             ),
           ),
+          /// 🔥 Chatbot Bubble Button
+          if (!_bubbleClosed)
+            AnimatedPositioned(
+              duration: const Duration(milliseconds: 400),
+              curve: Curves.easeOutBack,
+              bottom: 90,
+              right: 20,
+              child: AnimatedScale(
+                duration: const Duration(milliseconds: 300),
+                scale: !_bubbleClosed ? 1 : 0.7,
+                curve: Curves.easeOutBack,
+                child: AnimatedOpacity(
+                  duration: const Duration(milliseconds: 300),
+                  opacity: !_bubbleClosed ? 1 : 0,
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      // Bubble Button
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const ChatbotScreen()),
+                          );
+                        },
+                        child: Container(
+                          width: 62,
+                          height: 62,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            color: Colors.transparent,
+                            border: Border.all(
+                              color: isDark ? Colors.white24 : Colors.black12,
+                              width: 1.4,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: isDark ? Colors.white10 : Colors.black12,
+                                blurRadius: 16,
+                                offset: const Offset(0, 6),
+                              ),
+                            ],
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(20),
+                            child: BackdropFilter(
+                              filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                              child: Center(
+                                child: Icon(
+                                  Icons.chat_bubble_outline_rounded,
+                                  color: isDark ? Colors.white : Colors.black87,
+                                  size: 28,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      /// ❌ Nút close bubble
+                      Positioned(
+                        top: -6,
+                        right: -6,
+                        child: GestureDetector(
+                          onTap: () => setState(() => _bubbleClosed = true),
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: Colors.redAccent,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black26,
+                                  blurRadius: 4,
+                                  offset: Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: const Icon(
+                              Icons.close,
+                              color: Colors.white,
+                              size: 14,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -238,46 +266,104 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                   ),
                 ],
               ),
-
-              // Right: Notification Bell
-              Stack(
-                clipBehavior: Clip.none,
+              // RIGHT: Chatbot + Notification
+              Row(
                 children: [
-                  IconButton(
-                    onPressed: () {
-                      print('Notification tapped');
+                  // Chatbot Button (Circle) - Matching Theme
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const ChatbotScreen()),
+                      );
                     },
-                    icon: Icon(
-                      Icons.notifications_outlined,
-                      color: isDark ? Colors.white : Colors.black87,
-                    ),
-                  ),
-                  if (unreadCount > 0)
-                    Positioned(
-                      top: 8,
-                      right: 8,
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: const BoxDecoration(
-                          color: Colors.red,
-                          shape: BoxShape.circle,
+                    child: Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+
+                        /// 🎨 Gradient giống hệt bell notification
+                        color: Colors.transparent,
+
+                        /// 🌫️ Shadow giống bell
+                        boxShadow: [
+                          BoxShadow(
+                            color: isDark
+                                ? AppTheme.bluePrimary.withOpacity(0.3)
+                                : Colors.black12,
+                            blurRadius: 10,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
+
+                        /// Viền nhẹ giống bell notification
+                        border: Border.all(
+                          color: isDark ? Colors.white24 : Colors.black12,
+                          width: 1.2,
                         ),
-                        constraints: const BoxConstraints(
-                          minWidth: 18,
-                          minHeight: 18,
-                        ),
-                        child: Center(
-                          child: Text(
-                            unreadCount > 9 ? '9+' : '$unreadCount',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
+                      ),
+                      child: ClipOval(
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+                          child: Center(
+                            child: Icon(
+                              Icons.smart_toy,
+                              size: 20,
+
+                              /// Icon màu giống bell (trắng khi dark / đen khi light)
+                              color: isDark ? Colors.white : Colors.black87,
                             ),
                           ),
                         ),
                       ),
                     ),
+                  ),
+
+                  const SizedBox(width: 10),
+
+                  // Notification Bell
+                  Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          print('Notification tapped');
+                        },
+                        icon: Icon(
+                          Icons.notifications_outlined,
+                          color: isDark ? Colors.white : Colors.black87,
+                        ),
+                      ),
+
+                      if (unreadCount > 0)
+                        Positioned(
+                          top: 8,
+                          right: 8,
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: const BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                            ),
+                            constraints: const BoxConstraints(
+                              minWidth: 18,
+                              minHeight: 18,
+                            ),
+                            child: Center(
+                              child: Text(
+                                unreadCount > 9 ? '9+' : '$unreadCount',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
                 ],
               ),
             ],
@@ -312,17 +398,17 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
           decoration: BoxDecoration(
             gradient: isDark
                 ? LinearGradient(
-                    colors: [
-                      const Color(0xFF1E293B).withAlpha(229), // 0.9 opacity
-                      const Color(0xFF1E293B).withAlpha(204), // 0.8 opacity
-                    ],
-                  )
+              colors: [
+                const Color(0xFF1E293B).withAlpha(229), // 0.9 opacity
+                const Color(0xFF1E293B).withAlpha(204), // 0.8 opacity
+              ],
+            )
                 : LinearGradient(
-                    colors: [
-                      Colors.white.withAlpha(242), // 0.95 opacity
-                      Colors.white.withAlpha(242),
-                    ],
-                  ),
+              colors: [
+                Colors.white.withAlpha(242), // 0.95 opacity
+                Colors.white.withAlpha(242),
+              ],
+            ),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: isDark
@@ -531,18 +617,18 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
               child: Center(
                 child: action.textIcon != null
                     ? Text(
-                        action.textIcon!,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      )
+                  action.textIcon!,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                )
                     : Icon(
-                        icon,
-                        color: Colors.white,
-                        size: 28,
-                      ),
+                  icon,
+                  color: Colors.white,
+                  size: 28,
+                ),
               ),
             ),
           ),
@@ -592,12 +678,12 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                   boxShadow: isDark
                       ? []
                       : [
-                          BoxShadow(
-                            color: Colors.black.withAlpha(13),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
+                    BoxShadow(
+                      color: Colors.black.withAlpha(13),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
                 child: ListTile(
                   leading: Container(
@@ -606,14 +692,14 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                     decoration: BoxDecoration(
                       gradient: notification.isUnread
                           ? const LinearGradient(
-                              colors: [AppTheme.bluePrimary, AppTheme.blueLight],
-                            )
+                        colors: [AppTheme.bluePrimary, AppTheme.blueLight],
+                      )
                           : LinearGradient(
-                              colors: [
-                                Colors.grey.shade300,
-                                Colors.grey.shade200,
-                              ],
-                            ),
+                        colors: [
+                          Colors.grey.shade300,
+                          Colors.grey.shade200,
+                        ],
+                      ),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(
@@ -634,27 +720,27 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                   ),
                   subtitle: notification.body != null
                       ? Padding(
-                          padding: const EdgeInsets.only(top: 4),
-                          child: Text(
-                            notification.body!,
-                            style: TextStyle(
-                              color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
-                              fontSize: 12,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        )
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      notification.body!,
+                      style: TextStyle(
+                        color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                        fontSize: 12,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  )
                       : null,
                   trailing: notification.isUnread
                       ? Container(
-                          width: 10,
-                          height: 10,
-                          decoration: const BoxDecoration(
-                            color: AppTheme.bluePrimary,
-                            shape: BoxShape.circle,
-                          ),
-                        )
+                    width: 10,
+                    height: 10,
+                    decoration: const BoxDecoration(
+                      color: AppTheme.bluePrimary,
+                      shape: BoxShape.circle,
+                    ),
+                  )
                       : null,
                   onTap: () {
                     print('Tapped notification: ${notification.title}');
