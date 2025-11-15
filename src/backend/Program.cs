@@ -20,11 +20,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         {
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8
-                .GetBytes(builder.Configuration["Jwt:Key"])),
+                .GetBytes(builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key not configured"))),
             ValidateIssuer = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidIssuer = builder.Configuration["Jwt:Issuer"] ?? throw new InvalidOperationException("Jwt:Issuer not configured"),
             ValidateAudience = true,
-            ValidAudience = builder.Configuration["Jwt:Audience"]
+            ValidAudience = builder.Configuration["Jwt:Audience"] ?? throw new InvalidOperationException("Jwt:Audience not configured")
         };
     });
 
@@ -89,8 +89,11 @@ app.UseStaticFiles(new StaticFileOptions
 
 app.UseRouting();
 
-
-app.UseHttpsRedirection();
+// Chỉ bật HTTPS redirection trong production
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseAuthentication(); 
 app.UseAuthorization();  

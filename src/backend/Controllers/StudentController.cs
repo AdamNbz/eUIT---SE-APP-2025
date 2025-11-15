@@ -201,8 +201,9 @@ public class StudentsController : ControllerBase
             if (!string.IsNullOrEmpty(filter_by_semester))
             {
                 // Get grades for a specific semester
+                var semester = filter_by_semester;
                 gradeResults = await _context.Database
-                    .SqlQuery<GradeResult>($"SELECT * FROM func_get_student_semester_transcript({mssvInt}, {filter_by_semester})")
+                    .SqlQuery<GradeResult>($"SELECT * FROM func_get_student_semester_transcript({mssvInt}, {semester})")
                     .ToListAsync();
             }
             else
@@ -285,8 +286,9 @@ public class StudentsController : ControllerBase
             }
             else
             {
+                var semester = filter_by_semester;
                 trainingScoreResults = await _context.Database
-                    .SqlQuery<TrainingScoreResult>($"SELECT hoc_ky, tong_diem, xep_loai, 'Đã xác nhận' as tinh_trang FROM func_get_student_training_scores({mssvInt}) WHERE hoc_ky = {filter_by_semester}")
+                    .SqlQuery<TrainingScoreResult>($"SELECT hoc_ky, tong_diem, xep_loai, 'Đã xác nhận' as tinh_trang FROM func_get_student_training_scores({mssvInt}) WHERE hoc_ky = {semester}")
                     .ToListAsync();
             }
 
