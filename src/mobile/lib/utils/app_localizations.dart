@@ -50,6 +50,7 @@ class AppLocalizations {
       'close': 'Đóng',
       'digital_student_card_preview': 'Xem trước thẻ sinh viên số',
       'gpa_details_soon': 'Chi tiết GPA sẽ có trong bản cập nhật sau',
+      'profile_preview_coming_soon': 'Xem trước hồ sơ sinh viên sẽ có trong bản cập nhật sau',
     },
     'en': {
       'login': 'Login',
@@ -83,6 +84,7 @@ class AppLocalizations {
       'close': 'Close',
       'digital_student_card_preview': 'Digital student card preview',
       'gpa_details_soon': 'GPA details will be available in a future update',
+      'profile_preview_coming_soon': 'Student profile preview will be available in a future update',
     },
   };
 

@@ -67,7 +67,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // Header mới (Scrollable)
-                          _buildScrollableHeader(provider, isDark),
+                          _buildScrollableHeader(provider, isDark, loc),
                           const SizedBox(height: 24),
 
                           // Next Schedule Section
@@ -102,7 +102,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
   }
 
   // Header mới - Scrollable với BackdropFilter
-  Widget _buildScrollableHeader(HomeProvider provider, bool isDark) {
+  Widget _buildScrollableHeader(HomeProvider provider, bool isDark, AppLocalizations loc) {
     final unreadCount = provider.notifications.where((n) => n.isUnread).length;
 
     return ClipRRect(
@@ -129,19 +129,23 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
               // Left: Avatar + Name/MSSV
               Row(
                 children: [
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: const LinearGradient(
-                        colors: [AppTheme.bluePrimary, AppTheme.blueLight],
+                  // Avatar: tappable to show profile (temporary)
+                  GestureDetector(
+                    onTap: () => _showProfileDialog(loc, isDark),
+                    child: Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: const LinearGradient(
+                          colors: [AppTheme.bluePrimary, AppTheme.blueLight],
+                        ),
                       ),
-                    ),
-                    child: const Icon(
-                      Icons.person,
-                      color: Colors.white,
-                      size: 28,
+                      child: const Icon(
+                        Icons.person,
+                        color: Colors.white,
+                        size: 28,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -904,6 +908,63 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                 loc.t('gpa_details_soon'),
                 style: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey.shade600, fontSize: 12),
                 textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(loc.t('close')),
+            )
+          ],
+        );
+      },
+    );
+  }
+
+  // Temporary profile dialog shown when tapping avatar
+  void _showProfileDialog(AppLocalizations loc, bool isDark) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: isDark ? AppTheme.darkCard : Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Text(
+            loc.t('profile'),
+            style: TextStyle(color: isDark ? Colors.white : Colors.black87),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  color: isDark ? Colors.white.withAlpha(10) : AppTheme.lightCard,
+                  border: Border.all(color: isDark ? Colors.white24 : AppTheme.lightBorder),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.person_pin, size: 48, color: AppTheme.bluePrimary),
+                    const SizedBox(height: 12),
+                    Text(
+                      loc.t('coming_soon'),
+                      style: TextStyle(
+                        color: isDark ? Colors.white : Colors.black87,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      loc.t('profile_preview_coming_soon'),
+                      style: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey.shade600, fontSize: 12),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
