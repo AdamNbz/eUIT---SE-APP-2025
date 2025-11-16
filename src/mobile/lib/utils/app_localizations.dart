@@ -45,6 +45,11 @@ class AppLocalizations {
       'home': 'Trang chủ',
       'schedule': 'Lịch trình',
       'settings': 'Cài đặt',
+      // Added keys for new dialogs/cards
+      'coming_soon': 'Sắp ra mắt',
+      'close': 'Đóng',
+      'digital_student_card_preview': 'Xem trước thẻ sinh viên số',
+      'gpa_details_soon': 'Chi tiết GPA sẽ có trong bản cập nhật sau',
     },
     'en': {
       'login': 'Login',
@@ -73,6 +78,11 @@ class AppLocalizations {
       'home': 'Home',
       'schedule': 'Schedule',
       'settings': 'Settings',
+      // Added keys for new dialogs/cards
+      'coming_soon': 'Coming soon',
+      'close': 'Close',
+      'digital_student_card_preview': 'Digital student card preview',
+      'gpa_details_soon': 'GPA details will be available in a future update',
     },
   };
 
