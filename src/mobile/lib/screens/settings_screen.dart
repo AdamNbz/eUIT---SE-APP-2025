@@ -9,6 +9,8 @@ import '../services/language_controller.dart';
 import '../services/auth_service.dart';
 import '../utils/app_localizations.dart';
 import '../theme/app_theme.dart';
+import '../widgets/theme_switch.dart';
+import '../widgets/language_switch.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -46,97 +48,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     } catch (_) {}
   }
 
-  void _showThemeDialog() {
-    final themeController = context.read<ThemeController>();
-    final isDark = themeController.isDark;
+  // Theme is controlled directly via ThemeSwitch widget now.
 
-    showDialog<void>(
-      context: context,
-      builder: (ctx) {
-        String selected = isDark ? 'dark' : 'light';
-        return AlertDialog(
-          title: Text('Chế độ giao diện'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                title: const Text('Sáng'),
-                trailing: selected == 'light' ? const Icon(Icons.check) : null,
-                onTap: () {
-                  themeController.toggle(false);
-                  Navigator.of(ctx).pop();
-                },
-              ),
-              ListTile(
-                title: const Text('Tối'),
-                trailing: selected == 'dark' ? const Icon(Icons.check) : null,
-                onTap: () {
-                  themeController.toggle(true);
-                  Navigator.of(ctx).pop();
-                },
-              ),
-              ListTile(
-                title: const Text('Hệ thống'),
-                trailing: null,
-                onTap: () {
-                  final platformDark = MediaQuery.of(context).platformBrightness == Brightness.dark;
-                  themeController.toggle(platformDark);
-                  Navigator.of(ctx).pop();
-                },
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: Text(AppLocalizations.of(context).t('close')),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showLanguageDialog() {
-    final languageController = context.read<LanguageController>();
-    final current = languageController.locale.languageCode;
-
-    showDialog<void>(
-      context: context,
-      builder: (ctx) {
-        return AlertDialog(
-          title: Text('Ngôn ngữ'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                title: const Text('Tiếng Việt'),
-                trailing: current == 'vi' ? const Icon(Icons.check) : null,
-                onTap: () {
-                  languageController.setLocale(const Locale('vi'));
-                  Navigator.of(ctx).pop();
-                },
-              ),
-              ListTile(
-                title: const Text('English'),
-                trailing: current == 'en' ? const Icon(Icons.check) : null,
-                onTap: () {
-                  languageController.setLocale(const Locale('en'));
-                  Navigator.of(ctx).pop();
-                },
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: Text(AppLocalizations.of(context).t('close')),
-            ),
-          ],
-        );
-      },
-    );
-  }
+  // Language is controlled directly via LanguageSwitch widget now.
 
   Future<void> _confirmLogout() async {
     final loc = AppLocalizations.of(context);
@@ -230,15 +144,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ListTile(
                   title: const Text('Chế độ giao diện'),
                   subtitle: Text(themeController.isDark ? 'Tối' : 'Sáng'),
-                  trailing: const Icon(Icons.chevron_right_rounded),
-                  onTap: _showThemeDialog,
+                  trailing: ThemeSwitch(
+                    isDark: themeController.isDark,
+                    onToggle: () => themeController.toggleTheme(),
+                  ),
+                  onTap: () => themeController.toggleTheme(),
                 ),
                 const Divider(height: 1),
                 ListTile(
                   title: const Text('Ngôn ngữ'),
                   subtitle: Text(languageController.locale.languageCode == 'vi' ? 'Tiếng Việt' : 'English'),
-                  trailing: const Icon(Icons.chevron_right_rounded),
-                  onTap: _showLanguageDialog,
+                  trailing: LanguageSwitch(
+                    isVietnamese: languageController.locale.languageCode == 'vi',
+                    onToggle: () => languageController.toggleLanguage(),
+                  ),
+                  onTap: () => languageController.toggleLanguage(),
                 ),
               ],
             ),
@@ -275,8 +195,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
               children: [
                 ListTile(
                   title: const Text('Đổi mật khẩu'),
-                  trailing: const Icon(Icons.chevron_right_rounded),
-                  onTap: () => Navigator.pushNamed(context, '/change_password'),
+                  trailing: const Icon(Icons.open_in_new_rounded),
+                  onTap: () async {
+                    final url = Uri.parse('https://auth.uit.edu.vn/');
+                    if (await canLaunchUrl(url)) {
+                      await launchUrl(url, mode: LaunchMode.externalApplication);
+                    }
+                  },
                 ),
                 const Divider(height: 1),
                 ListTile(
