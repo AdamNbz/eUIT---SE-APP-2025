@@ -23,6 +23,9 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
   bool _hoverStudentCard = false;
   bool _hoverGpaCard = false;
 
+  // GPA visibility state
+  bool _isGpaVisible = false;
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -662,12 +665,15 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
     // Always render 2 cards on one row (each takes half width)
     final card1 = _buildStudentCard(loc, isDark);
     final card2 = _buildGpaCard(loc, isDark);
-    return Row(
-      children: [
-        Expanded(child: card1),
-        const SizedBox(width: 12),
-        Expanded(child: card2),
-      ],
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(child: card1),
+          const SizedBox(width: 12),
+          Expanded(child: card2),
+        ],
+      ),
     );
   }
 
@@ -678,6 +684,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
       onHover: (v) => setState(() => _hoverStudentCard = v),
       onTap: () => _showStudentCardDialog(loc, isDark),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
             width: 48,
@@ -713,12 +720,14 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
       isDark: isDark,
       isHover: _hoverGpaCard,
       onHover: (v) => setState(() => _hoverGpaCard = v),
-      onTap: () => _showGpaDialog(loc, isDark),
+      // We handle tap inside with the IconButton
+      onTap: () {},
       child: Row(
         children: [
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
                   loc.t('gpa'),
@@ -730,17 +739,17 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  '••••/10.0',
+                  _isGpaVisible ? '8.52/10.0' : '••••/10.0',
                   style: TextStyle(
                     color: isDark ? Colors.white : Colors.black87,
-                    fontSize: 22,
+                    fontSize: 21,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 0.2,
                   ),
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  loc.t('credits'),
+                  _isGpaVisible ? '${loc.t('credits')}: 128' : '${loc.t('credits')}: •••',
                   style: const TextStyle(
                     color: AppTheme.bluePrimary,
                     fontSize: 12,
@@ -750,9 +759,16 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
               ],
             ),
           ),
-          Icon(
-            Icons.chevron_right,
-            color: secondary,
+          IconButton(
+            icon: Icon(
+              _isGpaVisible ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+              color: secondary,
+            ),
+            onPressed: () {
+              setState(() {
+                _isGpaVisible = !_isGpaVisible;
+              });
+            },
           ),
         ],
       ),
