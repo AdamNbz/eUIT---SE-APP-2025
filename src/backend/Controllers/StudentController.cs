@@ -177,6 +177,24 @@ public class StudentsController : ControllerBase
         public float? diem_tong_ket { get; set; }
     }
 
+    // Detailed transcript row mapping from SQL function
+    private class DetailedGradeRow
+    {
+        public string hoc_ky { get; set; } = string.Empty;
+        public string ma_mon_hoc { get; set; } = string.Empty;
+        public string ten_mon_hoc { get; set; } = string.Empty;
+        public int so_tin_chi { get; set; }
+        public int trong_so_qua_trinh { get; set; }
+        public int trong_so_giua_ki { get; set; }
+        public int trong_so_thuc_hanh { get; set; }
+        public int trong_so_cuoi_ki { get; set; }
+        public float? diem_qua_trinh { get; set; }
+        public float? diem_giua_ki { get; set; }
+        public float? diem_thuc_hanh { get; set; }
+        public float? diem_cuoi_ki { get; set; }
+        public float? diem_tong_ket { get; set; }
+    }
+
     /// <summary>
     /// Retrieves the academic grades for the currently authenticated student.
     /// Can be filtered by semester using the filter_by_semester query parameter.
@@ -242,6 +260,99 @@ public class StudentsController : ControllerBase
             {
                 Grades = new List<GradeDto>(),
                 Message = "Không thể tải dữ liệu"
+            });
+        }
+    }
+
+    /// <summary>
+    /// Returns detailed transcript including component scores, weightings, overall GPA and accumulated credits.
+    /// </summary>
+    /// <param name="filter_by_semester">Optional semester filter for detailed view</param>
+    [HttpGet("/grades/details")]
+    public async Task<ActionResult<TranscriptOverviewDto>> GetDetailedTranscript([FromQuery] string? filter_by_semester = null)
+    {
+        var loggedInMssv = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (loggedInMssv == null) return Forbid();
+        if (!int.TryParse(loggedInMssv, out int mssvInt)) return Forbid();
+
+        try
+        {
+            // Overall GPA + accumulated credits
+            var overall = await _context.Database.SqlQuery<QuickGpa>($"SELECT * FROM func_calculate_gpa({mssvInt})").FirstOrDefaultAsync();
+
+            // Detailed rows (single set-based call)
+            List<DetailedGradeRow> rows;
+            if (string.IsNullOrEmpty(filter_by_semester))
+            {
+                rows = await _context.Database
+                    .SqlQuery<DetailedGradeRow>($"SELECT * FROM func_get_student_full_transcript_details({mssvInt})")
+                    .ToListAsync();
+            }
+            else
+            {
+                rows = await _context.Database
+                    .SqlQuery<DetailedGradeRow>($"SELECT * FROM func_get_student_semester_transcript_details({mssvInt}, {filter_by_semester})")
+                    .ToListAsync();
+            }
+
+            if (rows == null || rows.Count == 0)
+            {
+                return Ok(new TranscriptOverviewDto
+                {
+                    OverallGpa = overall?.gpa ?? 0f,
+                    AccumulatedCredits = overall?.so_tin_chi_tich_luy ?? 0,
+                    Semesters = new List<SemesterTranscriptDto>()
+                });
+            }
+
+            // Group by semester
+            var semesters = rows
+                .GroupBy(r => r.hoc_ky)
+                .Select(g => new SemesterTranscriptDto
+                {
+                    HocKy = g.Key,
+                    Subjects = g.Select(r => new SubjectGradeDetailDto
+                    {
+                        HocKy = r.hoc_ky,
+                        MaMonHoc = r.ma_mon_hoc,
+                        TenMonHoc = r.ten_mon_hoc,
+                        SoTinChi = r.so_tin_chi,
+                        TrongSoQuaTrinh = r.trong_so_qua_trinh,
+                        TrongSoGiuaKi = r.trong_so_giua_ki,
+                        TrongSoThucHanh = r.trong_so_thuc_hanh,
+                        TrongSoCuoiKi = r.trong_so_cuoi_ki,
+                        DiemQuaTrinh = r.diem_qua_trinh,
+                        DiemGiuaKi = r.diem_giua_ki,
+                        DiemThucHanh = r.diem_thuc_hanh,
+                        DiemCuoiKi = r.diem_cuoi_ki,
+                        DiemTongKet = r.diem_tong_ket
+                    }).ToList(),
+                    SemesterGpa = g.Any(x => x.diem_tong_ket.HasValue) ?
+                        (float?) Math.Round(
+                            g.Where(x => x.diem_tong_ket.HasValue)
+                             .Select(x => (x.diem_tong_ket!.Value, x.so_tin_chi))
+                             .Aggregate(0.0, (acc, t) => acc + (t.Item1 * t.Item2)) /
+                             Math.Max(1, g.Sum(x => x.so_tin_chi)), 2) : null
+                })
+                .OrderBy(s => s.HocKy)
+                .ToList();
+
+            var overview = new TranscriptOverviewDto
+            {
+                OverallGpa = overall?.gpa ?? 0f,
+                AccumulatedCredits = overall?.so_tin_chi_tich_luy ?? 0,
+                Semesters = semesters
+            };
+
+            return Ok(overview);
+        }
+        catch (Exception)
+        {
+            return StatusCode(500, new TranscriptOverviewDto
+            {
+                OverallGpa = 0f,
+                AccumulatedCredits = 0,
+                Semesters = new List<SemesterTranscriptDto>()
             });
         }
     }
