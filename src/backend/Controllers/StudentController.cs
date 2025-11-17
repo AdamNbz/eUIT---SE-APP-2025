@@ -414,7 +414,10 @@ public class StudentsController : ControllerBase
             {
                 HocKy = ts.hoc_ky,
                 TongDiem = ts.tong_diem,
-                XepLoai = ts.xep_loai,
+                    XepLoai = ts.tong_diem >= 90 ? "Xuất sắc" :
+                              ts.tong_diem >= 80 ? "Giỏi" :
+                              ts.tong_diem >= 70 ? "Khá" :
+                              ts.tong_diem >= 60 ? "Trung bình khá" : "Trung bình",
                 TinhTrang = ts.tinh_trang
             }).ToList();
 
