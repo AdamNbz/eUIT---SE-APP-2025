@@ -16,7 +16,8 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMixin {
+class _HomeScreenState extends State<HomeScreen>
+    with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
 
@@ -27,8 +28,6 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
   void initState() {
     super.initState();
     _scrollController = ScrollController();
-
-
   }
 
   @override
@@ -36,6 +35,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
     _scrollController.dispose();
     super.dispose();
   }
+
   // Hover states for interactive cards
   bool _hoverStudentCard = false;
   bool _hoverGpaCard = false;
@@ -51,65 +51,70 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? AppTheme.darkBackground : const Color(0xFFF7F8FC),
+      backgroundColor: isDark
+          ? AppTheme.darkBackground
+          : const Color(0xFFF7F8FC),
       body: Stack(
         children: [
           // Animated background cho Dark Mode
           if (isDark)
-            const Positioned.fill(
-              child: AnimatedBackground(isDark: true),
-            ),
+            const Positioned.fill(child: AnimatedBackground(isDark: true)),
 
           // Main scrollable content
           SafeArea(
             child: provider.isLoading
                 ? _buildShimmerLoading(isDark)
                 : RefreshIndicator(
-              onRefresh: () async {
-                await Future.delayed(const Duration(seconds: 1));
-              },
-              color: AppTheme.bluePrimary,
-              backgroundColor: isDark ? AppTheme.darkCard : Colors.white,
-              child: SingleChildScrollView(
-                controller: _scrollController,
-                physics: const AlwaysScrollableScrollPhysics(
-                  parent: BouncingScrollPhysics(),
-                ),
-                padding: const EdgeInsets.only(
-                  left: 20,
-                  right: 20,
-                  top: 20,
-                  bottom: 84, // Updated from 88 to match new bottom nav height (68 + 16)
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Header mới (Scrollable)
-                    _buildScrollableHeader(provider, isDark),
-                    const SizedBox(height: 24),
+                    onRefresh: () async {
+                      await Future.delayed(const Duration(seconds: 1));
+                    },
+                    color: AppTheme.bluePrimary,
+                    backgroundColor: isDark ? AppTheme.darkCard : Colors.white,
+                    child: SingleChildScrollView(
+                      controller: _scrollController,
+                      physics: const AlwaysScrollableScrollPhysics(
+                        parent: BouncingScrollPhysics(),
+                      ),
+                      padding: const EdgeInsets.only(
+                        left: 20,
+                        right: 20,
+                        top: 20,
+                        bottom:
+                            84, // Updated from 88 to match new bottom nav height (68 + 16)
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Header mới (Scrollable)
+                          _buildScrollableHeader(provider, isDark, loc),
+                          const SizedBox(height: 24),
 
-                    // Next Schedule Section
-                    _buildSectionTitle(loc.t('next_schedule'), isDark),
-                    const SizedBox(height: 12),
-                    _buildNextScheduleCard(provider, loc, isDark),
-                    const SizedBox(height: 24),
+                          // Next Schedule Section
+                          _buildSectionTitle(loc.t('next_schedule'), isDark),
+                          const SizedBox(height: 12),
+                          _buildNextScheduleCard(provider, loc, isDark),
+                          const SizedBox(height: 24),
 
-                    // Quick Actions Section (SQUIRCLE)
-                    _buildSectionTitle(loc.t('quick_actions'), isDark),
-                    const SizedBox(height: 12),
-                    _buildQuickActionsGrid(provider, isDark),
-                    const SizedBox(height: 24),
+                          // Quick Actions Section (SQUIRCLE)
+                          _buildSectionTitle(loc.t('quick_actions'), isDark),
+                          const SizedBox(height: 12),
+                          _buildQuickActionsGrid(provider, isDark),
+                          const SizedBox(height: 24),
 
-                    // Notifications Section
-                    _buildSectionTitle(loc.t('new_notifications'), isDark),
-                    const SizedBox(height: 12),
-                    _buildNotificationsList(provider, isDark),
-                    const SizedBox(height: 20),
-                  ],
-                ),
-              ),
-            ),
+                          // Notifications Section
+                          _buildSectionTitle(
+                            loc.t('new_notifications'),
+                            isDark,
+                          ),
+                          const SizedBox(height: 12),
+                          _buildNotificationsList(provider, isDark),
+                          const SizedBox(height: 20),
+                        ],
+                      ),
+                    ),
+                  ),
           ),
+
           /// 🔥 Chatbot Bubble Button
           if (!_bubbleClosed)
             AnimatedPositioned(
@@ -132,7 +137,9 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                         onTap: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => const ChatbotScreen()),
+                            MaterialPageRoute(
+                              builder: (context) => const ChatbotScreen(),
+                            ),
                           );
                         },
                         child: Container(
@@ -195,35 +202,6 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                             ),
                           ),
                         ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Header mới (Scrollable)
-                          _buildScrollableHeader(provider, isDark, loc),
-                          const SizedBox(height: 24),
-
-                          // Next Schedule Section
-                          _buildSectionTitle(loc.t('next_schedule'), isDark),
-                          const SizedBox(height: 12),
-                          _buildNextScheduleCard(provider, loc, isDark),
-                          const SizedBox(height: 24),
-
-                          // Student Info Cards (2 cols responsive)
-                          _buildStudentInfoCards(loc, isDark),
-                          const SizedBox(height: 24),
-
-                          // Quick Actions Section (SQUIRCLE)
-                          _buildSectionTitle(loc.t('quick_actions'), isDark),
-                          const SizedBox(height: 12),
-                          _buildQuickActionsGrid(provider, isDark),
-                          const SizedBox(height: 24),
-
-                          // Notifications Section
-                          _buildSectionTitle(loc.t('new_notifications'), isDark),
-                          const SizedBox(height: 12),
-                          _buildNotificationsList(provider, isDark),
-                          const SizedBox(height: 20),
-                        ],
                       ),
                     ],
                   ),
@@ -236,7 +214,11 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
   }
 
   // Header mới - Scrollable với BackdropFilter
-  Widget _buildScrollableHeader(HomeProvider provider, bool isDark, AppLocalizations loc) {
+  Widget _buildScrollableHeader(
+    HomeProvider provider,
+    bool isDark,
+    AppLocalizations loc,
+  ) {
     final unreadCount = provider.notifications.where((n) => n.isUnread).length;
 
     return ClipRRect(
@@ -297,7 +279,9 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                       Text(
                         'MSSV: 20520001',
                         style: TextStyle(
-                          color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                          color: isDark
+                              ? Colors.grey.shade400
+                              : Colors.grey.shade600,
                           fontSize: 12,
                         ),
                       ),
@@ -313,7 +297,9 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const ChatbotScreen()),
+                        MaterialPageRoute(
+                          builder: (context) => const ChatbotScreen(),
+                        ),
                       );
                     },
                     child: Container(
@@ -424,7 +410,11 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
   }
 
   // Next Schedule Card với BackdropFilter và visual hierarchy
-  Widget _buildNextScheduleCard(HomeProvider provider, AppLocalizations loc, bool isDark) {
+  Widget _buildNextScheduleCard(
+    HomeProvider provider,
+    AppLocalizations loc,
+    bool isDark,
+  ) {
     final schedule = provider.nextSchedule;
 
     return ClipRRect(
@@ -437,17 +427,17 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
           decoration: BoxDecoration(
             gradient: isDark
                 ? LinearGradient(
-              colors: [
-                const Color(0xFF1E293B).withAlpha(229), // 0.9 opacity
-                const Color(0xFF1E293B).withAlpha(204), // 0.8 opacity
-              ],
-            )
+                    colors: [
+                      const Color(0xFF1E293B).withAlpha(229), // 0.9 opacity
+                      const Color(0xFF1E293B).withAlpha(204), // 0.8 opacity
+                    ],
+                  )
                 : LinearGradient(
-              colors: [
-                Colors.white.withAlpha(242), // 0.95 opacity
-                Colors.white.withAlpha(242),
-              ],
-            ),
+                    colors: [
+                      Colors.white.withAlpha(242), // 0.95 opacity
+                      Colors.white.withAlpha(242),
+                    ],
+                  ),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: isDark
@@ -482,7 +472,9 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                         Text(
                           schedule.timeRange,
                           style: TextStyle(
-                            color: isDark ? AppTheme.bluePrimary : AppTheme.bluePrimary,
+                            color: isDark
+                                ? AppTheme.bluePrimary
+                                : AppTheme.bluePrimary,
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
                           ),
@@ -520,7 +512,9 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                       Text(
                         loc.t('starts_in'),
                         style: TextStyle(
-                          color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                          color: isDark
+                              ? Colors.grey.shade400
+                              : Colors.grey.shade600,
                           fontSize: 13,
                         ),
                       ),
@@ -528,7 +522,9 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                       Text(
                         schedule.countdown,
                         style: TextStyle(
-                          color: isDark ? AppTheme.bluePrimary : AppTheme.bluePrimary,
+                          color: isDark
+                              ? AppTheme.bluePrimary
+                              : AppTheme.bluePrimary,
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                         ),
@@ -549,7 +545,6 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                 ],
               ),
               const SizedBox(height: 10), // Reduced space
-
               // View schedule button aligned to the right
               Align(
                 alignment: Alignment.centerLeft,
@@ -557,8 +552,12 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                   onPressed: () {},
                   style: TextButton.styleFrom(
                     foregroundColor: AppTheme.bluePrimary,
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), // Compact padding
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap, // Reduce tap area
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ), // Compact padding
+                    tapTargetSize:
+                        MaterialTapTargetSize.shrinkWrap, // Reduce tap area
                   ),
                   icon: const Icon(Icons.arrow_forward_rounded, size: 18),
                   label: Text(loc.t('view_full_schedule')),
@@ -592,11 +591,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
       spacing: 12,
       runSpacing: 16,
       children: actions.asMap().entries.map((entry) {
-        return _buildSquircleActionButton(
-          entry.value,
-          isDark,
-          entry.key,
-        );
+        return _buildSquircleActionButton(entry.value, isDark, entry.key);
       }).toList(),
     );
   }
@@ -611,7 +606,10 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
       [const Color(0xFFF97316), const Color(0xFFEA580C)], // Gửi xe - Cam
       [const Color(0xFFEC4899), const Color(0xFFDB2777)], // Phúc khảo - Hồng
       [const Color(0xFF06B6D4), const Color(0xFF0891B2)], // GXN - Xanh lam
-      [const Color(0xFF14B8A6), const Color(0xFF0D9488)], // Chứng chỉ - Xanh ngọc
+      [
+        const Color(0xFF14B8A6),
+        const Color(0xFF0D9488),
+      ], // Chứng chỉ - Xanh ngọc
     ];
 
     final gradient = index < gradients.length
@@ -676,18 +674,14 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
               child: Center(
                 child: action.textIcon != null
                     ? Text(
-                  action.textIcon!,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                )
-                    : Icon(
-                  icon,
-                  color: Colors.white,
-                  size: 28,
-                ),
+                        action.textIcon!,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      )
+                    : Icon(icon, color: Colors.white, size: 28),
               ),
             ),
           ),
@@ -737,12 +731,12 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                   boxShadow: isDark
                       ? []
                       : [
-                    BoxShadow(
-                      color: Colors.black.withAlpha(13),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+                          BoxShadow(
+                            color: Colors.black.withAlpha(13),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                 ),
                 child: ListTile(
                   leading: Container(
@@ -751,19 +745,24 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                     decoration: BoxDecoration(
                       gradient: notification.isUnread
                           ? const LinearGradient(
-                        colors: [AppTheme.bluePrimary, AppTheme.blueLight],
-                      )
+                              colors: [
+                                AppTheme.bluePrimary,
+                                AppTheme.blueLight,
+                              ],
+                            )
                           : LinearGradient(
-                        colors: [
-                          Colors.grey.shade300,
-                          Colors.grey.shade200,
-                        ],
-                      ),
+                              colors: [
+                                Colors.grey.shade300,
+                                Colors.grey.shade200,
+                              ],
+                            ),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(
                       Icons.notifications_outlined,
-                      color: notification.isUnread ? Colors.white : Colors.grey.shade600,
+                      color: notification.isUnread
+                          ? Colors.white
+                          : Colors.grey.shade600,
                       size: 22,
                     ),
                   ),
@@ -779,27 +778,29 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                   ),
                   subtitle: notification.body != null
                       ? Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                      notification.body!,
-                      style: TextStyle(
-                        color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
-                        fontSize: 12,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  )
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(
+                            notification.body!,
+                            style: TextStyle(
+                              color: isDark
+                                  ? Colors.grey.shade400
+                                  : Colors.grey.shade600,
+                              fontSize: 12,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        )
                       : null,
                   trailing: notification.isUnread
                       ? Container(
-                    width: 10,
-                    height: 10,
-                    decoration: const BoxDecoration(
-                      color: AppTheme.bluePrimary,
-                      shape: BoxShape.circle,
-                    ),
-                  )
+                          width: 10,
+                          height: 10,
+                          decoration: const BoxDecoration(
+                            color: AppTheme.bluePrimary,
+                            shape: BoxShape.circle,
+                          ),
+                        )
                       : null,
                   onTap: () {
                     print('Tapped notification: ${notification.title}');
@@ -889,10 +890,17 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
               borderRadius: BorderRadius.circular(12),
               color: isDark ? Colors.white.withAlpha(13) : AppTheme.lightCard,
               border: Border.all(
-                color: _hoverStudentCard ? AppTheme.bluePrimary : (isDark ? Colors.white.withAlpha(26) : AppTheme.lightBorder),
+                color: _hoverStudentCard
+                    ? AppTheme.bluePrimary
+                    : (isDark
+                          ? Colors.white.withAlpha(26)
+                          : AppTheme.lightBorder),
               ),
             ),
-            child: const Icon(Icons.badge_outlined, color: AppTheme.bluePrimary),
+            child: const Icon(
+              Icons.badge_outlined,
+              color: AppTheme.bluePrimary,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -944,7 +952,9 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  _isGpaVisible ? '${loc.t('credits')}: 128' : '${loc.t('credits')}: •••',
+                  _isGpaVisible
+                      ? '${loc.t('credits')}: 128'
+                      : '${loc.t('credits')}: •••',
                   style: const TextStyle(
                     color: AppTheme.bluePrimary,
                     fontSize: 12,
@@ -956,7 +966,9 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
           ),
           IconButton(
             icon: Icon(
-              _isGpaVisible ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+              _isGpaVisible
+                  ? Icons.visibility_off_outlined
+                  : Icons.visibility_outlined,
               color: secondary,
             ),
             onPressed: () {
@@ -977,7 +989,9 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
     required VoidCallback onTap,
     required ValueChanged<bool> onHover,
   }) {
-    final baseBorder = isDark ? Colors.white.withAlpha(26) : AppTheme.lightBorder;
+    final baseBorder = isDark
+        ? Colors.white.withAlpha(26)
+        : AppTheme.lightBorder;
     final borderColor = isHover ? AppTheme.bluePrimary : baseBorder;
     final boxShadowColor = isHover
         ? AppTheme.bluePrimary.withAlpha(76)
@@ -1009,10 +1023,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
             onTap: onTap,
             splashColor: AppTheme.bluePrimary.withAlpha(38),
             highlightColor: AppTheme.bluePrimary.withAlpha(20),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: child,
-            ),
+            child: Padding(padding: const EdgeInsets.all(16), child: child),
           ),
         ),
       ),
@@ -1025,7 +1036,9 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
       builder: (context) {
         return AlertDialog(
           backgroundColor: isDark ? AppTheme.darkCard : Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           title: Text(
             loc.t('student_card'),
             style: TextStyle(color: isDark ? Colors.white : Colors.black87),
@@ -1038,13 +1051,21 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
-                  color: isDark ? Colors.white.withAlpha(10) : AppTheme.lightCard,
-                  border: Border.all(color: isDark ? Colors.white24 : AppTheme.lightBorder),
+                  color: isDark
+                      ? Colors.white.withAlpha(10)
+                      : AppTheme.lightCard,
+                  border: Border.all(
+                    color: isDark ? Colors.white24 : AppTheme.lightBorder,
+                  ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const Icon(Icons.badge_outlined, size: 48, color: AppTheme.bluePrimary),
+                    const Icon(
+                      Icons.badge_outlined,
+                      size: 48,
+                      color: AppTheme.bluePrimary,
+                    ),
                     const SizedBox(height: 12),
                     Text(
                       loc.t('coming_soon'),
@@ -1056,7 +1077,12 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                     const SizedBox(height: 8),
                     Text(
                       loc.t('digital_student_card_preview'),
-                      style: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey.shade600, fontSize: 12),
+                      style: TextStyle(
+                        color: isDark
+                            ? Colors.grey.shade400
+                            : Colors.grey.shade600,
+                        fontSize: 12,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -1068,7 +1094,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
               child: Text(loc.t('close')),
-            )
+            ),
           ],
         );
       },
@@ -1081,7 +1107,9 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
       builder: (context) {
         return AlertDialog(
           backgroundColor: isDark ? AppTheme.darkCard : Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           title: Text(
             loc.t('gpa'),
             style: TextStyle(color: isDark ? Colors.white : Colors.black87),
@@ -1089,16 +1117,26 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.assessment_outlined, size: 48, color: AppTheme.bluePrimary),
+              const Icon(
+                Icons.assessment_outlined,
+                size: 48,
+                color: AppTheme.bluePrimary,
+              ),
               const SizedBox(height: 12),
               Text(
                 loc.t('coming_soon'),
-                style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  color: isDark ? Colors.white : Colors.black87,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               const SizedBox(height: 8),
               Text(
                 loc.t('gpa_details_soon'),
-                style: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey.shade600, fontSize: 12),
+                style: TextStyle(
+                  color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                  fontSize: 12,
+                ),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -1107,7 +1145,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
               child: Text(loc.t('close')),
-            )
+            ),
           ],
         );
       },
