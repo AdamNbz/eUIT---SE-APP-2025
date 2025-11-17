@@ -134,9 +134,7 @@ public class StudentsController : ControllerBase
         return Ok(studentCard);
     }
 
-    /// <summary>
-    /// Retrieves the quick GPA and accumulated credits for the currently authenticated student.
-    /// </summary>
+    // GET: api/students/quickgpa
     [HttpGet("/quickgpa")]
     public async Task<ActionResult<QuickGpaDto>> GetQuickGpa()
     {
@@ -154,10 +152,7 @@ public class StudentsController : ControllerBase
             $"SELECT * FROM func_calculate_gpa({mssvInt})")
             .FirstOrDefaultAsync();
 
-        if (result == null)
-        {
-            return NotFound(); // Không tìm thấy sinh viên với mssv này
-        }
+        if (result == null) return NotFound();
 
         var gpaAndCredits = new QuickGpaDto
         {
@@ -177,7 +172,6 @@ public class StudentsController : ControllerBase
         public float? diem_tong_ket { get; set; }
     }
 
-    // Detailed transcript row mapping from SQL function
     private class DetailedGradeRow
     {
         public string hoc_ky { get; set; } = string.Empty;
@@ -195,11 +189,7 @@ public class StudentsController : ControllerBase
         public float? diem_tong_ket { get; set; }
     }
 
-    /// <summary>
-    /// Retrieves the academic grades for the currently authenticated student.
-    /// Can be filtered by semester using the filter_by_semester query parameter.
-    /// </summary>
-    /// <param name="filter_by_semester">Optional semester filter (e.g., "2025_2026_1")</param>
+    // GET: api/students/grades
     [HttpGet("/grades")]
     public async Task<ActionResult<GradeListResponseDto>> GetGrades([FromQuery] string? filter_by_semester = null)
     {
@@ -264,10 +254,7 @@ public class StudentsController : ControllerBase
         }
     }
 
-    /// <summary>
-    /// Returns detailed transcript including component scores, weightings, overall GPA and accumulated credits.
-    /// </summary>
-    /// <param name="filter_by_semester">Optional semester filter for detailed view</param>
+    // GET: api/students/grades/details
     [HttpGet("/grades/details")]
     public async Task<ActionResult<TranscriptOverviewDto>> GetDetailedTranscript([FromQuery] string? filter_by_semester = null)
     {
@@ -277,10 +264,8 @@ public class StudentsController : ControllerBase
 
         try
         {
-            // Overall GPA + accumulated credits
             var overall = await _context.Database.SqlQuery<QuickGpa>($"SELECT * FROM func_calculate_gpa({mssvInt})").FirstOrDefaultAsync();
 
-            // Detailed rows (single set-based call)
             List<DetailedGradeRow> rows;
             if (string.IsNullOrEmpty(filter_by_semester))
             {
@@ -305,7 +290,6 @@ public class StudentsController : ControllerBase
                 });
             }
 
-            // Group by semester
             var semesters = rows
                 .GroupBy(r => r.hoc_ky)
                 .Select(g => new SemesterTranscriptDto
@@ -327,12 +311,7 @@ public class StudentsController : ControllerBase
                         DiemCuoiKi = r.diem_cuoi_ki,
                         DiemTongKet = r.diem_tong_ket
                     }).ToList(),
-                    SemesterGpa = g.Any(x => x.diem_tong_ket.HasValue) ?
-                        (float?) Math.Round(
-                            g.Where(x => x.diem_tong_ket.HasValue)
-                             .Select(x => (x.diem_tong_ket!.Value, x.so_tin_chi))
-                             .Aggregate(0.0, (acc, t) => acc + (t.Item1 * t.Item2)) /
-                             Math.Max(1, g.Sum(x => x.so_tin_chi)), 2) : null
+                    SemesterGpa = CalculateSemesterGpa(g.ToList())
                 })
                 .OrderBy(s => s.HocKy)
                 .ToList();
@@ -346,8 +325,11 @@ public class StudentsController : ControllerBase
 
             return Ok(overview);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Console.WriteLine($"Error in GetDetailedTranscript: {ex.Message}");
+            Console.WriteLine($"Stack trace: {ex.StackTrace}");
+            
             return StatusCode(500, new TranscriptOverviewDto
             {
                 OverallGpa = 0f,
@@ -355,6 +337,18 @@ public class StudentsController : ControllerBase
                 Semesters = new List<SemesterTranscriptDto>()
             });
         }
+    }
+
+    private static float? CalculateSemesterGpa(List<DetailedGradeRow> subjects)
+    {
+        var validSubjects = subjects.Where(s => s.diem_tong_ket.HasValue).ToList();
+        if (validSubjects.Count == 0) return null;
+
+        var totalCredits = validSubjects.Sum(s => s.so_tin_chi);
+        if (totalCredits == 0) return null;
+
+        var weightedSum = validSubjects.Sum(s => s.diem_tong_ket!.Value * s.so_tin_chi);
+        return (float)Math.Round(weightedSum / totalCredits, 2);
     }
 
     private class TrainingScoreResult
@@ -365,11 +359,7 @@ public class StudentsController : ControllerBase
         public string tinh_trang { get; set; } = string.Empty;
     }
 
-    /// <summary>
-    /// Retrieves the training/conduct scores for the currently authenticated student.
-    /// Can be filtered by semester using the filter_by_semester query parameter.
-    /// </summary>
-    /// <param name="filter_by_semester">Optional semester filter (e.g., "2025_2026_1")</param>
+    // GET: api/students/training-scores
     [HttpGet("/training-scores")]
     public async Task<ActionResult<TrainingScoreListResponseDto>> GetTrainingScores([FromQuery] string? filter_by_semester = null)
     {
@@ -384,8 +374,6 @@ public class StudentsController : ControllerBase
 
         try
         {
-            // Note: This assumes you have a database function for training scores
-            // If not available, this will need to query the training score tables directly
             List<TrainingScoreResult> trainingScoreResults;
 
             if (string.IsNullOrEmpty(filter_by_semester))
