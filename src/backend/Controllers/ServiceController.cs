@@ -1,53 +1,15 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using eUIT.API.Data;
-using Npgsql;
 using System.Security.Claims;
-using System.ComponentModel.DataAnnotations;
+using Npgsql;
 
-namespace eUIT.API.Controllers;
+// DTO namespaces
+using eUIT.API.DTOs.ConfirmationLetter;
+using eUIT.API.DTOs.LanguageCertificate;
 
-#region DTO Classes
-public class ConfirmationLetterRequestDto
-{
-    [Required(ErrorMessage = "Vui lòng nhập lý do")]
-    public string Purpose { get; set; } = string.Empty;
-}
-
-public class ConfirmationLetterResponseDto
-{
-    public int SerialNumber { get; set; }
-    public string ExpiryDate { get; set; } = string.Empty; // Trả về string cho dễ format dd/MM/yyyy
-}
-
-// Class này dùng để hứng kết quả từ SQL Raw (tên biến phải khớp output SQL)
-public class ConfirmationLetterResult
-{
-    public int so_thu_tu { get; set; }
-    public DateTime ngay_het_han { get; set; }
-}
-
-public class LanguageCertificateRequestDto
-{
-    [Required(ErrorMessage = "Vui lòng chọn loại chứng chỉ")]
-    [FromForm(Name = "certificate_type")]
-    public string CertificateType { get; set; } = string.Empty;
-
-    [Required(ErrorMessage = "Vui lòng nhập điểm số")]
-    [FromForm(Name = "score")]
-    public float Score { get; set; }
-
-    [Required(ErrorMessage = "Vui lòng nhập ngày cấp")]
-    [FromForm(Name = "issue_date")]
-    public DateTime IssueDate { get; set; }
-
-    [FromForm(Name = "expiry_date")]
-    public DateTime? ExpiryDate { get; set; }
-}
-
-
-#endregion
+// DbContext
+using eUIT.API.Data;
 
 [Authorize]
 [ApiController]
@@ -63,37 +25,34 @@ public class ServiceController : ControllerBase
         _env = env;
     }
 
+    // =============================
+    //      REQUEST CONFIRMATION
+    // =============================
     [HttpPost("confirmation-letter")]
-    public async Task<ActionResult<ConfirmationLetterResponseDto>> RequestConfirmationLetter([FromBody] ConfirmationLetterRequestDto requestDto)
+    public async Task<ActionResult<ConfirmationLetterResponseDto>> RequestConfirmationLetter(
+        [FromBody] ConfirmationLetterRequestDto requestDto)
     {
-        // 1. Lấy MSSV từ Token
-        var (mssv, errorResult) = GetCurrentMssv();
-        if (errorResult != null) return errorResult;
+        // Lấy MSSV từ token
+        var (mssv, error) = GetCurrentMssv();
+        if (error != null) return error;
 
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
         try
         {
-            // 2. Chuẩn bị tham số gọi hàm SQL
-            var mssvParam = new NpgsqlParameter("p_mssv", mssv.Value);
-            var purposeParam = new NpgsqlParameter("p_purpose", requestDto.Purpose ?? "");
-
-            // 3. Gọi hàm SQL
-            // Lưu ý: Tên cột trong SELECT phải map với class ConfirmationLetterResult
-            string sql = "SELECT * FROM func_request_confirmation_letter(@p_mssv, @p_purpose)";
-
+            var sql = "SELECT * FROM func_request_confirmation_letter(@p_mssv, @p_purpose)";
+            
             var result = await _context.Database
-                .SqlQueryRaw<ConfirmationLetterResult>(sql, mssvParam, purposeParam)
-                .ToListAsync(); // Dùng ToListAsync an toàn hơn SingleOrDefault với Raw SQL đôi khi
+                .SqlQueryRaw<ConfirmationLetterResult>(sql,
+                    new NpgsqlParameter("p_mssv", mssv.Value),
+                    new NpgsqlParameter("p_purpose", requestDto.Purpose))
+                .ToListAsync();
 
             var record = result.FirstOrDefault();
 
             if (record == null)
-            {
-                return StatusCode(500, "Lỗi hệ thống: Không nhận được kết quả từ Database.");
-            }
+                return StatusCode(500, new { error = "Không nhận được kết quả từ DB." });
 
-            // 4. Trả về kết quả
             return Ok(new ConfirmationLetterResponseDto
             {
                 SerialNumber = record.so_thu_tu,
@@ -102,106 +61,181 @@ public class ServiceController : ControllerBase
         }
         catch (Exception ex)
         {
-            // Log error here if needed
-            return StatusCode(500, $"Lỗi Server: {ex.Message}");
+            return StatusCode(500, new { error = $"Lỗi Server: {ex.Message}" });
         }
     }
 
+    // =============================
+    //     SUBMIT LANGUAGE CERT
+    // =============================
     [HttpPost("language-certificate")]
-    [RequestSizeLimit(5 * 1024 * 1024)] // 5 MB
-    public async Task<IActionResult> SubmitLanguageCertificate([FromForm] LanguageCertificateRequestDto requestDto, IFormFile file)
+    [RequestSizeLimit(5 * 1024 * 1024)]
+    public async Task<IActionResult> SubmitLanguageCertificate(
+        [FromForm] LanguageCertificateRequestDto requestDto, IFormFile file)
     {
-        // 1. Lấy MSSV từ Token
-        var (mssv, errorResult) = GetCurrentMssv();
-        if (errorResult != null) return errorResult;
+        var (mssv, error) = GetCurrentMssv();
+        if (error != null) return error;
 
-        // 2. Validate DTO và file
         if (!ModelState.IsValid)
-        {
             return BadRequest(ModelState);
-        }
 
         if (file == null || file.Length == 0)
-        {
             return BadRequest(new { file = "Vui lòng tải lên file chứng chỉ." });
-        }
 
-        // 3. Kiểm tra định dạng file
-        var allowedExtensions = new[] { ".pdf", ".jpg", ".jpeg", ".png" };
-        var fileExtension = Path.GetExtension(file.FileName).ToLowerInvariant();
-        if (string.IsNullOrEmpty(fileExtension) || !allowedExtensions.Contains(fileExtension))
-        {
-            return BadRequest(new { error = "Định dạng file không hợp lệ. Chỉ chấp nhận PDF, JPG, PNG." });
-        }
+        // Check extension
+        var allowed = new[] { ".pdf", ".jpg", ".jpeg", ".png" };
+        var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
 
-        // 4. Lưu file vào thư mục (ví dụ: wwwroot/uploads/certificates)
-        string webRootPath = _env.WebRootPath ?? Path.Combine(_env.ContentRootPath, "wwwroot");
-        var uploadsFolder = Path.Combine(webRootPath, "uploads", "certificates");
+        if (!allowed.Contains(ext))
+            return BadRequest(new { error = "File phải là PDF hoặc JPG/PNG." });
 
-        if (!Directory.Exists(uploadsFolder))
-        {
-            Directory.CreateDirectory(uploadsFolder);
-        }
+        // Generate folder & file name
+        string root = _env.WebRootPath ?? Path.Combine(_env.ContentRootPath, "wwwroot");
+        string folder = Path.Combine(root, "uploads", "certificates");
 
-        // Tạo tên file duy nhất để tránh trùng lặp
-        var uniqueFileName = $"{mssv}_{DateTime.UtcNow:yyyyMMdd}_{Guid.NewGuid().ToString("N")[..8]}{fileExtension}";
-        var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+        Directory.CreateDirectory(folder);
+
+        string unique = $"{mssv}_{DateTime.UtcNow:yyyyMMdd}_{Guid.NewGuid():N}{ext}";
+        string filePath = Path.Combine(folder, unique);
 
         try
         {
+            // Save file
             await using (var stream = new FileStream(filePath, FileMode.Create))
             {
                 await file.CopyToAsync(stream);
             }
 
-            // 5. Lưu thông tin vào database
-            var mssvParam = new NpgsqlParameter("p_mssv", mssv.Value);
-            var typeParam = new NpgsqlParameter("p_certificate_type", requestDto.CertificateType);
-            var scoreParam = new NpgsqlParameter("p_score", requestDto.Score);
-            var issueDateParam = new NpgsqlParameter("p_issue_date", requestDto.IssueDate);
-            var expiryDateParam = new NpgsqlParameter("p_expiry_date", (object)requestDto.ExpiryDate ?? DBNull.Value);
-            var filePathParam = new NpgsqlParameter("p_file_path", $"uploads/certificates/{uniqueFileName}"); // Lưu đường dẫn tương đối
+            // Call SQL function
+            // Call SQL function - chỉ truyền DATE, không truyền TIME
+// Call SQL function với MSSV kiểu integer
+            string sql = "SELECT func_submit_language_certificate(@mssv, @type, @score, @issue::date, @expiry::date, @path)";
 
-            // SỬA DÒNG NÀY
-// Thêm ::date vào sau @p_issue_date và @p_expiry_date
-            string sql = "SELECT func_submit_language_certificate(@p_mssv, @p_certificate_type, @p_score, @p_issue_date::date, @p_expiry_date::date, @p_file_path)";
+            await _context.Database.ExecuteSqlRawAsync(
+                sql,
+                new NpgsqlParameter("mssv", mssv.Value), // Không cần ToString(), giữ nguyên integer
+                new NpgsqlParameter("type", requestDto.CertificateType),
+                new NpgsqlParameter("score", (float)requestDto.Score),
+                new NpgsqlParameter("issue", requestDto.IssueDate),
+                new NpgsqlParameter("expiry", requestDto.ExpiryDate.HasValue ? (object)requestDto.ExpiryDate.Value : DBNull.Value),
+                new NpgsqlParameter("path", $"uploads/certificates/{unique}")
+            );
 
-            await _context.Database.ExecuteSqlRawAsync(sql, mssvParam, typeParam, scoreParam, issueDateParam, expiryDateParam, filePathParam);;
-
-            return Ok(new { message = "Nộp chứng chỉ ngoại ngữ thành công." });
+            return Ok(new { message = "Nộp chứng chỉ thành công." });
         }
         catch (PostgresException pgEx)
         {
-            // Xóa file đã tải lên nếu có lỗi từ database
             if (System.IO.File.Exists(filePath))
-            {
                 System.IO.File.Delete(filePath);
-            }
-            // Giả sử mã lỗi 'P0001' là raise_exception trong PostgreSQL
+
+            // PostgreSQL raise exception
             if (pgEx.SqlState == "P0001")
-            {
-                return BadRequest(new { error = pgEx.Message });
-            }
-            return StatusCode(500, $"Lỗi Database: {pgEx.Message}");
+                return BadRequest(new { error = pgEx.MessageText });
+
+            return StatusCode(500, new { error = $"Lỗi Database: {pgEx.MessageText}" });
         }
         catch (Exception ex)
         {
-            return StatusCode(500, $"Lỗi Server: {ex.Message}");
+            if (System.IO.File.Exists(filePath))
+                System.IO.File.Delete(filePath);
+                
+            return StatusCode(500, new { error = $"Lỗi Server: {ex.Message}" });
+        }
+    }
+    /// <summary>
+    /// GET: api/service/confirmation-letter/history
+    /// Lấy lịch sử yêu cầu giấy xác nhận của sinh viên
+    /// </summary>
+    [HttpGet("confirmation-letter/history")]
+    public async Task<ActionResult<IEnumerable<ConfirmationLetterHistoryDto>>> GetConfirmationLetterHistory()
+    {
+        // Bước 1: Lấy MSSV từ token JWT
+        var (mssv, errorResult) = GetCurrentMssv();
+        if (errorResult != null) return errorResult;
+
+        try
+        {
+            // Bước 2: Gọi SQL function để lấy lịch sử
+            var sql = "SELECT * FROM func_get_confirmation_letter_status(@p_mssv)";
+            
+            var results = await _context.Database
+                .SqlQueryRaw<ConfirmationLetterHistoryResult>(sql, 
+                    new NpgsqlParameter("p_mssv", mssv.Value))
+                .ToListAsync();
+
+            // Bước 3: Mapping từ SQL result sang DTO
+            var history = results.Select(r => new ConfirmationLetterHistoryDto
+            {
+                SerialNumber = r.serial_number,
+                Purpose = r.purpose,
+                ExpiryDate = r.expiry_date?.ToString("dd/MM/yyyy") ?? "",
+                RequestedAt = r.requested_at.ToString("dd/MM/yyyy HH:mm")
+            }).ToList();
+
+            // Bước 4: Trả về kết quả
+            return Ok(history);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = $"Lỗi Server: {ex.Message}" });
+        }
+    }
+    /// <summary>
+    /// GET: api/service/language-certificate/history
+    /// Lấy lịch sử nộp chứng chỉ ngoại ngữ của sinh viên
+    /// </summary>
+    [HttpGet("language-certificate/history")]
+    public async Task<ActionResult<IEnumerable<LanguageCertificateHistoryDto>>> GetLanguageCertificateHistory()
+    {
+        // Bước 1: Lấy MSSV từ token JWT
+        var (mssv, errorResult) = GetCurrentMssv();
+        if (errorResult != null) return errorResult;
+
+        try
+        {
+            // Bước 2: Gọi SQL function để lấy lịch sử
+            var sql = "SELECT * FROM func_get_language_certificate_status(@p_mssv)";
+            
+            var results = await _context.Database
+                .SqlQueryRaw<LanguageCertificateHistoryResult>(sql,
+                    new NpgsqlParameter("p_mssv", mssv.Value))
+                .ToListAsync();
+
+            // Bước 3: Mapping từ SQL result sang DTO
+            var history = results.Select(r => new LanguageCertificateHistoryDto
+            {
+                Id = r.id,
+                CertificateType = r.certificate_type,
+                Score = r.score,
+                IssueDate = r.issue_date.ToString("dd/MM/yyyy"),
+                ExpiryDate = r.expiry_date?.ToString("dd/MM/yyyy"),
+                Status = r.status,
+                FilePath = r.file_path,
+                CreatedAt = r.created_at.ToString("dd/MM/yyyy HH:mm")
+            }).ToList();
+
+            // Bước 4: Trả về kết quả
+            return Ok(history);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = $"Lỗi Server: {ex.Message}" });
         }
     }
 
-    private (int? mssv, ActionResult? errorResult) GetCurrentMssv()
+    // =============================
+    //        GET CURRENT MSSV
+    // =============================
+    private (int? mssv, ActionResult? error) GetCurrentMssv()
     {
         var claim = User.FindFirst(ClaimTypes.NameIdentifier);
-        if (claim == null || string.IsNullOrEmpty(claim.Value))
-        {
-            return (null, Unauthorized("Không tìm thấy thông tin người dùng."));
-        }
 
-        if (int.TryParse(claim.Value, out int mssv))
-        {
-            return (mssv, null);
-        }
-        return (null, BadRequest("Mã số sinh viên không hợp lệ."));
+        if (claim == null)
+            return (null, Unauthorized("Không tìm thấy thông tin người dùng."));
+
+        if (!int.TryParse(claim.Value, out int mssv))
+            return (null, BadRequest("MSSV không hợp lệ."));
+
+        return (mssv, null);
     }
 }
