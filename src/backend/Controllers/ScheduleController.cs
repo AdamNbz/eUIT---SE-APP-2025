@@ -125,6 +125,11 @@ public class ScheduleController : ControllerBase
                     filteredResults = filteredResults.Where(s => 
                         s.ngay_bat_dau <= endOfMonth && s.ngay_ket_thuc >= startOfMonth);
                     break;
+                case "all":
+                    // Show all classes from now until the end
+                    filteredResults = filteredResults.Where(s => 
+                        s.ngay_ket_thuc >= now.Date);
+                    break;
             }
 
             var classes = filteredResults.Select(s => new ScheduleClassDto
