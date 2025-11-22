@@ -7,9 +7,12 @@ using Npgsql;
 // DTO namespaces
 using eUIT.API.DTOs.ConfirmationLetter;
 using eUIT.API.DTOs.LanguageCertificate;
+using eUIT.API.DTOs;
 
 // DbContext
 using eUIT.API.Data;
+// Models
+using eUIT.API.Models;
 
 [Authorize]
 [ApiController]
@@ -216,6 +219,86 @@ public class ServiceController : ControllerBase
 
             // Bước 4: Trả về kết quả
             return Ok(history);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = $"Lỗi Server: {ex.Message}" });
+        }
+    }
+
+    private class ParkingPassResult
+    {
+        public int id { get; set; }
+        public string license_plate { get; set; } = string.Empty;
+        public string vehicle_type { get; set; } = string.Empty;
+        public DateTime expiry_date { get; set; }
+        public DateTime registered_at { get; set; }
+    }
+
+    // =============================
+    //      PARKING PASS REGISTRATION
+    // =============================
+    /// <summary>
+    /// Đăng ký vé gửi xe tháng cho sinh viên.
+    /// </summary>
+    /// <param name="requestDto">Thông tin đăng ký vé xe.</param>
+    /// <returns>Thông tin vé đã được tạo.</returns>
+    [HttpPost("parking-pass")]
+    public async Task<ActionResult<ParkingPassResponseDto>> RegisterParkingPass(
+        [FromBody] ParkingPassRequestDto requestDto)
+    {
+        // Lấy MSSV từ token
+        var (mssv, error) = GetCurrentMssv();
+        if (error != null) return error;
+
+        // Xác định biển số xe dựa trên loại xe
+        string licensePlate;
+        if (requestDto.VehicleType == "bicycle")
+        {
+            licensePlate = mssv.Value.ToString();
+        }
+        else // motorbike
+        {
+            if (string.IsNullOrWhiteSpace(requestDto.LicensePlate))
+            {
+                ModelState.AddModelError(nameof(requestDto.LicensePlate), "Biển số xe là bắt buộc cho xe máy.");
+                return BadRequest(ModelState);
+            }
+            licensePlate = requestDto.LicensePlate;
+        }
+
+        try
+        {
+            var sql = "SELECT * FROM func_register_parking_pass(@p_mssv, @p_license_plate, @p_vehicle_type, @p_registration_months)";
+
+            var result = await _context.Database
+                .SqlQueryRaw<ParkingPassResult>(sql,
+                    new NpgsqlParameter("p_mssv", mssv.Value),
+                    new NpgsqlParameter("p_license_plate", licensePlate),
+                    new NpgsqlParameter("p_vehicle_type", requestDto.VehicleType),
+                    new NpgsqlParameter("p_registration_months", requestDto.RegistrationMonths))
+                .FirstOrDefaultAsync();
+
+            if (result == null)
+            {
+                return StatusCode(500, new { error = "Không thể đăng ký vé xe. Vui lòng thử lại." });
+            }
+
+            var responseDto = new ParkingPassResponseDto
+            {
+                Id = result.id,
+                LicensePlate = result.license_plate,
+                VehicleType = result.vehicle_type,
+                RegisteredAt = result.registered_at.ToString("dd/MM/yyyy HH:mm"),
+                ExpiryDate = result.expiry_date.ToString("dd/MM/yyyy")
+            };
+
+            return CreatedAtAction(nameof(RegisterParkingPass), new { id = result.id }, responseDto);
+        }
+        catch (PostgresException pgEx) when (pgEx.SqlState == "P0001")
+        {
+            // Bắt lỗi 'P0001' từ hàm SQL và trả về 409 Conflict
+            return Conflict(new { error = pgEx.MessageText });
         }
         catch (Exception ex)
         {

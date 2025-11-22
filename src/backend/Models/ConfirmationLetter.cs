@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace eUIT.API.Models;
@@ -14,7 +14,7 @@ public class ConfirmationLetter
     public int Mssv { get; set; }
     
     [Column("purpose")]
-    public string Purpose { get; set; }
+    public string Purpose { get; set; } = string.Empty;
     
     [Column("serial_number")]
     public int SerialNumber { get; set; }

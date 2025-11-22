@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace eUIT.API.Models;
@@ -14,7 +14,7 @@ public class LanguageCertificate
     public int Mssv { get; set; }
 
     [Column("certificate_type")]
-    public string CertificateType { get; set; }
+    public string CertificateType { get; set; } = string.Empty;
 
     [Column("score")]
     public float Score { get; set; }
@@ -26,10 +26,10 @@ public class LanguageCertificate
     public DateTime? ExpiryDate { get; set; }
 
     [Column("file_path")]
-    public string FilePath { get; set; }
+    public string FilePath { get; set; } = string.Empty;
 
     [Column("status")]
-    public string Status { get; set; }
+    public string Status { get; set; } = string.Empty;
 
     [Column("created_at")]
     public DateTime CreatedAt { get; set; }
