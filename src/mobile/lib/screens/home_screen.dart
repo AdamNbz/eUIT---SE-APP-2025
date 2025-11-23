@@ -518,6 +518,8 @@ class _HomeScreenState extends State<HomeScreen>
                         // Course name
                         Text(
                           schedule.courseName,
+                          maxLines: 2, // limit to two lines; if it would go to a 3rd line show ellipsis
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             color: isDark ? Colors.white : Colors.black87,
                             fontSize: 22,
