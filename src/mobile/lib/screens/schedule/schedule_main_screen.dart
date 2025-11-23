@@ -11,13 +11,32 @@ class ScheduleMainScreen extends StatefulWidget {
 }
 
 class _ScheduleMainScreenState extends State<ScheduleMainScreen> {
-  DateTime currentWeekStart = DateTime(2025, 9, 29); // Monday of the week (31 Sep doesn't exist, so week starts Sep 29)
+  DateTime currentWeekStart = DateTime(2025, 11, 25); // Monday of the week (31 Sep doesn't exist, so week starts Sep 29)
   int selectedDay = 3; // Day of October (T4 - Thursday)
   int selectedTab = 0; // 0: Lên lớp, 1: Kiểm tra, 2: Cá nhân
 
+  // Lấy ngày hôm nay
+  DateTime get today {
+    DateTime now = DateTime.now();
+    return DateTime(now.year, now.month, now.day);
+  }
+
+  // Lấy tuần bắt đầu của ngày hôm nay (Monday)
+  DateTime get todayWeekStart {
+    DateTime now = today;
+    return now.subtract(Duration(days: now.weekday - 1));
+  }
+
+  // Kiểm tra có đang ở tuần hiện tại không
+  bool get isCurrentWeek {
+    return currentWeekStart.year == todayWeekStart.year &&
+        currentWeekStart.month == todayWeekStart.month &&
+        currentWeekStart.day == todayWeekStart.day;
+  }
+
   // Sample schedule data
   final Map<String, List<ScheduleItem>> scheduleData = {
-    '2025-10-3': [
+    '2025-11-25': [
       ScheduleItem(
         startTime: '8:15 AM',
         endTime: '11:30 AM',
@@ -35,7 +54,7 @@ class _ScheduleMainScreenState extends State<ScheduleMainScreen> {
         teacher: 'ThS. Trần Thị B', // Thêm tên giảng viên
       ),
     ],
-    '2025-10-4': [
+    '2025-11-27': [
       ScheduleItem(
         startTime: '9:00 AM',
         endTime: '11:00 AM',
@@ -45,7 +64,7 @@ class _ScheduleMainScreenState extends State<ScheduleMainScreen> {
         teacher: 'PGS.TS. Phan Trọng Đĩnh', // Thêm tên giảng viên
       ),
     ],
-    '2025-10-1': [
+    '2025-11-30': [
       ScheduleItem(
         startTime: '14:00 PM',
         endTime: '16:00 PM',
@@ -58,8 +77,23 @@ class _ScheduleMainScreenState extends State<ScheduleMainScreen> {
   };
 
   void changeWeek(int delta) {
+    DateTime newWeek = currentWeekStart.add(Duration(days: 7 * delta));
+
+    // Không cho xem quá khứ
+    if (newWeek.isBefore(todayWeekStart)) {
+      return;
+    }
+
     setState(() {
-      currentWeekStart = currentWeekStart.add(Duration(days: 7 * delta));
+      currentWeekStart = newWeek;
+    });
+  }
+
+  // Hàm quay về ngày hôm nay
+  void goToToday() {
+    setState(() {
+      currentWeekStart = todayWeekStart;
+      selectedDay = today.day;
     });
   }
 
@@ -95,8 +129,8 @@ class _ScheduleMainScreenState extends State<ScheduleMainScreen> {
   void showMonthYearPicker() async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: currentWeekStart,
-      firstDate: DateTime(2020),
+      initialDate: currentWeekStart.isBefore(today) ? today : currentWeekStart,
+      firstDate: today, // Chỉ cho chọn từ hôm nay trở đi
       lastDate: DateTime(2030),
       builder: (context, child) {
         return Theme(
@@ -211,6 +245,32 @@ class _ScheduleMainScreenState extends State<ScheduleMainScreen> {
 
                   Row(
                     children: [
+                      // Nút "Hôm nay" - chỉ hiện khi không ở tuần hiện tại
+                      if (!isCurrentWeek) ...[
+                        GestureDetector(
+                          onTap: goToToday,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF4FFFED).withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: const Color(0xFF4FFFED),
+                                width: 1,
+                              ),
+                            ),
+                            child: const Text(
+                              'Hôm nay',
+                              style: TextStyle(
+                                color: Color(0xFF4FFFED),
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                      ],
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
@@ -256,19 +316,11 @@ class _ScheduleMainScreenState extends State<ScheduleMainScreen> {
                       ],
                     ),
                   ),
-                  Row(
-                    children: [
-                      IconButton(
-                        onPressed: () => changeWeek(-1),
-                        icon: const Icon(Icons.chevron_left),
-                        color: Colors.white,
-                      ),
-                      IconButton(
-                        onPressed: () => changeWeek(1),
-                        icon: const Icon(Icons.chevron_right),
-                        color: Colors.white,
-                      ),
-                    ],
+                  // Chỉ hiện nút next week
+                  IconButton(
+                    onPressed: () => changeWeek(1),
+                    icon: const Icon(Icons.chevron_right),
+                    color: Colors.white,
                   ),
                 ],
               ),
