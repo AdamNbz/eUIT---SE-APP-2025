@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../utils/app_localizations.dart';
 import '../theme/app_theme.dart';
 
@@ -46,74 +47,72 @@ class StudentIdCard extends StatelessWidget {
               flex: 1,
               child: Row(
                 children: [
-                  // Logo placeholder (keeps square proportion using LayoutBuilder)
+                  // Logo: plain SVG (no circle wrapper), sized similar to previous circle
                   Expanded(
                     flex: 1,
                     child: LayoutBuilder(
                       builder: (context, constraints) {
                         final size = min(constraints.maxHeight, constraints.maxWidth);
                         return Center(
-                          child: Container(
-                            width: size * 0.6,
-                            height: size * 0.6,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              gradient: const LinearGradient(
-                                colors: [AppTheme.bluePrimary, AppTheme.blueLight],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                            ),
-                            child: const Icon(Icons.school, color: Colors.white),
+                          child: SvgPicture.asset(
+                            'assets/icons/logo-uit.svg',
+                            width: size * 0.7,
+                            height: size * 0.7,
+                            fit: BoxFit.contain,
+                            colorFilter: const ColorFilter.mode(AppTheme.bluePrimary, BlendMode.srcIn),
                           ),
                         );
                       },
                     ),
                   ),
-                  // Right blue area with 2 lines
+                  // Right blue area with rounded corners
                   Expanded(
                     flex: 3,
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       decoration: BoxDecoration(
                         color: Colors.blue.shade800,
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: AutoSizeText(
-                              loc.t('vnu_name'),
-                              maxLines: 1,
-                              minFontSize: 8,
-                              overflow: TextOverflow.ellipsis,
-                              stepGranularity: 0.5,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: 0.3,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: AutoSizeText(
+                                loc.t('vnu_name'),
+                                maxLines: 1,
+                                minFontSize: 8,
+                                overflow: TextOverflow.ellipsis,
+                                stepGranularity: 0.5,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 0.3,
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(height: 4),
-                          Expanded(
-                            child: AutoSizeText(
-                              loc.t('uit_name'),
-                              maxLines: 1,
-                              minFontSize: 8,
-                              overflow: TextOverflow.ellipsis,
-                              stepGranularity: 0.5,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: 0.2,
+                            const SizedBox(height: 4),
+                            Expanded(
+                              child: AutoSizeText(
+                                loc.t('uit_name'),
+                                maxLines: 1,
+                                minFontSize: 8,
+                                overflow: TextOverflow.ellipsis,
+                                stepGranularity: 0.5,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 0.2,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -164,17 +163,17 @@ class StudentIdCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  // Right column: Details + Barcode
+                  // Right column: center-aligned detail texts
                   Expanded(
                     flex: 3,
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           AutoSizeText(
                             loc.t('card_title'),
+                            textAlign: TextAlign.center,
                             maxLines: 1,
                             minFontSize: 8,
                             overflow: TextOverflow.ellipsis,
@@ -185,8 +184,10 @@ class StudentIdCard extends StatelessWidget {
                               fontWeight: FontWeight.w500,
                             ),
                           ),
+                          const SizedBox(height: 6),
                           AutoSizeText(
                             studentName.toUpperCase(),
+                            textAlign: TextAlign.center,
                             maxLines: 1,
                             minFontSize: 10,
                             overflow: TextOverflow.ellipsis,
@@ -198,12 +199,12 @@ class StudentIdCard extends StatelessWidget {
                               letterSpacing: 0.5,
                             ),
                           ),
+                          const SizedBox(height: 6),
                           AutoSizeText(
                             cohortYear != null
-                                ? (loc.locale.languageCode == 'vi'
-                                    ? 'Khoá $cohortYear'
-                                    : 'Cohort $cohortYear')
+                                ? (loc.locale.languageCode == 'vi' ? 'Khoá $cohortYear' : 'Cohort $cohortYear')
                                 : (loc.locale.languageCode == 'vi' ? 'Khoá ?' : 'Cohort ?'),
+                            textAlign: TextAlign.center,
                             maxLines: 1,
                             minFontSize: 8,
                             overflow: TextOverflow.ellipsis,
@@ -214,8 +215,10 @@ class StudentIdCard extends StatelessWidget {
                               fontWeight: FontWeight.w600,
                             ),
                           ),
+                          const SizedBox(height: 6),
                           AutoSizeText(
                             majorName,
+                            textAlign: TextAlign.center,
                             maxLines: 1,
                             minFontSize: 8,
                             overflow: TextOverflow.ellipsis,
@@ -226,30 +229,21 @@ class StudentIdCard extends StatelessWidget {
                               fontWeight: FontWeight.w600,
                             ),
                           ),
-                          // Barcode simulated area + code
-                          Flexible(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  child: _BarcodePlaceholder(isDark: isDark),
-                                ),
-                                const SizedBox(height: 4),
-                                AutoSizeText(
-                                  '15000$studentId',
-                                  maxLines: 1,
-                                  minFontSize: 8,
-                                  overflow: TextOverflow.ellipsis,
-                                  stepGranularity: 0.5,
-                                  style: TextStyle(
-                                    color: isDark ? Colors.white70 : Colors.black87,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                    letterSpacing: 1.2,
-                                  ),
-                                ),
-                              ],
+                          const Spacer(),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: AutoSizeText(
+                              '15000$studentId',
+                              maxLines: 1,
+                              minFontSize: 8,
+                              overflow: TextOverflow.ellipsis,
+                              stepGranularity: 0.5,
+                              style: TextStyle(
+                                color: isDark ? Colors.white70 : Colors.black87,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 1.2,
+                              ),
                             ),
                           ),
                         ],
@@ -266,43 +260,3 @@ class StudentIdCard extends StatelessWidget {
   }
 }
 
-class _BarcodePlaceholder extends StatelessWidget {
-  final bool isDark;
-  const _BarcodePlaceholder({required this.isDark});
-
-  List<int> _pattern() {
-    // Deterministic pseudo pattern based on prime numbers for visual variety
-    const primes = [2,3,5,7,11,13,17,19,23,29,31];
-    final List<int> bars = [];
-    for (var i = 0; i < 42; i++) {
-      final p = primes[i % primes.length];
-      bars.add((i * p) % 5 == 0 ? 2 : (i % 3 == 0 ? 1 : 3)); // thickness categories
-    }
-    return bars;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final bars = _pattern();
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            for (final t in bars)
-              Expanded(
-                flex: t,
-                child: Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 0.5),
-                  decoration: BoxDecoration(
-                    color: t % 2 == 0 ? (isDark ? Colors.white : Colors.black) : (isDark ? Colors.white24 : Colors.black12),
-                    borderRadius: BorderRadius.circular(1),
-                  ),
-                ),
-              ),
-          ],
-        );
-      },
-    );
-  }
-}
