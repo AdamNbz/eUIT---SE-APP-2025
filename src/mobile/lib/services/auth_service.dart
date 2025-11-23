@@ -15,7 +15,7 @@ class AuthService {
   static const String _savedUsernameKey = 'saved_username';
   static const String _savedPasswordKey = 'saved_password';
 
-  Uri _buildUri(String path) {
+  Uri buildUri(String path) {
     // Safely read API_URL; if dotenv not initialized or key missing, fallback.
     String effectiveBase;
     try {
@@ -52,7 +52,7 @@ class AuthService {
   /// - Errors: throws Exception with a stable key 'invalid_credentials' for authentication failures,
   ///   or other message keys like 'login_failed'/'invalid_response' for other cases.
   Future<String> login(String userId, String password, {String role = 'student'}) async {
-    final uri = _buildUri(_loginPath);
+    final uri = buildUri(_loginPath);
 
     http.Response res;
     try {

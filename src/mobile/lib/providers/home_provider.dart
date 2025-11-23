@@ -1,23 +1,36 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import '../models/schedule_item.dart';
 import '../models/notification_item.dart';
 import '../models/quick_action.dart';
+import '../services/auth_service.dart';
 
 class HomeProvider extends ChangeNotifier {
-  final bool _isLoading = false;
+  bool _isLoading = false;
 
   HomeProvider() {
     _loadMock();
+    // Try to fetch quick GPA in background when provider is created
+    Future.microtask(() => fetchQuickGpa());
   }
 
   late ScheduleItem _nextSchedule;
   List<NotificationItem> _notifications = [];
   List<QuickAction> _quickActions = [];
 
+  double? _gpa;
+  int? _soTinChiTichLuy;
+
+  final AuthService _auth = AuthService();
+
   bool get isLoading => _isLoading;
   ScheduleItem get nextSchedule => _nextSchedule;
   List<NotificationItem> get notifications => _notifications;
   List<QuickAction> get quickActions => _quickActions;
+
+  double? get gpa => _gpa;
+  int? get soTinChiTichLuy => _soTinChiTichLuy;
 
   void _loadMock() {
     _nextSchedule = ScheduleItem(
@@ -58,6 +71,60 @@ class HomeProvider extends ChangeNotifier {
       QuickAction(label: 'Giấy giới thiệu', type: 'reference', iconName: 'description_outlined'),
       QuickAction(label: 'Chứng chỉ', type: 'certificate', iconName: 'workspace_premium_outlined'),
     ];
+    // notifyListeners(); // not necessary here because ctor will cause initial build
+  }
+
+  /// Fetch quick GPA from backend: GET /quickgpa
+  /// Requires JWT token stored by AuthService
+  Future<void> fetchQuickGpa() async {
+    try {
+      final token = await _auth.getToken();
+      if (token == null || token.isEmpty) {
+        // No token available; cannot fetch
+        return;
+      }
+
+      final uri = _auth.buildUri('/quickgpa');
+      final res = await http.get(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (res.statusCode >= 200 && res.statusCode < 300) {
+        final Map<String, dynamic> body = jsonDecode(res.body) as Map<String, dynamic>;
+        // Parse fields safely
+        final gpaVal = body['gpa'];
+        if (gpaVal != null) {
+          if (gpaVal is num) {
+            _gpa = gpaVal.toDouble();
+          } else {
+            _gpa = double.tryParse(gpaVal.toString());
+          }
+        } else {
+          _gpa = null;
+        }
+
+        final creditVal = body['soTinChiTichLuy'];
+        if (creditVal != null) {
+          if (creditVal is int) {
+            _soTinChiTichLuy = creditVal;
+          } else {
+            _soTinChiTichLuy = int.tryParse(creditVal.toString());
+          }
+        } else {
+          _soTinChiTichLuy = null;
+        }
+
+        notifyListeners();
+      } else if (res.statusCode == 401) {
+        // Unauthorized - token likely expired. Clear it so UX can re-authenticate.
+        await _auth.deleteToken();
+      }
+    } catch (e) {
+      // Silently ignore network/parse errors for now; UI will continue using mock or empty state.
+    }
   }
 }
-

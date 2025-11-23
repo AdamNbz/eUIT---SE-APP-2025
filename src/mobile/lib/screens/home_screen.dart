@@ -43,6 +43,11 @@ class _HomeScreenState extends State<HomeScreen>
   // GPA visibility state
   bool _isGpaVisible = false;
 
+  String _formatGpa(double? gpa) {
+    if (gpa == null) return '••••/10.0';
+    return '${gpa.toStringAsFixed(gpa.truncateToDouble() == gpa ? 0 : 2)}/10.0';
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -66,7 +71,11 @@ class _HomeScreenState extends State<HomeScreen>
                 ? _buildShimmerLoading(isDark)
                 : RefreshIndicator(
                     onRefresh: () async {
-                      await Future.delayed(const Duration(seconds: 1));
+                      try {
+                        await provider.fetchQuickGpa();
+                      } catch (_) {
+                        // ignore
+                      }
                     },
                     color: AppTheme.bluePrimary,
                     backgroundColor: isDark ? AppTheme.darkCard : Colors.white,
@@ -104,7 +113,7 @@ class _HomeScreenState extends State<HomeScreen>
                           _buildNotificationsList(provider, isDark, loc, maxItems: 1),
                           const SizedBox(height: 16),
                           // Student card + GPA placed between Notifications and Quick Actions
-                          _buildStudentInfoCards(loc, isDark),
+                          _buildStudentInfoCards(loc, isDark, provider),
                           const SizedBox(height: 24),
 
                           // Quick Actions Section (SQUIRCLE)
@@ -121,6 +130,7 @@ class _HomeScreenState extends State<HomeScreen>
                           // const SizedBox(height: 12),
                           // _buildNotificationsList(provider, isDark),
                           // const SizedBox(height: 20),
+
                         ],
                       ),
                     ),
@@ -919,10 +929,10 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   // Build 2 info cards (Student Card & GPA)
-  Widget _buildStudentInfoCards(AppLocalizations loc, bool isDark) {
+  Widget _buildStudentInfoCards(AppLocalizations loc, bool isDark, HomeProvider provider) {
     // Always render 2 cards on one row (each takes half width)
     final card1 = _buildStudentCard(loc, isDark);
-    final card2 = _buildGpaCard(loc, isDark);
+    final card2 = _buildGpaCard(loc, isDark, provider);
     return IntrinsicHeight(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -979,13 +989,16 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  Widget _buildGpaCard(AppLocalizations loc, bool isDark) {
+  Widget _buildGpaCard(AppLocalizations loc, bool isDark, HomeProvider provider) {
     final secondary = isDark ? Colors.grey.shade400 : Colors.grey.shade600;
+    final gpaText = _isGpaVisible ? (provider.gpa != null ? '${provider.gpa!.toStringAsFixed(2)}/10.0' : '0.00/10.0') : '••••/10.0';
+    final creditsText = _isGpaVisible ? (provider.soTinChiTichLuy != null ? '${loc.t('credits')}: ${provider.soTinChiTichLuy}' : '${loc.t('credits')}: 0') : '${loc.t('credits')}: •••';
+
     return _buildHoverCard(
       isDark: isDark,
       isHover: _hoverGpaCard,
       onHover: (v) => setState(() => _hoverGpaCard = v),
-      onTap: () => _showGpaDialog(loc, isDark),
+      onTap: () => _showGpaDialog(loc, isDark, provider),
       child: Row(
         children: [
           Expanded(
@@ -1003,7 +1016,7 @@ class _HomeScreenState extends State<HomeScreen>
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  _isGpaVisible ? '8.52/10.0' : '••••/10.0',
+                  gpaText,
                   style: TextStyle(
                     color: isDark ? Colors.white : Colors.black87,
                     fontSize: 21,
@@ -1013,9 +1026,7 @@ class _HomeScreenState extends State<HomeScreen>
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  _isGpaVisible
-                      ? '${loc.t('credits')}: 128'
-                      : '${loc.t('credits')}: •••',
+                  creditsText,
                   style: const TextStyle(
                     color: AppTheme.bluePrimary,
                     fontSize: 12,
@@ -1162,7 +1173,10 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  void _showGpaDialog(AppLocalizations loc, bool isDark) {
+  void _showGpaDialog(AppLocalizations loc, bool isDark, HomeProvider provider) {
+    final gpa = provider.gpa;
+    final credits = provider.soTinChiTichLuy;
+
     showDialog(
       context: context,
       builder: (context) {
@@ -1184,16 +1198,26 @@ class _HomeScreenState extends State<HomeScreen>
                 color: AppTheme.bluePrimary,
               ),
               const SizedBox(height: 12),
-              Text(
-                loc.t('coming_soon'),
-                style: TextStyle(
-                  color: isDark ? Colors.white : Colors.black87,
-                  fontWeight: FontWeight.w600,
+              if (gpa != null)
+                Text(
+                  '${gpa.toStringAsFixed(2)}/10.0',
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black87,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 18,
+                  ),
+                )
+              else
+                Text(
+                  loc.t('coming_soon'),
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black87,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
               const SizedBox(height: 8),
               Text(
-                loc.t('gpa_details_soon'),
+                gpa != null ? '${loc.t('credits')}: ${credits ?? 0}' : loc.t('gpa_details_soon'),
                 style: TextStyle(
                   color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
                   fontSize: 12,
