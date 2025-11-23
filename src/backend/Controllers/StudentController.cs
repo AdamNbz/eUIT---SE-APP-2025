@@ -86,7 +86,7 @@ public class StudentsController : ControllerBase
         var mssvParam = new NpgsqlParameter("p_mssv", mssv);
         var NextClassResult = await
         _context.Database.SqlQuery<NextClassInfoDto>
-        ($"SELECT * FROM func_get_next_class({mssvInt})")
+        ($"SELECT * FROM func_get_next_class({mssv})")
         .FirstOrDefaultAsync();
 
         if (NextClassResult == null) return NoContent();
@@ -94,8 +94,8 @@ public class StudentsController : ControllerBase
         var NextClass = new NextClassDto
         {
             MaLop = NextClassResult.ma_lop,
-            TenLop = NextClassResult.ten_mon_hoc_vn,
-            GiangVien = NextClassResult.ho_ten,
+            TenMonHoc = NextClassResult.ten_mon_hoc_vn,
+            TenGiangVien = NextClassResult.ho_ten,
             Thu = NextClassResult.thu,
             TietBatDau = NextClassResult.tiet_bat_dau,
             TietKetThuc = NextClassResult.tiet_ket_thuc,
@@ -118,7 +118,7 @@ public class StudentsController : ControllerBase
         var mssvParam = new NpgsqlParameter("p_mssv", mssv);
         var student = await
             _context.Database.SqlQuery<CardInfoResultDto>(
-            $"SELECT * FROM func_get_student_card_info({mssvInt})")
+            $"SELECT * FROM func_get_student_card_info({mssv})")
             .FirstOrDefaultAsync();
 
         if (student == null)
@@ -160,7 +160,7 @@ public class StudentsController : ControllerBase
         var mssvParam = new NpgsqlParameter("p_mssv", mssv);
         var result = await
             _context.Database.SqlQuery<QuickGpaResultDto>(
-            $"SELECT * FROM func_calculate_gpa({mssvInt})")
+            $"SELECT * FROM func_calculate_gpa({mssv})")
             .FirstOrDefaultAsync();
 
         if (result == null) return NotFound();
@@ -399,6 +399,8 @@ public class StudentsController : ControllerBase
                 Message = "Đang chờ xác nhận"
             });
         }
+    }
+
     /// <summary>
     /// Retrieves tuition fee information for the currently authenticated student.
     /// Can be filtered by academic year.
