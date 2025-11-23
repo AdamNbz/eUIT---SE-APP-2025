@@ -20,32 +20,6 @@ public class StudentsController : ControllerBase
         _context = context;
     }
 
-    public class NextClassInfo
-    {
-        public string ma_lop { get; set; } = string.Empty;
-        public string ten_mon_hoc_vn { get; set; } = string.Empty;
-        public string thu { get; set; } = string.Empty;
-        public int tiet_bat_dau { get; set; }
-        public int tiet_ket_thuc { get; set; }
-        public string phong_hoc { get; set; } = string.Empty;
-        public DateTime ngay_hoc { get; set; }
-    }
-    private class CardInfoResult
-    {
-        public int mssv { get; set; }
-        public string ho_ten { get; set; } = string.Empty;
-        public int khoa_hoc { get; set; }
-        public string nganh_hoc { get; set; } = string.Empty;
-        public string? anh_the_url { get; set; }
-    }
-
-    private class QuickGpa
-    {
-        public float gpa { get; set; }
-
-        public int so_tin_chi_tich_luy { get; set; } = 0;
-    }
-
     // GET: api/students/nextclass
     [HttpGet("/nextclass")]
     public async Task<ActionResult<NextClassDto>> GetNextClass()
@@ -62,7 +36,7 @@ public class StudentsController : ControllerBase
         }
 
         var NextClassResult = await
-        _context.Database.SqlQuery<NextClassInfo>
+        _context.Database.SqlQuery<NextClassInfoDto>
         ($"SELECT * FROM func_get_next_class({mssvInt})")
         .FirstOrDefaultAsync();
 
@@ -72,11 +46,13 @@ public class StudentsController : ControllerBase
         {
             MaLop = NextClassResult.ma_lop,
             TenLop = NextClassResult.ten_mon_hoc_vn,
+            GiangVien = NextClassResult.ho_ten,
             Thu = NextClassResult.thu,
             TietBatDau = NextClassResult.tiet_bat_dau,
             TietKetThuc = NextClassResult.tiet_ket_thuc,
             PhongHoc = NextClassResult.phong_hoc,
-            NgayHoc = NextClassResult.ngay_hoc
+            NgayHoc = NextClassResult.ngay_hoc,
+            CountdownMinutes = NextClassResult.countdown_minutes
         };
 
         return Ok(NextClass);
@@ -101,7 +77,7 @@ public class StudentsController : ControllerBase
         }
 
         var student = await
-            _context.Database.SqlQuery<CardInfoResult>(
+            _context.Database.SqlQuery<CardInfoResultDto>(
             $"SELECT * FROM func_get_student_card_info({mssvInt})")
             .FirstOrDefaultAsync();
 
@@ -148,7 +124,7 @@ public class StudentsController : ControllerBase
         }
 
         var result = await
-            _context.Database.SqlQuery<QuickGpa>(
+            _context.Database.SqlQuery<QuickGpaResultDto>(
             $"SELECT * FROM func_calculate_gpa({mssvInt})")
             .FirstOrDefaultAsync();
 
@@ -161,32 +137,6 @@ public class StudentsController : ControllerBase
         };
 
         return Ok(gpaAndCredits);
-    }
-
-    private class GradeResult
-    {
-        public string hoc_ky { get; set; } = string.Empty;
-        public string ma_mon_hoc { get; set; } = string.Empty;
-        public string ten_mon_hoc { get; set; } = string.Empty;
-        public int so_tin_chi { get; set; }
-        public float? diem_tong_ket { get; set; }
-    }
-
-    private class DetailedGradeRow
-    {
-        public string hoc_ky { get; set; } = string.Empty;
-        public string ma_mon_hoc { get; set; } = string.Empty;
-        public string ten_mon_hoc { get; set; } = string.Empty;
-        public int so_tin_chi { get; set; }
-        public int trong_so_qua_trinh { get; set; }
-        public int trong_so_giua_ki { get; set; }
-        public int trong_so_thuc_hanh { get; set; }
-        public int trong_so_cuoi_ki { get; set; }
-        public float? diem_qua_trinh { get; set; }
-        public float? diem_giua_ki { get; set; }
-        public float? diem_thuc_hanh { get; set; }
-        public float? diem_cuoi_ki { get; set; }
-        public float? diem_tong_ket { get; set; }
     }
 
     // GET: api/students/grades
@@ -204,20 +154,20 @@ public class StudentsController : ControllerBase
 
         try
         {
-            List<GradeResult> gradeResults;
+            List<GradeResultDto> gradeResults;
 
             if (!string.IsNullOrEmpty(filter_by_semester))
             {
                 // Get grades for a specific semester
                 gradeResults = await _context.Database
-                    .SqlQuery<GradeResult>($"SELECT * FROM func_get_student_semester_transcript({mssvInt}, {filter_by_semester})")
+                    .SqlQuery<GradeResultDto>($"SELECT * FROM func_get_student_semester_transcript({mssvInt}, {filter_by_semester})")
                     .ToListAsync();
             }
             else
             {
                 // Get all grades (full transcript)
                 gradeResults = await _context.Database
-                    .SqlQuery<GradeResult>($"SELECT * FROM func_get_student_full_transcript({mssvInt})")
+                    .SqlQuery<GradeResultDto>($"SELECT * FROM func_get_student_full_transcript({mssvInt})")
                     .ToListAsync();
             }
 
@@ -264,19 +214,19 @@ public class StudentsController : ControllerBase
 
         try
         {
-            var overall = await _context.Database.SqlQuery<QuickGpa>($"SELECT * FROM func_calculate_gpa({mssvInt})").FirstOrDefaultAsync();
+            var overall = await _context.Database.SqlQuery<QuickGpaResultDto>($"SELECT * FROM func_calculate_gpa({mssvInt})").FirstOrDefaultAsync();
 
-            List<DetailedGradeRow> rows;
+            List<DetailedGradeRowDto> rows;
             if (string.IsNullOrEmpty(filter_by_semester))
             {
                 rows = await _context.Database
-                    .SqlQuery<DetailedGradeRow>($"SELECT * FROM func_get_student_full_transcript_details({mssvInt})")
+                    .SqlQuery<DetailedGradeRowDto>($"SELECT * FROM func_get_student_full_transcript_details({mssvInt})")
                     .ToListAsync();
             }
             else
             {
                 rows = await _context.Database
-                    .SqlQuery<DetailedGradeRow>($"SELECT * FROM func_get_student_semester_transcript_details({mssvInt}, {filter_by_semester})")
+                    .SqlQuery<DetailedGradeRowDto>($"SELECT * FROM func_get_student_semester_transcript_details({mssvInt}, {filter_by_semester})")
                     .ToListAsync();
             }
 
@@ -339,7 +289,7 @@ public class StudentsController : ControllerBase
         }
     }
 
-    private static float? CalculateSemesterGpa(List<DetailedGradeRow> subjects)
+    private static float? CalculateSemesterGpa(List<DetailedGradeRowDto> subjects)
     {
         var validSubjects = subjects.Where(s => s.diem_tong_ket.HasValue).ToList();
         if (validSubjects.Count == 0) return null;
@@ -349,14 +299,6 @@ public class StudentsController : ControllerBase
 
         var weightedSum = validSubjects.Sum(s => s.diem_tong_ket!.Value * s.so_tin_chi);
         return (float)Math.Round(weightedSum / totalCredits, 2);
-    }
-
-    private class TrainingScoreResult
-    {
-        public string hoc_ky { get; set; } = string.Empty;
-        public int tong_diem { get; set; }
-        public string xep_loai { get; set; } = string.Empty;
-        public string tinh_trang { get; set; } = string.Empty;
     }
 
     // GET: api/students/training-scores
@@ -374,18 +316,18 @@ public class StudentsController : ControllerBase
 
         try
         {
-            List<TrainingScoreResult> trainingScoreResults;
+            List<TrainingScoreResultDto> trainingScoreResults;
 
             if (string.IsNullOrEmpty(filter_by_semester))
             {
                 trainingScoreResults = await _context.Database
-                    .SqlQuery<TrainingScoreResult>($"SELECT hoc_ky, tong_diem, xep_loai, 'Đã xác nhận' as tinh_trang FROM func_get_student_training_scores({mssvInt})")
+                    .SqlQuery<TrainingScoreResultDto>($"SELECT hoc_ky, tong_diem, xep_loai, 'Đã xác nhận' as tinh_trang FROM func_get_student_training_scores({mssvInt})")
                     .ToListAsync();
             }
             else
             {
                 trainingScoreResults = await _context.Database
-                    .SqlQuery<TrainingScoreResult>($"SELECT hoc_ky, tong_diem, xep_loai, 'Đã xác nhận' as tinh_trang FROM func_get_student_training_scores({mssvInt}) WHERE hoc_ky = {filter_by_semester}")
+                    .SqlQuery<TrainingScoreResultDto>($"SELECT hoc_ky, tong_diem, xep_loai, 'Đã xác nhận' as tinh_trang FROM func_get_student_training_scores({mssvInt}) WHERE hoc_ky = {filter_by_semester}")
                     .ToListAsync();
             }
 
