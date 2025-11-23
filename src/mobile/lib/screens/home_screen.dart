@@ -291,7 +291,7 @@ class _HomeScreenState extends State<HomeScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        provider.studentCard?.hoTen ?? 'Nguyễn Văn A',
+                        provider.studentCard?.hoTen ?? 'Họ tên sinh viên',
                         style: TextStyle(
                           color: isDark ? Colors.white : Colors.black87,
                           fontSize: 16,
@@ -299,7 +299,7 @@ class _HomeScreenState extends State<HomeScreen>
                         ),
                       ),
                       Text(
-                        'MSSV: ${provider.studentCard?.mssv?.toString() ?? '20520001'}',
+                        'MSSV: ${provider.studentCard?.mssv?.toString() ?? '12345678'}',
                         style: TextStyle(
                           color: isDark
                               ? Colors.grey.shade400
