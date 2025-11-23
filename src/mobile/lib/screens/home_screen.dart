@@ -1103,30 +1103,47 @@ class _HomeScreenState extends State<HomeScreen>
   void _showStudentCardDialog(AppLocalizations loc, bool isDark) {
     showDialog(
       context: context,
+      barrierDismissible: true,
       builder: (context) {
-        return AlertDialog(
-          backgroundColor: isDark ? AppTheme.darkCard : Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          title: Text(
-            loc.t('student_card'),
-            style: TextStyle(color: isDark ? Colors.white : Colors.black87),
-          ),
-          content: SizedBox(
-            width: 360,
-            child: StudentIdCard(
-              studentName: 'Nguyễn Văn A',
-              studentId: '20520001',
-              majorName: 'Khoa học máy tính',
+        final width = MediaQuery.of(context).size.width;
+        return Dialog(
+          insetPadding: EdgeInsets.zero,
+          backgroundColor: Colors.transparent,
+          child: SafeArea(
+            child: Stack(
+              children: [
+                // Full-width card centered vertically with a small top/bottom padding
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    child: SizedBox(
+                      width: width,
+                      child: StudentIdCard(
+                        studentName: 'Nguyễn Văn A',
+                        studentId: '20520001',
+                        majorName: 'Khoa học máy tính',
+                      ),
+                    ),
+                  ),
+                ),
+                // Close button (top-right)
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: IconButton(
+                      style: IconButton.styleFrom(
+                        backgroundColor: (isDark ? Colors.black : Colors.white).withAlpha(178), // ~0.7
+                      ),
+                      icon: Icon(Icons.close, color: isDark ? Colors.white : Colors.black87),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(loc.t('close')),
-            ),
-          ],
         );
       },
     );
