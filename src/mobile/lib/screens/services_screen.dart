@@ -16,9 +16,7 @@ class ServicesScreen extends StatelessWidget {
     // Background: #0F172A, Card: #1E293B, Primary text: #F8FAFC, Secondary text: #94A3B8, Accent: #38BDF8
     // final Color darkCardBase = const Color(0xFF1E293B);
 
-    // Card color and stroke (slightly translucent so backdrop blur still reads through)
-    final Color cardColor = isDark ? Color.fromRGBO(30, 41, 59, 0.95) : Colors.white;
-    final Color strokeColor = isDark ? Color.fromRGBO(255, 255, 255, 0.12) : Color.fromRGBO(0, 0, 0, 0.06);
+    // (AppBar uses transparent background; per-tile card/stroke colors are defined inside the tile builder)
 
     return Scaffold(
       backgroundColor: isDark ? AppTheme.darkBackground : const Color(0xFFF7F8FC),
@@ -38,10 +36,9 @@ class ServicesScreen extends StatelessWidget {
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
                   child: Container(
-                    // Use elevated cardColor and a thin stroke to separate from background
-                    decoration: BoxDecoration(
-                      color: cardColor,
-                      border: Border.all(color: strokeColor, width: 1),
+                    // Make AppBar background transparent so the animated background shows through
+                    decoration: const BoxDecoration(
+                      color: Colors.transparent,
                     ),
                     child: AppBar(
                       backgroundColor: Colors.transparent,
@@ -238,6 +235,7 @@ class ServicesScreen extends StatelessWidget {
     final Color darkSecondaryText = const Color(0xFF94A3B8);
     final Color defaultAccent = const Color(0xFF38BDF8);
 
+    // Card color and stroke for tiles (local to this helper)
     final Color cardColor = isDark ? Color.fromRGBO(30, 41, 59, 0.95) : Colors.white;
     final Color strokeColor = isDark ? Color.fromRGBO(255, 255, 255, 0.12) : Color.fromRGBO(0, 0, 0, 0.06);
 
