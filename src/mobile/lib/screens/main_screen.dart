@@ -154,10 +154,11 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Each item expands evenly; inside we render a small rounded-square "bubble" above a tiny label.
     return Expanded(
       child: TweenAnimationBuilder<double>(
         duration: const Duration(milliseconds: 200),
-        tween: Tween(begin: 1.0, end: isActive ? 1.05 : 1.0),
+        tween: Tween(begin: 1.0, end: isActive ? 1.03 : 1.0),
         curve: Curves.easeInOut,
         builder: (context, scale, child) {
           return Transform.scale(
@@ -169,52 +170,67 @@ class _NavItem extends StatelessWidget {
           onTap: onTap,
           borderRadius: BorderRadius.circular(12),
           child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 4), // Minimal padding
+            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Icon with active dot
-                Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    TweenAnimationBuilder<Color?>(
+                // Rounded-square bubble
+                TweenAnimationBuilder<Color?>(
+                  duration: const Duration(milliseconds: 200),
+                  tween: ColorTween(
+                    begin: Colors.transparent,
+                    end: isActive
+                        ? (isDark ? Colors.blue.shade300.withAlpha((0.18 * 255).round()) : AppTheme.bluePrimary.withAlpha((0.12 * 255).round()))
+                        : Colors.transparent,
+                  ),
+                  builder: (context, bubbleColor, child) {
+                    return AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
-                      tween: ColorTween(
-                        begin: Colors.grey.shade600,
-                        end: isActive
-                            ? (isDark ? Colors.blue.shade300 : AppTheme.bluePrimary)
-                            : Colors.grey.shade600,
+                      width: 44, // small square suitable for nav height
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: bubbleColor,
+                        borderRadius: BorderRadius.circular(10), // rounded corners
+                        border: Border.all(
+                          color: isActive
+                              ? (isDark ? Colors.blue.shade300 : AppTheme.bluePrimary)
+                              : (isDark ? Colors.white.withAlpha(26) : Colors.grey.shade200),
+                          width: isActive ? 1.2 : 1.0,
+                        ),
+                        boxShadow: isActive
+                            ? [
+                                BoxShadow(
+                                  color: (isDark ? Colors.blue.shade300 : AppTheme.bluePrimary).withAlpha((0.12 * 255).round()),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ]
+                            : [],
                       ),
-                      builder: (context, color, child) {
-                        return Icon(
-                          iconData,
-                          size: 20, // Further reduced from 22 to 20
-                          color: color,
-                        );
-                      },
-                    ),
-                    if (isActive)
-                      Positioned(
-                        top: -5, // Adjusted from -6 to -5
-                        left: 0,
-                        right: 0,
-                        child: Center(
-                          child: Container(
-                            width: 3, // Reduced from 4 to 3
-                            height: 3, // Reduced from 4 to 3
-                            decoration: BoxDecoration(
-                              color: isDark
-                                  ? Colors.blue.shade300
-                                  : AppTheme.bluePrimary,
-                              shape: BoxShape.circle,
-                            ),
+                      child: Center(
+                        child: TweenAnimationBuilder<Color?>(
+                          duration: const Duration(milliseconds: 200),
+                          tween: ColorTween(
+                            begin: Colors.grey.shade600,
+                            end: isActive
+                                ? (isDark ? Colors.blue.shade300 : AppTheme.bluePrimary)
+                                : Colors.grey.shade600,
                           ),
+                          builder: (context, iconColor, _) {
+                            return Icon(
+                              iconData,
+                              size: 20,
+                              color: iconColor,
+                            );
+                          },
                         ),
                       ),
-                  ],
+                    );
+                  },
                 ),
-                const SizedBox(height: 2), // Keep at 2
-                // Label
+
+                const SizedBox(height: 4),
+                // Label under the bubble
                 TweenAnimationBuilder<Color?>(
                   duration: const Duration(milliseconds: 200),
                   tween: ColorTween(
@@ -226,11 +242,13 @@ class _NavItem extends StatelessWidget {
                   builder: (context, color, child) {
                     return Text(
                       label,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                       style: TextStyle(
-                        fontSize: 9, // Further reduced from 10 to 9
+                        fontSize: 10,
                         fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
                         color: color,
-                        height: 1.0, // Tighten line height
+                        height: 1.0,
                       ),
                     );
                   },
