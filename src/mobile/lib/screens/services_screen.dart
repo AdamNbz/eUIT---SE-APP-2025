@@ -11,6 +11,12 @@ class ServicesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    // Increased contrast: use a lighter slate-blue translucent card in dark mode
+    // and a subtle white (10-20% opacity) stroke. In light mode keep white card but add faint stroke.
+    final Color cardColor = isDark
+        ? Color.fromRGBO(110, 123, 214, 0.22) // slate-blue translucent for dark mode
+        : Colors.white;
+    final Color strokeColor = isDark ? Color.fromRGBO(255, 255, 255, 0.12) : Color.fromRGBO(0, 0, 0, 0.06);
 
     return Scaffold(
       backgroundColor: isDark ? AppTheme.darkBackground : const Color(0xFFF7F8FC),
@@ -30,8 +36,11 @@ class ServicesScreen extends StatelessWidget {
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
                   child: Container(
-                    // Use same semi-transparent dark card for dark mode and white for light mode
-                    color: isDark ? AppTheme.darkCard.withAlpha(160) : Colors.white,
+                    // Use elevated cardColor and a thin stroke to separate from background
+                    decoration: BoxDecoration(
+                      color: cardColor,
+                      border: Border.all(color: strokeColor, width: 1),
+                    ),
                     child: AppBar(
                       backgroundColor: Colors.transparent,
                       elevation: 0,
@@ -206,6 +215,12 @@ class ServicesScreen extends StatelessWidget {
     final displaySubtitle = subtitle;
     final iconData = icon ?? Icons.miscellaneous_services_outlined;
 
+    // Define tile colors here as well so this helper is self-contained
+    final Color cardColor = isDark
+        ? Color.fromRGBO(110, 123, 214, 0.22)
+        : Colors.white;
+    final Color strokeColor = isDark ? Color.fromRGBO(255, 255, 255, 0.12) : Color.fromRGBO(0, 0, 0, 0.06);
+
     // Adjust sizes. When isLarge==true we make the surrounding wrapper only slightly taller than the icon box
     final baseIconBoxSize = 56.0; // standard icon box size
     final iconBoxSize = baseIconBoxSize; // keep icon box consistent
@@ -239,10 +254,11 @@ class ServicesScreen extends StatelessWidget {
             height: tileHeight,
             padding: EdgeInsets.all(paddingAll),
             decoration: BoxDecoration(
-              color: isDark ? AppTheme.darkCard.withAlpha(160) : Colors.white,
+              color: cardColor,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: isDark ? Colors.white12 : Colors.grey.shade100,
+                color: strokeColor,
+                width: 1,
               ),
             ),
             child: Row(
