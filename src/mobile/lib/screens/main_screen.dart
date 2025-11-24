@@ -240,6 +240,7 @@ class _NavItem extends StatelessWidget {
                       height: _computeBubbleSize(index, selectedIndex),
                       padding: const EdgeInsets.all(0),
                       decoration: BoxDecoration(
+                        // Default background (frosted card look). No special-case background for Home.
                         gradient: isDark
                             ? LinearGradient(
                                 colors: [
@@ -257,14 +258,12 @@ class _NavItem extends StatelessWidget {
                         border: Border.all(
                           color: selectedIndex == index
                               ? (isDark ? AppTheme.bluePrimary.withAlpha(200) : AppTheme.bluePrimary)
-                              : (isDark ? Colors.white.withAlpha(26) : Colors.grey.shade200),
+                              : (index == 2 ? AppTheme.bluePrimary : (isDark ? Colors.white.withAlpha(26) : Colors.grey.shade200)),
                           width: selectedIndex == index ? 1.4 : 1.0,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: isDark
-                                ? AppTheme.bluePrimary.withAlpha(20)
-                                : Colors.black.withAlpha(10),
+                            color: isDark ? AppTheme.bluePrimary.withAlpha(20) : Colors.black.withAlpha(10),
                             blurRadius: selectedIndex == index ? 12 : 6,
                             offset: const Offset(0, 3),
                           ),
@@ -277,7 +276,7 @@ class _NavItem extends StatelessWidget {
                             begin: Colors.grey.shade600,
                             end: selectedIndex == index
                                 ? (isDark ? Colors.blue.shade300 : AppTheme.bluePrimary)
-                                : Colors.grey.shade600,
+                                : (index == 2 ? AppTheme.bluePrimary : const Color(0xFFE3E3E3)),
                           ),
                           builder: (context, iconColor, _) {
                             final bubbleSize = _computeBubbleSize(index, selectedIndex);
@@ -304,7 +303,7 @@ class _NavItem extends StatelessWidget {
                     begin: Colors.grey.shade600,
                     end: selectedIndex == index
                         ? (isDark ? Colors.blue.shade300 : AppTheme.bluePrimary)
-                        : Colors.grey.shade600,
+                        : (index == 2 ? AppTheme.bluePrimary : const Color(0xFFE3E3E3)),
                   ),
                   builder: (context, color, child) {
                     return Text(
