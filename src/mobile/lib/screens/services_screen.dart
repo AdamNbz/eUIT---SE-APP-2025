@@ -11,11 +11,13 @@ class ServicesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    // Increased contrast: use a lighter slate-blue translucent card in dark mode
-    // and a subtle white (10-20% opacity) stroke. In light mode keep white card but add faint stroke.
-    final Color cardColor = isDark
-        ? Color.fromRGBO(110, 123, 214, 0.22) // slate-blue translucent for dark mode
-        : Colors.white;
+
+    // Suggested dark palette (can be tuned):
+    // Background: #0F172A, Card: #1E293B, Primary text: #F8FAFC, Secondary text: #94A3B8, Accent: #38BDF8
+    // final Color darkCardBase = const Color(0xFF1E293B);
+
+    // Card color and stroke (slightly translucent so backdrop blur still reads through)
+    final Color cardColor = isDark ? Color.fromRGBO(30, 41, 59, 0.95) : Colors.white;
     final Color strokeColor = isDark ? Color.fromRGBO(255, 255, 255, 0.12) : Color.fromRGBO(0, 0, 0, 0.06);
 
     return Scaffold(
@@ -224,10 +226,41 @@ class ServicesScreen extends StatelessWidget {
     final iconData = icon ?? Icons.miscellaneous_services_outlined;
 
     // Define tile colors here as well so this helper is self-contained
-    final Color cardColor = isDark
-        ? Color.fromRGBO(110, 123, 214, 0.22)
-        : Colors.white;
+    // Reuse the suggested palette from build()
+    final Color darkPrimaryText = const Color(0xFFF8FAFC);
+    final Color darkSecondaryText = const Color(0xFF94A3B8);
+    final Color defaultAccent = const Color(0xFF38BDF8);
+
+    final Color cardColor = isDark ? Color.fromRGBO(30, 41, 59, 0.95) : Colors.white;
     final Color strokeColor = isDark ? Color.fromRGBO(255, 255, 255, 0.12) : Color.fromRGBO(0, 0, 0, 0.06);
+
+    // Determine department color from subtitle (simple heuristics)
+    Color departmentColorForSubtitle(String? s) {
+      if (s == null) return defaultAccent;
+      final lower = s.toLowerCase();
+      if (lower.contains('công tác') || lower.contains('sinh viên')) {
+        return const Color(0xFF22C55E); // green for Student Affairs
+      }
+      if (lower.contains('đào tạo')) {
+        return const Color(0xFF2563EB); // blue for Training
+      }
+      if (lower.contains('tài') || lower.contains('dữ liệu') || lower.contains('tài chính')) {
+        return const Color(0xFF7C3AED); // purple for Finance/Data
+      }
+      return defaultAccent;
+    }
+
+    final Color deptColor = departmentColorForSubtitle(displaySubtitle);
+
+    // Helper to apply opacity to a dynamic color without using deprecated color component accessors
+    Color applyOpacity(Color c, double opacity) {
+      // c.r, c.g, c.b are normalized floats in [0,1]; convert to 0-255 ints
+      final int a = (opacity * 255).round().clamp(0, 255);
+      final int r = (c.r * 255.0).round() & 0xFF;
+      final int g = (c.g * 255.0).round() & 0xFF;
+      final int b = (c.b * 255.0).round() & 0xFF;
+      return Color.fromARGB(a, r, g, b);
+    }
 
     // Adjust sizes. When isLarge==true we make the surrounding wrapper only slightly taller than the icon box
     final baseIconBoxSize = 56.0; // standard icon box size
@@ -271,6 +304,17 @@ class ServicesScreen extends StatelessWidget {
             ),
             child: Row(
               children: [
+                // Colored stripe for department coding
+                Container(
+                  width: 4,
+                  height: double.infinity,
+                  decoration: BoxDecoration(
+                    color: applyOpacity(deptColor, 0.95),
+                    borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(12), bottomLeft: Radius.circular(12)),
+                  ),
+                ),
+                const SizedBox(width: 12),
                 Container(
                   width: iconBoxSize,
                   height: iconBoxSize,
@@ -284,7 +328,8 @@ class ServicesScreen extends StatelessWidget {
                   child: Icon(
                     iconData,
                     size: iconSize,
-                    color: iconVariant == 0 ? Theme.of(context).colorScheme.primary : Colors.white,
+                    // For variant 0 use department accent to color the icon; variant 1 keeps white
+                    color: iconVariant == 0 ? deptColor : Colors.white,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -296,8 +341,8 @@ class ServicesScreen extends StatelessWidget {
                       Text(
                         displayTitle,
                         style: TextStyle(
-                          // Title: strong white in dark mode, dark text in light mode
-                          color: isDark ? Colors.white : Colors.black87,
+                          // Title: strong primary text in dark mode, dark text in light mode
+                          color: isDark ? darkPrimaryText : Colors.black87,
                           fontSize: titleFontSize,
                           fontWeight: titleWeight,
                         ),
@@ -308,7 +353,7 @@ class ServicesScreen extends StatelessWidget {
                           displaySubtitle,
                           style: TextStyle(
                             // Subtitle: use a light silver-blue in dark mode for hierarchy and readability
-                            color: isDark ? const Color(0xFFBFD8FF) : Colors.grey.shade600,
+                            color: isDark ? darkSecondaryText : Colors.grey.shade600,
                             fontSize: 13,
                           ),
                         ),
@@ -319,8 +364,8 @@ class ServicesScreen extends StatelessWidget {
                 Icon(
                   Icons.arrow_forward_ios_rounded,
                   size: 18,
-                  // Arrow color: use accent (primary) to invite action in both themes
-                  color: Theme.of(context).colorScheme.primary,
+                  // Arrow color: use department accent to invite action
+                  color: deptColor,
                 ),
               ],
             ),
