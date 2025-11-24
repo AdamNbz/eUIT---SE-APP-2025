@@ -56,7 +56,7 @@ class ServicesScreen extends StatelessWidget {
 
               // Placeholder service tiles: now each tile combines two previous horizontal tiles (full-width cards)
               Column(
-                children: List.generate(4, (index) {
+                children: List.generate(5, (index) {
                   // All tiles should use the same compact sizing as the first one (isLarge: true)
                   if (index == 0) {
                     return Padding(
@@ -114,6 +114,22 @@ class ServicesScreen extends StatelessWidget {
                         title: 'Đăng ký Phúc khảo',
                         subtitle: 'Phòng Đào tạo Đại học / VPCCTĐB',
                         icon: Icons.edit_document,
+                        isLarge: true,
+                      ),
+                    );
+                  }
+
+                  // Fifth tile: 'Đăng ký bảng điểm'
+                  if (index == 4) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: _buildWidePlaceholderTile(
+                        context,
+                        isDark,
+                        loc,
+                        title: 'Đăng ký Bảng điểm',
+                        subtitle: 'Phòng Đào tạo Đại học / VPCCTĐB',
+                        icon: Icons.receipt_long_outlined,
                         isLarge: true,
                       ),
                     );
