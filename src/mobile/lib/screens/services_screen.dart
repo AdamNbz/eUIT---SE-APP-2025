@@ -57,7 +57,7 @@ class ServicesScreen extends StatelessWidget {
               // Placeholder service tiles: now each tile combines two previous horizontal tiles (full-width cards)
               Column(
                 children: List.generate(4, (index) {
-                  // For the first tile, show the requested service details; others use the default placeholder
+                  // For the first tile, show the requested service details and make it slightly larger
                   if (index == 0) {
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 12),
@@ -68,6 +68,7 @@ class ServicesScreen extends StatelessWidget {
                         title: 'Đăng ký giấy xác nhận sinh viên',
                         subtitle: 'Phòng Công tác Sinh viên',
                         icon: Icons.description_outlined,
+                        isLarge: true,
                       ),
                     );
                   }
@@ -93,12 +94,23 @@ class ServicesScreen extends StatelessWidget {
     String? title,
     String? subtitle,
     IconData? icon,
+    bool isLarge = false,
   }) {
     final fullWidth = MediaQuery.of(context).size.width - 20 * 2; // account for horizontal padding
 
     final displayTitle = title ?? loc.t('waiting_integration');
     final displaySubtitle = subtitle;
     final iconData = icon ?? Icons.miscellaneous_services_outlined;
+
+    // Adjust sizes. When isLarge==true we make the surrounding wrapper only slightly taller than the icon box
+    final baseIconBoxSize = 56.0; // standard icon box size
+    final iconBoxSize = baseIconBoxSize; // keep icon box consistent
+    final paddingAll = isLarge ? 8.0 : 12.0;
+    // For compact (isLarge) wrapper: height = iconBox + vertical padding + small offset
+    final tileHeight = isLarge ? (iconBoxSize + paddingAll * 2 + 6.0) : 120.0;
+    final iconSize = 32.0;
+    final titleFontSize = isLarge ? 15.0 : 15.0;
+    final titleWeight = isLarge ? FontWeight.w700 : FontWeight.w700;
 
     return InkWell(
       borderRadius: BorderRadius.circular(12),
@@ -120,8 +132,8 @@ class ServicesScreen extends StatelessWidget {
           filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
           child: Container(
             width: fullWidth,
-            height: 120,
-            padding: const EdgeInsets.all(12),
+            height: tileHeight,
+            padding: EdgeInsets.all(paddingAll),
             decoration: BoxDecoration(
               color: isDark ? AppTheme.darkCard.withAlpha(160) : Colors.white,
               borderRadius: BorderRadius.circular(12),
@@ -132,15 +144,15 @@ class ServicesScreen extends StatelessWidget {
             child: Row(
               children: [
                 Container(
-                  width: 56,
-                  height: 56,
+                  width: iconBoxSize,
+                  height: iconBoxSize,
                   decoration: BoxDecoration(
                     color: isDark ? Colors.white12 : Colors.grey.shade100,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
                     iconData,
-                    size: 32,
+                    size: iconSize,
                     color: isDark ? Colors.grey.shade300 : Colors.grey.shade600,
                   ),
                 ),
@@ -154,8 +166,8 @@ class ServicesScreen extends StatelessWidget {
                         displayTitle,
                         style: TextStyle(
                           color: isDark ? Colors.grey.shade300 : Colors.grey.shade700,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
+                          fontSize: titleFontSize,
+                          fontWeight: titleWeight,
                         ),
                       ),
                       if (displaySubtitle != null) ...[
