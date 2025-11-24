@@ -60,103 +60,127 @@ class _MainScreenState extends State<MainScreen> {
   Widget _buildCustomBottomNav(AppLocalizations loc, bool isDark) {
     // Bottom nav background: frosted schedule-card-like look but slightly more transparent.
     // Fix the background height so it doesn't change when children animate.
-    final double baseHeight = 90.0; // base bar height (content)
+    final double baseHeight = 75.0; // base bar height (content)
     final double bottomInset = MediaQuery.of(context).padding.bottom; // device inset
     final double barHeight = baseHeight + bottomInset;
 
-    return ClipRRect(
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-        child: Container(
-          // Fixed height to avoid layout shifts
-          height: barHeight,
-          decoration: BoxDecoration(
-            gradient: isDark
-                ? LinearGradient(
-                    colors: [
-                      const Color(0xFF1E293B).withAlpha(200), // slightly more transparent than card
-                      const Color(0xFF1E293B).withAlpha(180),
+    // We want the background to be visually lower than the nav items.
+    // We'll render a fixed-height container (barHeight) as the background and shift it down by bgShift.
+    // The foreground (nav items) will remain in the original position.
+    final double bgShift = 12.0; // how many pixels to push the background down
+
+    // Outer height must accommodate the shifted background so it doesn't clip.
+    final double outerHeight = barHeight + bgShift;
+
+    return SizedBox(
+      height: outerHeight,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          // Shifted background layer
+          Positioned(
+            top: bgShift,
+            left: 0,
+            right: 0,
+            child: ClipRRect(
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                child: Container(
+                  height: barHeight,
+                  decoration: BoxDecoration(
+                    gradient: isDark
+                        ? LinearGradient(
+                            colors: [
+                              const Color(0xFF1E293B).withAlpha(200),
+                              const Color(0xFF1E293B).withAlpha(180),
+                            ],
+                          )
+                        : LinearGradient(
+                            colors: [
+                              Colors.white.withAlpha(220),
+                              Colors.white.withAlpha(220),
+                            ],
+                          ),
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                    border: Border(
+                      top: BorderSide(
+                        color: isDark
+                            ? AppTheme.bluePrimary.withAlpha(40)
+                            : AppTheme.bluePrimary.withAlpha(30),
+                        width: 1,
+                      ),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: isDark
+                            ? AppTheme.bluePrimary.withAlpha(18)
+                            : Colors.black.withAlpha(10),
+                        blurRadius: 16,
+                        offset: const Offset(0, -6),
+                      ),
                     ],
-                  )
-                : LinearGradient(
-                    colors: [
-                      Colors.white.withAlpha(220), // a bit more transparent than card
-                      Colors.white.withAlpha(220),
-                    ],
                   ),
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-            border: Border(
-              top: BorderSide(
-                color: isDark
-                    ? AppTheme.bluePrimary.withAlpha(40)
-                    : AppTheme.bluePrimary.withAlpha(30),
-                width: 1,
-              ),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: isDark
-                    ? AppTheme.bluePrimary.withAlpha(18)
-                    : Colors.black.withAlpha(10),
-                blurRadius: 16,
-                offset: const Offset(0, -6),
-              ),
-            ],
-          ),
-          child: SafeArea(
-            child: Padding(
-              // Reduced vertical padding to make the bar shorter
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  _NavItem(
-                    index: 0,
-                    selectedIndex: _selectedIndex,
-                    iconData: Icons.apps_rounded,
-                    label: loc.t('services'),
-                    isDark: isDark,
-                    onTap: () => setState(() => _selectedIndex = 0),
-                  ),
-                  _NavItem(
-                    index: 1,
-                    selectedIndex: _selectedIndex,
-                    iconData: Icons.search_rounded,
-                    label: loc.t('search'),
-                    isDark: isDark,
-                    onTap: () => setState(() => _selectedIndex = 1),
-                  ),
-                  _NavItem(
-                    index: 2,
-                    selectedIndex: _selectedIndex,
-                    iconData: Icons.home_rounded,
-                    label: loc.t('home'),
-                    isDark: isDark,
-                    onTap: () => setState(() => _selectedIndex = 2),
-                  ),
-                  _NavItem(
-                    index: 3,
-                    selectedIndex: _selectedIndex,
-                    iconData: Icons.calendar_month_rounded,
-                    label: loc.t('schedule'),
-                    isDark: isDark,
-                    onTap: () => setState(() => _selectedIndex = 3),
-                  ),
-                  _NavItem(
-                    index: 4,
-                    selectedIndex: _selectedIndex,
-                    iconData: Icons.settings_rounded,
-                    label: loc.t('settings'),
-                    isDark: isDark,
-                    onTap: () => setState(() => _selectedIndex = 4),
-                  ),
-                ],
+                ),
               ),
             ),
           ),
-        ),
+
+          // Foreground: nav items stay in original position (not shifted)
+          Positioned.fill(
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    _NavItem(
+                      index: 0,
+                      selectedIndex: _selectedIndex,
+                      iconData: Icons.apps_rounded,
+                      label: loc.t('services'),
+                      isDark: isDark,
+                      onTap: () => setState(() => _selectedIndex = 0),
+                    ),
+                    _NavItem(
+                      index: 1,
+                      selectedIndex: _selectedIndex,
+                      iconData: Icons.search_rounded,
+                      label: loc.t('search'),
+                      isDark: isDark,
+                      onTap: () => setState(() => _selectedIndex = 1),
+                    ),
+                    _NavItem(
+                      index: 2,
+                      selectedIndex: _selectedIndex,
+                      iconData: Icons.home_rounded,
+                      label: loc.t('home'),
+                      isDark: isDark,
+                      onTap: () => setState(() => _selectedIndex = 2),
+                    ),
+                    _NavItem(
+                      index: 3,
+                      selectedIndex: _selectedIndex,
+                      iconData: Icons.calendar_month_rounded,
+                      label: loc.t('schedule'),
+                      isDark: isDark,
+                      onTap: () => setState(() => _selectedIndex = 3),
+                    ),
+                    _NavItem(
+                      index: 4,
+                      selectedIndex: _selectedIndex,
+                      iconData: Icons.settings_rounded,
+                      label: loc.t('settings'),
+                      isDark: isDark,
+                      onTap: () => setState(() => _selectedIndex = 4),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -198,8 +222,8 @@ class _NavItem extends StatelessWidget {
           onTap: onTap,
           borderRadius: BorderRadius.circular(12),
           child: Container(
-            // Reduced padding to compact items
-            padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
+            // Reduce top padding so bubbles sit closer to the top of the navbar
+            padding: const EdgeInsets.only(top: 1, bottom: 2, left: 4, right: 4),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
