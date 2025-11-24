@@ -101,6 +101,7 @@ class ServicesScreen extends StatelessWidget {
                               subtitle: 'Phòng Công tác Sinh viên',
                               icon: Icons.description_outlined,
                               isLarge: true,
+                              iconVariant: 0,
                             ),
                           );
                         }
@@ -116,6 +117,7 @@ class ServicesScreen extends StatelessWidget {
                               subtitle: 'Phòng Dữ liệu & Công nghệ thông tin',
                               icon: Icons.local_parking_rounded,
                               isLarge: true,
+                              iconVariant: 0,
                             ),
                           );
                         }
@@ -131,6 +133,7 @@ class ServicesScreen extends StatelessWidget {
                               subtitle: 'Phòng Đào tạo Đại học / VPCCTĐB',
                               icon: Icons.document_scanner_outlined,
                               isLarge: true,
+                              iconVariant: 0,
                             ),
                           );
                         }
@@ -147,6 +150,7 @@ class ServicesScreen extends StatelessWidget {
                               subtitle: 'Phòng Đào tạo Đại học / VPCCTĐB',
                               icon: Icons.edit_document,
                               isLarge: true,
+                              iconVariant: 0,
                             ),
                           );
                         }
@@ -163,6 +167,7 @@ class ServicesScreen extends StatelessWidget {
                               subtitle: 'Phòng Đào tạo Đại học / VPCCTĐB',
                               icon: Icons.receipt_long,
                               isLarge: true,
+                              iconVariant: 0,
                             ),
                           );
                         }
@@ -179,6 +184,7 @@ class ServicesScreen extends StatelessWidget {
                               subtitle: 'Phòng Đào tạo Đại học / VPCCTĐB',
                               icon: Icons.assignment_ind,
                               isLarge: true,
+                              iconVariant: 0,
                             ),
                           );
                         }
@@ -208,6 +214,8 @@ class ServicesScreen extends StatelessWidget {
     String? subtitle,
     IconData? icon,
     bool isLarge = false,
+    int iconVariant = 0, // 0 = dark bg + primary-colored icon, 1 = pastel/gradient bg + white icon
+    Gradient? iconGradient,
   }) {
     final fullWidth = MediaQuery.of(context).size.width - 20 * 2; // account for horizontal padding
 
@@ -267,13 +275,16 @@ class ServicesScreen extends StatelessWidget {
                   width: iconBoxSize,
                   height: iconBoxSize,
                   decoration: BoxDecoration(
-                    color: isDark ? Colors.white12 : Colors.grey.shade100,
+                    color: iconVariant == 0
+                        ? (isDark ? Color.fromRGBO(0, 0, 0, 0.28) : Color.fromRGBO(0, 0, 0, 0.08))
+                        : null,
+                    gradient: iconVariant == 1 ? iconGradient : null,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
                     iconData,
                     size: iconSize,
-                    color: isDark ? Colors.grey.shade300 : Colors.grey.shade600,
+                    color: iconVariant == 0 ? Theme.of(context).colorScheme.primary : Colors.white,
                   ),
                 ),
                 const SizedBox(width: 12),
