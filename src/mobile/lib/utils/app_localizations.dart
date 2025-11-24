@@ -71,6 +71,7 @@ class AppLocalizations {
       'next_schedule': 'Lịch trình tiếp theo',
       'starts_in': 'Bắt đầu trong',
       'view_full_schedule': 'Xem toàn bộ thời khóa biểu',
+      'view_all': 'Xem tất cả',
       'new_notifications': 'Thông báo mới',
       'student_card': 'Thẻ sinh viên',
       'gpa': 'GPA',
@@ -94,6 +95,11 @@ class AppLocalizations {
       'new_password_label': 'Mật khẩu mới',
       'old_password_required': 'Vui lòng nhập mật khẩu cũ',
       'new_password_min_length': 'Mật khẩu phải có ít nhất 6 ký tự',
+      // New keys for StudentIdCard header
+      'vnu_name': 'ĐẠI HỌC QUỐC GIA THÀNH PHỐ HỒ CHÍ MINH',
+      'uit_name': 'TRƯỜNG ĐẠI HỌC CÔNG NGHỆ THÔNG TIN',
+      'card_title': 'Thẻ sinh viên',
+      // ...existing code...
     },
     'en': {
       'login': 'Login',
@@ -148,6 +154,7 @@ class AppLocalizations {
       'next_schedule': 'Next Schedule',
       'starts_in': 'Starts in',
       'view_full_schedule': 'View full schedule',
+      'view_all': 'View all',
       'new_notifications': 'New Notifications',
       'student_card': 'Student Card',
       'gpa': 'GPA',
@@ -171,6 +178,11 @@ class AppLocalizations {
       'new_password_label': 'New password',
       'old_password_required': 'Please enter old password',
       'new_password_min_length': 'Password must be at least 6 characters',
+      // New keys for StudentIdCard header
+      'vnu_name': 'VIETNAM NATIONAL UNIVERSITY HO CHI MINH CITY',
+      'uit_name': 'UNIVERSITY OF INFORMATION TECHNOLOGY',
+      'card_title': 'Student Card',
+      // ...existing code...
     },
   };
 
