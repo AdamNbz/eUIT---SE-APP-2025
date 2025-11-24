@@ -103,6 +103,22 @@ class ServicesScreen extends StatelessWidget {
                     );
                   }
 
+                  // Fourth tile: 'Đăng ký Phúc khảo'
+                  if (index == 3) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: _buildWidePlaceholderTile(
+                        context,
+                        isDark,
+                        loc,
+                        title: 'Đăng ký Phúc khảo',
+                        subtitle: 'Phòng Đào tạo Đại học / VPCCTĐB',
+                        icon: Icons.edit_document,
+                        isLarge: true,
+                      ),
+                    );
+                  }
+
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 12),
                     child: _buildWidePlaceholderTile(context, isDark, loc, isLarge: true),
