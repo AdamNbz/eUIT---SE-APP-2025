@@ -104,6 +104,7 @@ class ServicesScreen extends StatelessWidget {
                               icon: Icons.description_outlined,
                               isLarge: true,
                               iconVariant: 0,
+                              orderIndex: index,
                             ),
                           );
                         }
@@ -120,6 +121,7 @@ class ServicesScreen extends StatelessWidget {
                               icon: Icons.local_parking_rounded,
                               isLarge: true,
                               iconVariant: 0,
+                              orderIndex: index,
                             ),
                           );
                         }
@@ -136,6 +138,7 @@ class ServicesScreen extends StatelessWidget {
                               icon: Icons.document_scanner_outlined,
                               isLarge: true,
                               iconVariant: 0,
+                              orderIndex: index,
                             ),
                           );
                         }
@@ -153,6 +156,7 @@ class ServicesScreen extends StatelessWidget {
                               icon: Icons.edit_document,
                               isLarge: true,
                               iconVariant: 0,
+                              orderIndex: index,
                             ),
                           );
                         }
@@ -170,6 +174,7 @@ class ServicesScreen extends StatelessWidget {
                               icon: Icons.receipt_long,
                               isLarge: true,
                               iconVariant: 0,
+                              orderIndex: index,
                             ),
                           );
                         }
@@ -187,13 +192,14 @@ class ServicesScreen extends StatelessWidget {
                               icon: Icons.assignment_ind,
                               isLarge: true,
                               iconVariant: 0,
+                              orderIndex: index,
                             ),
                           );
                         }
 
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 12),
-                          child: _buildWidePlaceholderTile(context, isDark, loc, isLarge: true),
+                          child: _buildWidePlaceholderTile(context, isDark, loc, isLarge: true, orderIndex: index),
                         );
                       }),
                     ),
@@ -218,6 +224,7 @@ class ServicesScreen extends StatelessWidget {
     bool isLarge = false,
     int iconVariant = 0, // 0 = dark bg + primary-colored icon, 1 = pastel/gradient bg + white icon
     Gradient? iconGradient,
+    int orderIndex = -1, // optional tile order index for alternating colors
   }) {
     final fullWidth = MediaQuery.of(context).size.width - 20 * 2; // account for horizontal padding
 
@@ -234,33 +241,15 @@ class ServicesScreen extends StatelessWidget {
     final Color cardColor = isDark ? Color.fromRGBO(30, 41, 59, 0.95) : Colors.white;
     final Color strokeColor = isDark ? Color.fromRGBO(255, 255, 255, 0.12) : Color.fromRGBO(0, 0, 0, 0.06);
 
-    // Determine department color from subtitle (simple heuristics)
-    Color departmentColorForSubtitle(String? s) {
-      if (s == null) return defaultAccent;
-      final lower = s.toLowerCase();
-      if (lower.contains('công tác') || lower.contains('sinh viên')) {
-        return const Color(0xFF22C55E); // green for Student Affairs
-      }
-      if (lower.contains('đào tạo')) {
-        return const Color(0xFF2563EB); // blue for Training
-      }
-      if (lower.contains('tài') || lower.contains('dữ liệu') || lower.contains('tài chính')) {
-        return const Color(0xFF7C3AED); // purple for Finance/Data
-      }
-      return defaultAccent;
-    }
+    // Determine stripe/icon/arrow colors:
+    // If orderIndex provided, alternate by order: even -> strong blue, odd -> lighter blue
+    final Color strongBlue = const Color(0xFF2F6BFF);
+    final Color lightBlue = const Color (0xFF20B0FF);
+    final bool useAlternating = orderIndex >= 0;
+    final Color stripeColor = useAlternating ? (orderIndex % 2 == 0 ? strongBlue : lightBlue) : defaultAccent;
 
-    final Color deptColor = departmentColorForSubtitle(displaySubtitle);
-
-    // Helper to apply opacity to a dynamic color without using deprecated color component accessors
-    Color applyOpacity(Color c, double opacity) {
-      // c.r, c.g, c.b are normalized floats in [0,1]; convert to 0-255 ints
-      final int a = (opacity * 255).round().clamp(0, 255);
-      final int r = (c.r * 255.0).round() & 0xFF;
-      final int g = (c.g * 255.0).round() & 0xFF;
-      final int b = (c.b * 255.0).round() & 0xFF;
-      return Color.fromARGB(a, r, g, b);
-    }
+    // Helper to apply opacity when needed
+    Color applyOpacity(Color c, double opacity) => Color.fromRGBO((c.r * 255).round(), (c.g * 255).round(), (c.b * 255).round(), opacity);
 
     // Adjust sizes. When isLarge==true we make the surrounding wrapper only slightly taller than the icon box
     final baseIconBoxSize = 56.0; // standard icon box size
@@ -304,12 +293,12 @@ class ServicesScreen extends StatelessWidget {
             ),
             child: Row(
               children: [
-                // Colored stripe for department coding
+                // Colored stripe (alternating by order or default accent)
                 Container(
                   width: 4,
                   height: double.infinity,
                   decoration: BoxDecoration(
-                    color: applyOpacity(deptColor, 0.95),
+                    color: applyOpacity(stripeColor, 0.95),
                     borderRadius: const BorderRadius.only(
                         topLeft: Radius.circular(12), bottomLeft: Radius.circular(12)),
                   ),
@@ -328,8 +317,8 @@ class ServicesScreen extends StatelessWidget {
                   child: Icon(
                     iconData,
                     size: iconSize,
-                    // For variant 0 use department accent to color the icon; variant 1 keeps white
-                    color: iconVariant == 0 ? deptColor : Colors.white,
+                    // For variant 0 use stripeColor to color the icon; variant 1 keeps white
+                    color: iconVariant == 0 ? stripeColor : Colors.white,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -364,8 +353,8 @@ class ServicesScreen extends StatelessWidget {
                 Icon(
                   Icons.arrow_forward_ios_rounded,
                   size: 18,
-                  // Arrow color: use department accent to invite action
-                  color: deptColor,
+                  // Arrow color: use stripeColor to invite action
+                  color: stripeColor,
                 ),
               ],
             ),
