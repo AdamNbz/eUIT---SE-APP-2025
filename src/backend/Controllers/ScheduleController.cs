@@ -157,8 +157,11 @@ public class ScheduleController : ControllerBase
             return false;
 
         // Check cach_tuan (interval weeks)
-        var weeksSinceStart = (date - schedule.ngay_bat_dau).Days / 7;
-        return weeksSinceStart % schedule.cach_tuan == 0;
+        if (!schedule.ngay_bat_dau.HasValue || !schedule.cach_tuan.HasValue)
+            return false;
+            
+        var weeksSinceStart = (date - schedule.ngay_bat_dau.Value).Days / 7;
+        return weeksSinceStart % schedule.cach_tuan.Value == 0;
     }
 
     // GET: api/student/schedule/exams
@@ -473,9 +476,9 @@ public class ScheduleController : ControllerBase
                     // Check if time overlaps (assuming class time based on tiet)
                     // Each tiet is approximately 50 minutes, starting from 7:00 AM
                     var classStartTime = new DateTime(eventTime.Year, eventTime.Month, eventTime.Day, 7, 0, 0)
-                        .AddMinutes((schedule.tiet_bat_dau - 1) * 50);
+                        .AddMinutes((schedule.tiet_bat_dau.GetValueOrDefault(1) - 1) * 50);
                     var classEndTime = new DateTime(eventTime.Year, eventTime.Month, eventTime.Day, 7, 0, 0)
-                        .AddMinutes(schedule.tiet_ket_thuc * 50);
+                        .AddMinutes(schedule.tiet_ket_thuc.GetValueOrDefault(1) * 50);
 
                     if (eventTime >= classStartTime && eventTime < classEndTime)
                     {
