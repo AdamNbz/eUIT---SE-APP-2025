@@ -143,22 +143,30 @@ class _NavigationScreenState extends State<NavigationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: Color(0xFF0F172A),
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Header with Search
-            _buildHeader(),
+      backgroundColor: isDark ? AppTheme.darkBackground : const Color(0xFFF7F8FC),
+      body: Stack(
+        children: [
+          // Animated background layer shared across main nav pages
+          Positioned.fill(child: AnimatedBackground(isDark: isDark)),
 
-            // Content
-            Expanded(
-              child: _filteredItems.isEmpty
-                  ? _buildEmptyState()
-                  : _buildMenuGrid(),
+          SafeArea(
+            child: Column(
+              children: [
+                // Header with Search
+                _buildHeader(),
+
+                // Content
+                Expanded(
+                  child: _filteredItems.isEmpty
+                      ? _buildEmptyState()
+                      : _buildMenuGrid(),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

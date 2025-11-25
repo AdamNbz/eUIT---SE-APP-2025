@@ -138,10 +138,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: Stack(
         children: [
           // Use the same animated background as HomeScreen; pass current isDark
-          if (isDark)
-            const Positioned.fill(
-              child: AnimatedBackground(isDark: true),
-            ),
+          Positioned.fill(child: AnimatedBackground(isDark: isDark)),
           ListView(
             padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 84),
             children: [

@@ -22,8 +22,8 @@ class ServicesScreen extends StatelessWidget {
       backgroundColor: isDark ? AppTheme.darkBackground : const Color(0xFFF7F8FC),
       body: Stack(
         children: [
-          // Animated background for dark mode matching HomeScreen
-          if (isDark) const Positioned.fill(child: AnimatedBackground(isDark: true)),
+          // Animated background for both light and dark modes so the navbar pages share the same background visual
+          Positioned.fill(child: AnimatedBackground(isDark: isDark)),
 
           // Main scaffold content
           Scaffold(

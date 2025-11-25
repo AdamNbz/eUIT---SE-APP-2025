@@ -438,32 +438,35 @@ class _HomeScreenState extends State<HomeScreen>
           width: double.infinity,
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
+            // Reduced opacity so animated background shows through
             gradient: isDark
                 ? LinearGradient(
                     colors: [
-                      const Color(0xFF1E293B).withAlpha(229), // 0.9 opacity
-                      const Color(0xFF1E293B).withAlpha(204), // 0.8 opacity
+                      // lower alpha than before to allow background to be visible
+                      const Color(0xFF1E293B).withAlpha(140), // ~0.55 opacity
+                      const Color(0xFF1E293B).withAlpha(110), // ~0.43 opacity
                     ],
                   )
                 : LinearGradient(
                     colors: [
-                      Colors.white.withAlpha(242), // 0.95 opacity
-                      Colors.white.withAlpha(242),
+                      // Allow more of the animated background in light mode
+                      Colors.white.withAlpha(180), // ~0.7 opacity
+                      Colors.white.withAlpha(160),
                     ],
                   ),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: isDark
-                  ? AppTheme.bluePrimary.withAlpha(76) // 0.3 opacity
-                  : AppTheme.bluePrimary.withAlpha(51), // 0.2 opacity
+                  ? AppTheme.bluePrimary.withAlpha(40) // reduced from 76 -> ~0.16
+                  : AppTheme.bluePrimary.withAlpha(30), // reduced from 51
               width: 1,
             ),
             boxShadow: [
               BoxShadow(
                 color: isDark
-                    ? AppTheme.bluePrimary.withAlpha(26) // 0.1 opacity
-                    : Colors.black.withAlpha(13),
-                blurRadius: isDark ? 20 : 10,
+                    ? AppTheme.bluePrimary.withAlpha(12) // lighter shadow
+                    : Colors.black.withAlpha(8),
+                blurRadius: isDark ? 16 : 8,
                 offset: const Offset(0, 4),
               ),
             ],
