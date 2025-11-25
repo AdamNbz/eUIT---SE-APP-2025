@@ -82,6 +82,9 @@ class AppLocalizations {
       'home': 'Trang chủ',
       'schedule': 'Lịch trình',
       'settings': 'Cài đặt',
+      // Header for Navigation / Search screen
+      'search_title': 'Tra cứu thông tin',
+      'search_subtitle': 'Tìm kiếm thông tin sinh viên',
       // Added keys for new dialogs/cards
       'coming_soon': 'Sắp ra mắt',
       'close': 'Đóng',
@@ -99,7 +102,6 @@ class AppLocalizations {
       'vnu_name': 'ĐẠI HỌC QUỐC GIA THÀNH PHỐ HỒ CHÍ MINH',
       'uit_name': 'TRƯỜNG ĐẠI HỌC CÔNG NGHỆ THÔNG TIN',
       'card_title': 'Thẻ sinh viên',
-      // ...existing code...
     },
     'en': {
       'login': 'Login',
@@ -165,6 +167,9 @@ class AppLocalizations {
       'home': 'Home',
       'schedule': 'Schedule',
       'settings': 'Settings',
+      // Header for Navigation / Search screen
+      'search_title': 'Search Information',
+      'search_subtitle': 'Find student information',
       // Added keys for new dialogs/cards
       'coming_soon': 'Coming soon',
       'close': 'Close',
@@ -182,7 +187,6 @@ class AppLocalizations {
       'vnu_name': 'VIETNAM NATIONAL UNIVERSITY HO CHI MINH CITY',
       'uit_name': 'UNIVERSITY OF INFORMATION TECHNOLOGY',
       'card_title': 'Student Card',
-      // ...existing code...
     },
   };
 
