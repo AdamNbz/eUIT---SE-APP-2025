@@ -101,6 +101,17 @@ class _ModernLoginScreenState extends State<ModernLoginScreen>
         _usernameController.text = remembered;
         // legacy stored username implies remember checkbox visually
         setState(() => _rememberMe = true);
+        return;
+      }
+
+      // If there's a transient last-username (set at logout), prefill it once (do not persist)
+      final transient = _authService.getTransientLastUsername();
+      if (transient != null && transient.isNotEmpty) {
+        _usernameController.text = transient;
+        // Clear transient so it only shows once in this session
+        _authService.clearTransientLastUsername();
+        setState(() {});
+        return;
       }
     } catch (_) {
       // ignore
@@ -141,6 +152,9 @@ class _ModernLoginScreenState extends State<ModernLoginScreen>
       );
 
       await _authService.saveToken(token);
+
+      // Remember current username in-memory for potential one-time prefill after logout
+      _authService.setTransientLastUsername(_usernameController.text.trim());
 
       // Best-effort: trigger providers to refresh now so Home shows fresh data.
       try {

@@ -214,4 +214,22 @@ class AuthService {
       return false;
     }
   }
+
+  // --- Transient in-memory last-logged username (not persisted)
+  // Used to prefill username once immediately after logout, without
+  // persisting it across app restarts.
+  String? _transientLastUsername;
+
+  /// Set a transient last-logged-in username (in-memory only).
+  void setTransientLastUsername(String? username) {
+    _transientLastUsername = username;
+  }
+
+  /// Get transient last username (may be null). Not persisted.
+  String? getTransientLastUsername() => _transientLastUsername;
+
+  /// Clear transient username.
+  void clearTransientLastUsername() {
+    _transientLastUsername = null;
+  }
 }

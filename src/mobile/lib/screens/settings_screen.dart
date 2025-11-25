@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../services/theme_controller.dart';
 import '../services/language_controller.dart';
 import '../services/auth_service.dart';
+import '../providers/home_provider.dart';
 import '../utils/app_localizations.dart';
 import '../theme/app_theme.dart';
 import '../widgets/theme_switch.dart';
@@ -69,7 +70,48 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     if (res == true) {
       final auth = context.read<AuthService>();
-      await auth.deleteToken();
+      try {
+        // Determine a username to show once on the login screen
+        String? oneTimeUsername;
+        try {
+          final creds = await auth.getSavedCredentials();
+          if (creds != null && creds['username'] != null && creds['username']!.isNotEmpty) {
+            oneTimeUsername = creds['username'];
+          }
+        } catch (_) {}
+
+        // If still null, try to obtain from HomeProvider studentCard if present
+        try {
+          final hp = context.read<HomeProvider>();
+          final sc = hp.studentCard;
+          if (oneTimeUsername == null && sc != null) {
+            // Use mssv if available as a fallback username
+            if (sc.mssv != null) oneTimeUsername = sc.mssv.toString();
+          }
+        } catch (_) {}
+
+        // Store transient username (one-time) in AuthService
+        if (oneTimeUsername != null && oneTimeUsername.isNotEmpty) {
+          auth.setTransientLastUsername(oneTimeUsername);
+        }
+
+        // Remove any persisted credentials and remember flag so that logout
+        // clears all account data. This ensures credentials are not persisted
+        // after logout.
+        await auth.deleteCredentials();
+        await auth.setRememberMe(false);
+
+        // Delete auth token — this triggers tokenNotifier and provider clears.
+        await auth.deleteToken();
+
+        // Clear provider state explicitly (best-effort)
+        try {
+          context.read<HomeProvider>().clear();
+        } catch (_) {}
+      } catch (_) {
+        // ignore errors during logout cleanup
+      }
+
       if (!mounted) return;
       Navigator.pushReplacementNamed(context, '/');
     }
