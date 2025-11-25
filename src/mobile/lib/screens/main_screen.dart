@@ -19,6 +19,7 @@ class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 2; // home
 
   late final List<Widget> _pages;
+  late final PageController _pageController;
 
   @override
   void initState() {
@@ -30,6 +31,25 @@ class _MainScreenState extends State<MainScreen> {
       const ScheduleMainScreen(),
       const SettingsScreen(),
     ];
+    _pageController = PageController(initialPage: _selectedIndex);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void _onNavTap(int index) {
+    if (index == _selectedIndex) return;
+    setState(() {
+      _selectedIndex = index;
+    });
+    _pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeInOut,
+    );
   }
 
   @override
@@ -37,23 +57,43 @@ class _MainScreenState extends State<MainScreen> {
     final loc = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Scaffold(
-      backgroundColor: isDark
-          ? AppTheme.darkBackground
-          : const Color(0xFFF7F8FC),
-      body: Stack(
-        children: [
-          // Main content
-          _pages[_selectedIndex],
+    return WillPopScope(
+      onWillPop: () async {
+        // Khi không ở tab Home, back sẽ đưa về Home thay vì thoát app
+        if (_selectedIndex != 2) {
+          _onNavTap(2);
+          return false;
+        }
+        return true;
+      },
+      child: Scaffold(
+        backgroundColor:
+            isDark ? AppTheme.darkBackground : const Color(0xFFF7F8FC),
+        body: Stack(
+          children: [
+            // Main content with horizontal swipe between tabs
+            PageView(
+              controller: _pageController,
+              physics: const BouncingScrollPhysics(),
+              onPageChanged: (index) {
+                if (index != _selectedIndex) {
+                  setState(() {
+                    _selectedIndex = index;
+                  });
+                }
+              },
+              children: _pages,
+            ),
 
-          // Custom Bottom Navigation Bar
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: _buildCustomBottomNav(loc, isDark),
-          ),
-        ],
+            // Custom Bottom Navigation Bar
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: _buildCustomBottomNav(loc, isDark),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -142,7 +182,7 @@ class _MainScreenState extends State<MainScreen> {
                       iconData: Icons.home_repair_service_outlined,
                       label: loc.t('services'),
                       isDark: isDark,
-                      onTap: () => setState(() => _selectedIndex = 0),
+                      onTap: () => _onNavTap(0),
                     ),
                     _NavItem(
                       index: 1,
@@ -150,7 +190,7 @@ class _MainScreenState extends State<MainScreen> {
                       iconData: Icons.search_rounded,
                       label: loc.t('search'),
                       isDark: isDark,
-                      onTap: () => setState(() => _selectedIndex = 1),
+                      onTap: () => _onNavTap(1),
                     ),
                     _NavItem(
                       index: 2,
@@ -158,7 +198,7 @@ class _MainScreenState extends State<MainScreen> {
                       iconData: Icons.home_rounded,
                       label: loc.t('home'),
                       isDark: isDark,
-                      onTap: () => setState(() => _selectedIndex = 2),
+                      onTap: () => _onNavTap(2),
                     ),
                     _NavItem(
                       index: 3,
@@ -166,7 +206,7 @@ class _MainScreenState extends State<MainScreen> {
                       iconData: Icons.calendar_month_rounded,
                       label: loc.t('schedule'),
                       isDark: isDark,
-                      onTap: () => setState(() => _selectedIndex = 3),
+                      onTap: () => _onNavTap(3),
                     ),
                     _NavItem(
                       index: 4,
@@ -174,7 +214,7 @@ class _MainScreenState extends State<MainScreen> {
                       iconData: Icons.settings_rounded,
                       label: loc.t('settings'),
                       isDark: isDark,
-                      onTap: () => setState(() => _selectedIndex = 4),
+                      onTap: () => _onNavTap(4),
                     ),
                   ],
                 ),
