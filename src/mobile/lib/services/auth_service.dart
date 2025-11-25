@@ -4,12 +4,32 @@ import 'dart:io' show Platform;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter/foundation.dart';
 
 class AuthService {
+  // Notifier shared across all AuthService instances so providers and UI can
+  // listen for token changes (login/logout) and react immediately.
+  static final ValueNotifier<String?> tokenNotifier = ValueNotifier<String?>(null);
+
+  AuthService() {
+    // Initialize notifier with stored token once.
+    _init();
+  }
+
   // Storage key for the auth token
   static const String _tokenKey = 'auth_token';
   static const String _loginPath = '/api/Auth/login';
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
+
+  // Read stored token at startup and update the notifier.
+  Future<void> _init() async {
+    try {
+      final t = await _storage.read(key: _tokenKey);
+      if (tokenNotifier.value != t) tokenNotifier.value = t;
+    } catch (_) {
+      // ignore read errors
+    }
+  }
 
   // Keys for storing credentials securely
   static const String _savedUsernameKey = 'saved_username';
@@ -109,6 +129,12 @@ class AuthService {
 
   Future<void> saveToken(String token) async {
     await _storage.write(key: _tokenKey, value: token);
+    try {
+      // Notify listeners (e.g., providers) that a new token is available.
+      tokenNotifier.value = token;
+    } catch (_) {
+      // ignore notifier errors
+    }
   }
 
   Future<String?> getToken() async {
@@ -117,6 +143,11 @@ class AuthService {
 
   Future<void> deleteToken() async {
     await _storage.delete(key: _tokenKey);
+    try {
+      tokenNotifier.value = null;
+    } catch (_) {
+      // ignore
+    }
   }
 
   // --- Credential helpers ---

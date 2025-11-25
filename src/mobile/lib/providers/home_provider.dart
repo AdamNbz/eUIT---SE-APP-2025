@@ -5,13 +5,35 @@ import '../models/schedule_item.dart';
 import '../models/notification_item.dart';
 import '../models/quick_action.dart';
 import '../services/auth_service.dart';
+import 'package:flutter/foundation.dart';
 import '../models/student_card_dto.dart';
 
 class HomeProvider extends ChangeNotifier {
   bool _isLoading = false;
 
-  HomeProvider() {
+  // Listen for token changes and refetch data when a new token is saved.
+  late final VoidCallback _tokenListener;
+
+  HomeProvider({AuthService? auth}) {
     _loadMock();
+    _auth = auth ?? AuthService();
+
+    // When token changes, refresh data (or clear on null).
+    _tokenListener = () {
+      final tok = AuthService.tokenNotifier.value;
+      if (tok == null || tok.isEmpty) {
+        clear();
+      } else {
+        // Fire-and-forget background refresh
+        fetchQuickGpa();
+        fetchStudentCard();
+        fetchNextClass();
+      }
+    };
+
+    // Attach listener (also triggers initial reaction if token already present)
+    AuthService.tokenNotifier.addListener(_tokenListener);
+
     // Try to fetch quick GPA in background when provider is created
     Future.microtask(() => fetchQuickGpa());
     // Fetch student card in background
@@ -30,7 +52,7 @@ class HomeProvider extends ChangeNotifier {
 
   StudentCardDto? get studentCard => _studentCard;
 
-  final AuthService _auth = AuthService();
+  late AuthService _auth;
 
   bool get isLoading => _isLoading;
   ScheduleItem get nextSchedule => _nextSchedule;
@@ -266,5 +288,31 @@ class HomeProvider extends ChangeNotifier {
     final start = startMap[startPeriod] ?? '${startPeriod}';
     final end = endMap[endPeriod] ?? '${endPeriod}';
     return '$start - $end';
+  }
+
+  /// Refresh all backend-backed fields. Useful to call immediately after login.
+  Future<void> refreshAll() async {
+    await Future.wait([
+      fetchQuickGpa(),
+      fetchStudentCard(),
+      fetchNextClass(),
+    ]);
+  }
+
+  /// Clear sensitive data when logged out or token removed.
+  void clear() {
+    _gpa = null;
+    _soTinChiTichLuy = null;
+    _studentCard = null;
+    // leave mock schedule/notifications untouched or override as needed
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    try {
+      AuthService.tokenNotifier.removeListener(_tokenListener);
+    } catch (_) {}
+    super.dispose();
   }
 }
