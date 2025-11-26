@@ -301,7 +301,7 @@ class _HomeScreenState extends State<HomeScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        provider.studentCard?.hoTen ?? 'Họ tên sinh viên',
+                        provider.studentCard?.hoTen ?? loc.t('student_name'),
                         style: TextStyle(
                           color: isDark ? Colors.white : Colors.black87,
                           fontSize: 16,
@@ -309,7 +309,7 @@ class _HomeScreenState extends State<HomeScreen>
                         ),
                       ),
                       Text(
-                        'MSSV: ${provider.studentCard?.mssv?.toString() ?? '12345678'}',
+                        'MSSV: ${provider.studentCard?.mssv?.toString()}',
                         style: TextStyle(
                           color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
                           fontSize: 12,
@@ -550,8 +550,9 @@ class _HomeScreenState extends State<HomeScreen>
                 spacing: 8,
                 runSpacing: 8,
                 children: [
-                  _buildDetailChip('Phòng: ${schedule.room}', isDark),
-                  _buildDetailChip('GV: ${schedule.lecturer}', isDark),
+                  // Localize
+                  _buildDetailChip('${loc.t('room')}: ${schedule.room}', isDark),
+                  _buildDetailChip('${loc.t('lecturer')}: ${schedule.lecturer}', isDark),
                 ],
               ),
               const SizedBox(height: 10), // Reduced space

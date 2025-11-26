@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../providers/home_provider.dart';
 import '../services/theme_controller.dart';
 import '../services/language_controller.dart';
 import '../services/auth_service.dart';
@@ -120,6 +121,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final provider = context.watch<HomeProvider>();
     final themeController = context.watch<ThemeController>();
     final languageController = context.watch<LanguageController>();
 
@@ -177,7 +179,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                loc.t('student_name_placeholder'),
+                                provider.studentCard?.hoTen ?? loc.t('student_name'),
                                 style: TextStyle(
                                   color: textColor,
                                   fontWeight: FontWeight.bold,
@@ -186,7 +188,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                loc.t('student_id_placeholder'),
+                                '${loc.t('id')}: ${provider.studentCard?.mssv?.toString()}',
                                 style: TextStyle(color: secondary, fontSize: 12),
                               ),
                             ],
