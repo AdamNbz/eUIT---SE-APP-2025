@@ -95,7 +95,7 @@ class AuthService {
           'password': password,
         }),
       )
-          .timeout(const Duration(seconds: 30)); // <-- 30s timeout
+          .timeout(const Duration(seconds: 15)); // <-- 15s timeout
     } on Exception catch (e) {
       // Ensure the client is closed to abort the underlying connection
       try {
