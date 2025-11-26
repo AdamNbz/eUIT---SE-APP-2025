@@ -8,7 +8,6 @@ import '../providers/home_provider.dart';
 import '../services/theme_controller.dart';
 import '../services/language_controller.dart';
 import '../services/auth_service.dart';
-import '../providers/home_provider.dart';
 import '../utils/app_localizations.dart';
 import '../theme/app_theme.dart';
 import '../widgets/theme_switch.dart';
