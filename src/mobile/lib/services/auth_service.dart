@@ -80,8 +80,12 @@ class AuthService {
     final uri = buildUri(_loginPath);
 
     http.Response res;
+    // Use a per-request Client so we can close it to abort the underlying connection
+    final client = http.Client();
+    var clientClosed = false;
     try {
-      res = await http.post(
+      res = await client
+          .post(
         uri,
         // No required headers, but Content-Type helps most backends parse JSON.
         headers: const {'Content-Type': 'application/json'},
@@ -90,10 +94,23 @@ class AuthService {
           'userId': userId,
           'password': password,
         }),
-      );
-    } catch (e) {
-      // Network/connection error
+      )
+          .timeout(const Duration(seconds: 30)); // <-- 30s timeout
+    } on Exception catch (e) {
+      // Ensure the client is closed to abort the underlying connection
+      try {
+        client.close();
+      } catch (_) {}
+      clientClosed = true;
+      // Network/connection error (including TimeoutException)
       throw Exception('network_error');
+    } finally {
+      // Close client if not already closed (successful response still needs client closed)
+      if (!clientClosed) {
+        try {
+          client.close();
+        } catch (_) {}
+      }
     }
 
     if (res.statusCode >= 200 && res.statusCode < 300) {

@@ -204,8 +204,16 @@ class _ModernLoginScreenState extends State<ModernLoginScreen>
             _errorMessage = errorText; // fallback raw message
             _errorKey = null;
           }
-          _passwordController.clear();
-          _shakePassword = true;
+
+          // Only clear the password for credential/validation related errors.
+          // Do NOT clear the password when the failure is a network error so the
+          // user doesn't have to retype it on intermittent connectivity issues.
+          if (errorText != 'network_error') {
+            _passwordController.clear();
+            _shakePassword = true;
+          } else {
+            _shakePassword = false;
+          }
         });
         Future.delayed(const Duration(milliseconds: 500), () {
           if (mounted) setState(() => _shakePassword = false);
