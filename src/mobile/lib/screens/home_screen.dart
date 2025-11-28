@@ -309,7 +309,7 @@ class _HomeScreenState extends State<HomeScreen>
                         ),
                       ),
                       Text(
-                        'MSSV: ${provider.studentCard?.mssv?.toString()}',
+                        '${loc.t('id')}: ${provider.studentCard?.mssv?.toString()}',
                         style: TextStyle(
                           color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
                           fontSize: 12,
