@@ -1,16 +1,32 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 
 import '../widgets/animated_background.dart';
 import '../utils/app_localizations.dart';
+import '../theme/app_theme.dart';
 
 class StudentConfirmationScreen extends StatefulWidget {
-  const StudentConfirmationScreen({Key? key}) : super(key: key);
+  const StudentConfirmationScreen({super.key});
 
   @override
   State<StudentConfirmationScreen> createState() => _StudentConfirmationScreenState();
 }
 
 class _StudentConfirmationScreenState extends State<StudentConfirmationScreen> {
+  // Selected language chip (UI only)
+  String _selectedLang = 'vi';
+
+  // Selected reason value
+  String? _selectedReason;
+  final TextEditingController _otherController = TextEditingController();
+
+  @override
+  void dispose() {
+    _otherController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -46,20 +62,203 @@ class _StudentConfirmationScreenState extends State<StudentConfirmationScreen> {
 
           // Safe area for content; leave content area empty as requested
           SafeArea(
-            child: Column(
-              children: [
-                // Keep space under the header; rest intentionally left empty
-                const SizedBox(height: 16),
-                Expanded(
-                  child: Container(
-                    // Intentionally empty: UI under header to be implemented later
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 8),
+
+                  // Language chips row
+                  Row(
+                    children: [
+                      _buildLanguageChip(context, 'vi'),
+                      const SizedBox(width: 12),
+                      _buildLanguageChip(context, 'en'),
+                    ],
                   ),
-                ),
-              ],
+
+                  const SizedBox(height: 20),
+
+                  // Title
+                  Text(
+                    AppLocalizations.of(context).t('student_confirmation_reason_title'),
+                    style: TextStyle(
+                      color: isDark ? Colors.white : Colors.black87,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // Glassmorphism container with radios
+                  Expanded(
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? Color.fromRGBO(255, 255, 255, 0.04)
+                            : Color.fromRGBO(255, 255, 255, 0.7),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: isDark
+                              ? Color.fromRGBO(255, 255, 255, 0.10)
+                              : Color.fromRGBO(0, 0, 0, 0.06),
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: isDark
+                                ? Color.fromRGBO(0, 0, 0, 0.4)
+                                : Color.fromRGBO(0, 0, 0, 0.06),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: SingleChildScrollView(
+                          child: Column(
+                            children: _buildReasonList(context, isDark),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Submit button
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.bluePrimary,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        elevation: 4,
+                      ),
+                      onPressed: () {
+                        // UI only: no real submit logic as requested
+                        showDialog(
+                          context: context,
+                          builder: (_) => AlertDialog(
+                            title: Text(AppLocalizations.of(context).t('student_confirmation_success_title')),
+                            content: Text(AppLocalizations.of(context).t('under_development')),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.of(context).pop(),
+                                child: Text(AppLocalizations.of(context).t('close')),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                      child: Text(
+                        AppLocalizations.of(context).t('student_confirmation_submit'),
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                ],
+              ),
             ),
           ),
         ],
       ),
     );
+  }
+
+  Widget _buildLanguageChip(BuildContext context, String code) {
+    final isSelected = _selectedLang == code;
+    final label = AppLocalizations.of(context).t(code == 'vi' ? 'vietnamese' : 'english');
+    return ChoiceChip(
+      label: Text(label, style: TextStyle(color: isSelected ? Colors.white : Colors.white70)),
+      selected: isSelected,
+      onSelected: (_) => setState(() => _selectedLang = code),
+      backgroundColor: Colors.transparent,
+      selectedColor: AppTheme.bluePrimary,
+      shape: RoundedRectangleBorder(
+        side: BorderSide(color: isSelected ? AppTheme.bluePrimary : Color.fromRGBO(255, 255, 255, 0.14)),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+    );
+  }
+
+  List<Widget> _buildReasonList(BuildContext context, bool isDark) {
+    final t = AppLocalizations.of(context).t;
+
+    final items = [
+      {'value': 'military', 'key': 'student_confirmation_reason_military_defer'},
+      {'value': 'dorm', 'key': 'student_confirmation_reason_dorm_extend'},
+      {'value': 'tax', 'key': 'student_confirmation_reason_tax_reduction'},
+      {'value': 'education', 'key': 'student_confirmation_reason_military_education'},
+      {'value': 'other', 'key': 'student_confirmation_reason_other'},
+    ];
+
+    final List<Widget> widgets = [];
+
+    for (var i = 0; i < items.length; i++) {
+      final item = items[i];
+      widgets.add(
+        ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 0),
+          leading: Radio<String>(
+            value: item['value']!,
+            groupValue: _selectedReason,
+            onChanged: (v) => setState(() {
+              _selectedReason = v;
+              if (v != 'other') _otherController.clear();
+            }),
+            fillColor: MaterialStateProperty.all(AppTheme.bluePrimary),
+          ),
+          title: Text(
+            t(item['key']!),
+            style: TextStyle(color: isDark ? Colors.white : Colors.black87),
+          ),
+          onTap: () => setState(() {
+            _selectedReason = item['value'];
+            if (item['value'] != 'other') _otherController.clear();
+          }),
+        ),
+      );
+
+      if (i != items.length - 1) {
+        widgets.add(Divider(color: Color.fromRGBO(255, 255, 255, isDark ? 0.06 : 0.12), height: 1));
+      }
+
+      // If 'other' and selected, render TextField directly under that option
+      if (item['value'] == 'other' && _selectedReason == 'other') {
+        widgets.add(
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: TextField(
+              controller: _otherController,
+              maxLines: 3,
+              style: TextStyle(color: Colors.white, fontSize: 14),
+              decoration: InputDecoration(
+                hintText: t('student_confirmation_reason_other_hint'),
+                hintStyle: TextStyle(color: Colors.white70),
+                filled: true,
+                fillColor: Color.fromRGBO(0, 0, 0, isDark ? 0.35 : 0.06),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding: const EdgeInsets.all(12),
+              ),
+            ),
+          ),
+        );
+      }
+    }
+
+    return widgets;
   }
 }
