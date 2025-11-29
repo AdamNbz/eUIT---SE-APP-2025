@@ -389,17 +389,17 @@ class _StudentConfirmationScreenState extends State<StudentConfirmationScreen> {
                             const SizedBox(height: 6),
                             Text(
                               AppLocalizations.of(context).t('student_confirmation_other_section_instruction'),
-                              style: TextStyle(color: isDark ? Colors.white70 : Colors.black54, fontSize: 13),
+                              style: TextStyle(color: isDark ? Colors.white70 : Colors.black87, fontSize: 14),
                             ),
                             const SizedBox(height: 4),
                             Text(
                               AppLocalizations.of(context).t('student_confirmation_other_section_example'),
-                              style: TextStyle(color: isDark ? Colors.white70 : Colors.black54, fontSize: 13, fontStyle: FontStyle.italic),
+                              style: TextStyle(color: isDark ? Colors.white70 : Colors.black87, fontSize: 14, fontStyle: FontStyle.italic),
                             ),
                             const SizedBox(height: 4),
                             Text(
                               AppLocalizations.of(context).t('student_confirmation_other_section_format_warning'),
-                              style: TextStyle(color: isDark ? Colors.red[300] : Colors.red[700], fontSize: 13, fontWeight: FontWeight.w600),
+                              style: TextStyle(color: isDark ? Colors.red[400] : Colors.limeAccent, fontSize: 15, fontWeight: FontWeight.w600),
                             ),
                           ],
                         ),
@@ -444,7 +444,7 @@ class _StudentConfirmationScreenState extends State<StudentConfirmationScreen> {
                       child: Text(
                         AppLocalizations.of(context).t('student_confirmation_review_warning'),
                         textAlign: TextAlign.center,
-                        style: TextStyle(color: isDark ? Colors.white70 : Colors.black87, fontSize: 12),
+                        style: TextStyle(color: isDark ? Colors.white70 : Colors.black87, fontSize: 13),
                       ),
                     ),
                   ),
