@@ -307,7 +307,7 @@ class _NavItem extends StatelessWidget {
                         border: Border.all(
                           color: selectedIndex == index
                               ? (isDark ? AppTheme.bluePrimary.withAlpha(200) : AppTheme.bluePrimary)
-                              : (index == 2 ? AppTheme.bluePrimary : (isDark ? Colors.white.withAlpha(26) : Colors.grey.shade200)),
+                              : (index == 2 ? AppTheme.bluePrimary : (isDark ? Colors.white.withAlpha(200) : Colors.black45)),
                           width: selectedIndex == index ? 1.4 : 1.0,
                         ),
                         boxShadow: [
@@ -325,7 +325,7 @@ class _NavItem extends StatelessWidget {
                             begin: Colors.grey.shade600,
                             end: selectedIndex == index
                                 ? (isDark ? Colors.blue.shade300 : AppTheme.bluePrimary)
-                                : (index == 2 ? AppTheme.bluePrimary : const Color(0xFFE3E3E3)),
+                                : (index == 2 ? AppTheme.bluePrimary : (isDark ? Colors.white.withAlpha(200)  : Colors.black45)),
                           ),
                           builder: (context, iconColor, _) {
                             final bubbleSize = _computeBubbleSize(index, selectedIndex);
@@ -352,7 +352,7 @@ class _NavItem extends StatelessWidget {
                     begin: Colors.grey.shade600,
                     end: selectedIndex == index
                         ? (isDark ? Colors.blue.shade300 : AppTheme.bluePrimary)
-                        : (index == 2 ? AppTheme.bluePrimary : const Color(0xFFE3E3E3)),
+                        : (index == 2 ? AppTheme.bluePrimary : (isDark ? Colors.white.withAlpha(200)  : Colors.black45)),
                   ),
                   builder: (context, color, child) {
                     return Text(

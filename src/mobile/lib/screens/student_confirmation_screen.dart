@@ -216,9 +216,11 @@ class _StudentConfirmationScreenState extends State<StudentConfirmationScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: false,
+        iconTheme: const IconThemeData(color: Colors.white),
         title: Text(
           AppLocalizations.of(context).t('student_confirmation_title'),
-          style: const TextStyle(
+          style: TextStyle(
+            color: Colors.white,
             fontSize: 18,
             fontWeight: FontWeight.w600,
           ),
@@ -237,7 +239,7 @@ class _StudentConfirmationScreenState extends State<StudentConfirmationScreen> {
       // Add endDrawer to show history
       endDrawer: Drawer(
         // semi-transparent drawer background (adapts to light/dark for contrast)
-        backgroundColor: isDark ? Colors.black.withOpacity(0.8) : Colors.white.withOpacity(0.85),
+        backgroundColor: isDark ? Colors.black.withOpacity(0.8) : Colors.white.withOpacity(0.92),
         elevation: 0,
         child: SafeArea(
           child: Column(
@@ -248,7 +250,7 @@ class _StudentConfirmationScreenState extends State<StudentConfirmationScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(AppLocalizations.of(context).t('student_confirmation_history_title'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                    IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.of(context).maybePop()),
+                    IconButton(icon: Icon(Icons.close, color: isDark ? Colors.white : Colors.black87), onPressed: () => Navigator.of(context).maybePop()),
                   ],
                 ),
               ),
@@ -323,7 +325,7 @@ class _StudentConfirmationScreenState extends State<StudentConfirmationScreen> {
                       Text(
                         AppLocalizations.of(context).t('student_confirmation_reason_title'),
                         style: TextStyle(
-                          color: isDark ? Colors.white : Colors.black87,
+                          color: Colors.white,
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
@@ -342,18 +344,18 @@ class _StudentConfirmationScreenState extends State<StudentConfirmationScreen> {
                             decoration: BoxDecoration(
                               color: isDark
                                   ? Color.fromRGBO(255, 255, 255, 0.1)
-                                  : Color.fromRGBO(255, 255, 255, 0.5),
+                                  : Color.fromRGBO(255, 255, 255, 0.8),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
                                 color: isDark
                                     ? Color.fromRGBO(255, 255, 255, 0.10)
-                                    : Color.fromRGBO(0, 0, 0, 0.5),
+                                    : Color.fromRGBO(0, 0, 0, 0.8),
                               ),
                               boxShadow: [
                                 BoxShadow(
                                   color: isDark
                                       ? Color.fromRGBO(0, 0, 0, 0.1)
-                                      : Color.fromRGBO(0, 0, 0, 0.1),
+                                      : Color.fromRGBO(0, 0, 0, 0.05),
                                   blurRadius: 8,
                                   offset: const Offset(0, 4),
                                 ),
@@ -428,7 +430,7 @@ class _StudentConfirmationScreenState extends State<StudentConfirmationScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
     );
   }
-
+  // TODO: Sửa lại cấu trúc request khi backend đã sửa thành language và purpose riêng biệt
   List<Widget> _buildReasonList(BuildContext context, bool isDark) {
     // Localized labels for the reasons (local, independent from AppLocalizations)
     final Map<String, String> vi = {
@@ -482,7 +484,7 @@ class _StudentConfirmationScreenState extends State<StudentConfirmationScreen> {
       );
 
       if (i != items.length - 1) {
-        widgets.add(Divider(color: Color.fromRGBO(255, 255, 255, isDark ? 0.2 : 0.8), height: 1));
+        widgets.add(Divider(color: isDark ? Color.fromRGBO(255, 255, 255, 0.5) : Color.fromRGBO(0, 0, 0, 0.5), height: 1));
       }
 
       // If 'other' and selected, render TextField directly under that option

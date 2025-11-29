@@ -50,7 +50,7 @@ class ServicesScreen extends StatelessWidget {
                           Text(
                             loc.t('services'),
                             style: TextStyle(
-                              color: isDark ? Colors.white : Colors.black87,
+                              color: Colors.white,
                               fontSize: 20, // increased by 1 size (from 18 -> 20)
                               fontWeight: FontWeight.bold,
                             ),
@@ -59,7 +59,7 @@ class ServicesScreen extends StatelessWidget {
                           Text(
                             loc.t('services_description'),
                             style: TextStyle(
-                              color: isDark ? Colors.grey.shade400 : Colors.grey.shade700,
+                              color: Colors.white,
                               fontSize: 13,
                             ),
                           ),
@@ -236,8 +236,11 @@ class ServicesScreen extends StatelessWidget {
     final Color defaultAccent = const Color(0xFF38BDF8);
 
     // Card color and stroke for tiles (local to this helper)
-    final Color cardColor = isDark ? Color.fromRGBO(30, 41, 59, 0.95) : Colors.white;
-    final Color strokeColor = isDark ? Color.fromRGBO(255, 255, 255, 0.12) : Color.fromRGBO(0, 0, 0, 0.06);
+    // Use semi-transparent card backgrounds so the blurred/animated background shows through.
+    // Dark: deep blue-gray with ~62% opacity. Light: white with slight transparency to soften edges.
+    final Color cardColor = isDark ? Color.fromRGBO(30, 41, 59, 0.62) : Color.fromRGBO(255, 255, 255, 0.9);
+    // Stroke remains subtle; slightly reduce dark stroke to avoid harsh lines on top of blurred background.
+    final Color strokeColor = isDark ? Color.fromRGBO(255, 255, 255, 0.10) : Color.fromRGBO(0, 0, 0, 0.5);
 
     // Determine stripe/icon/arrow colors:
     // Use a per-index palette so each tile gets its own distinctive color
@@ -253,8 +256,16 @@ class ServicesScreen extends StatelessWidget {
     final bool hasIndex = orderIndex >= 0 && orderIndex < 10000; // simple guard
     final Color stripeColor = hasIndex ? palette[orderIndex % palette.length] : defaultAccent;
 
-    // Helper to apply opacity when needed (avoid deprecated accessors)
-    Color applyOpacity(Color c, double opacity) => Color.fromRGBO((c.r * 255).round(), (c.g * 255).round(), (c.b * 255).round(), opacity);
+    // Helper to apply opacity when needed. Use the new r/g/b/a channels to avoid deprecated accessors.
+    Color applyOpacity(Color c, double opacity) {
+      // Convert color channels (r/g/b/a are 0.0..1.0) to 0..255 integers
+      final int r = (c.r * 255.0).round() & 0xff;
+      final int g = (c.g * 255.0).round() & 0xff;
+      final int b = (c.b * 255.0).round() & 0xff;
+      // Combine original alpha with requested opacity (preserve existing transparency)
+      final int a = (c.a * opacity * 255.0).round() & 0xff;
+      return Color.fromARGB(a, r, g, b);
+    }
 
     // Adjust sizes. When isLarge==true we make the surrounding wrapper only slightly taller than the icon box
     final baseIconBoxSize = 56.0; // standard icon box size
