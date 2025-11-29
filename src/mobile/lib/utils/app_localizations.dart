@@ -121,6 +121,12 @@ class AppLocalizations {
       // History / empty state for confirmation screen
       'student_confirmation_history_title': 'Lịch sử đăng ký',
       'no_history': 'Không có lịch sử',
+      // Notes for student confirmation screen
+      'student_confirmation_other_section_title': 'Lý do khác',
+      'student_confirmation_other_section_instruction': 'Nhập theo mẫu bổ sung hồ sơ',
+      'student_confirmation_other_section_example': 'Ví dụ mẫu: Bổ sung hồ sơ học bổng ở địa phương, ...',
+      'student_confirmation_other_section_format_warning': 'Nếu sai mẫu này giấy xác nhận sẽ bị huỷ.',
+      'student_confirmation_review_warning': 'Vui lòng kiểm tra thật kỹ thông tin trước khi yêu cầu.\nNếu sai liên hệ phòng CTSV để làm lại.',
     },
     'en': {
       'login': 'Login',
@@ -225,6 +231,12 @@ class AppLocalizations {
       // History / empty state for confirmation screen
       'student_confirmation_history_title': 'Request history',
       'no_history': 'No history',
+      // Notes for student confirmation screen
+      'student_confirmation_other_section_title': 'Other reason',
+      'student_confirmation_other_section_instruction': 'Enter following supplementary document format',
+      'student_confirmation_other_section_example': 'Example format: Supplement scholarship documents from local authorities, ...',
+      'student_confirmation_other_section_format_warning': 'If this format is incorrect, the confirmation letter will be cancelled.',
+      'student_confirmation_review_warning': 'Please check all information carefully before submitting.\nIf incorrect, contact the Student Affairs Office to have it reissued.',
     },
   };
 

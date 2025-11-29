@@ -375,6 +375,35 @@ class _StudentConfirmationScreenState extends State<StudentConfirmationScreen> {
 
                       // spacer so content doesn't butt into the bottom fixed button area
                       const SizedBox(height: 12),
+
+                      // Small explanatory notes directly under the reasons card
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              AppLocalizations.of(context).t('student_confirmation_other_section_title'),
+                              style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.w600),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              AppLocalizations.of(context).t('student_confirmation_other_section_instruction'),
+                              style: TextStyle(color: isDark ? Colors.white70 : Colors.black54, fontSize: 13),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              AppLocalizations.of(context).t('student_confirmation_other_section_example'),
+                              style: TextStyle(color: isDark ? Colors.white70 : Colors.black54, fontSize: 13, fontStyle: FontStyle.italic),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              AppLocalizations.of(context).t('student_confirmation_other_section_format_warning'),
+                              style: TextStyle(color: isDark ? Colors.red[300] : Colors.red[700], fontSize: 13, fontWeight: FontWeight.w600),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
 
@@ -401,6 +430,21 @@ class _StudentConfirmationScreenState extends State<StudentConfirmationScreen> {
                                 AppLocalizations.of(context).t('student_confirmation_submit'),
                                 style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
                               ),
+                      ),
+                    ),
+                  ),
+
+                  // Localized review warning (separate, above the submit button)
+                  Positioned(
+                    left: 16,
+                    right: 16,
+                    bottom: 68, // place above the fixed button (button height 56 + spacing)
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: Text(
+                        AppLocalizations.of(context).t('student_confirmation_review_warning'),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: isDark ? Colors.white70 : Colors.black87, fontSize: 12),
                       ),
                     ),
                   ),
