@@ -8,7 +8,7 @@ import '../services/auth_service.dart';
 import '../models/student_card_dto.dart';
 
 class HomeProvider extends ChangeNotifier {
-  bool _isLoading = false;
+  final bool _isLoading = false;
 
   HomeProvider() {
     _loadMock();
@@ -263,8 +263,8 @@ class HomeProvider extends ChangeNotifier {
       0: '17:00',
     };
 
-    final start = startMap[startPeriod] ?? '${startPeriod}';
-    final end = endMap[endPeriod] ?? '${endPeriod}';
+    final start = startMap[startPeriod] ?? '$startPeriod';
+    final end = endMap[endPeriod] ?? '$endPeriod';
     return '$start - $end';
   }
 }
