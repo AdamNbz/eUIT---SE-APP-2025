@@ -7,6 +7,7 @@ import '../providers/home_provider.dart';
 import '../services/theme_controller.dart';
 import '../services/language_controller.dart';
 import '../services/auth_service.dart';
+import '../providers/home_provider.dart';
 import '../theme/app_theme.dart';
 import '../utils/app_localizations.dart';
 import '../widgets/animated_background.dart';
@@ -187,6 +188,12 @@ class _ModernLoginScreenState extends State<ModernLoginScreen>
       } catch (_) {}
 
       if (mounted) {
+        // Fetch student card và các dữ liệu khác sau khi login thành công
+        final homeProvider = context.read<HomeProvider>();
+        homeProvider.fetchStudentCard();
+        homeProvider.fetchQuickGpa();
+        homeProvider.fetchNextClass();
+        
         Navigator.pushReplacementNamed(context, '/home');
       }
     } catch (e) {
