@@ -16,19 +16,10 @@ class _ParkingMonthlyScreenState extends State<ParkingMonthlyScreen> {
   final TextEditingController _plateController = TextEditingController();
   int? _selectedMonths;
   bool _isSubmitting = false;
-  // whether the month menu is open (for arrow rotation)
-  bool _isMonthListOpen = false;
-  // key to find selector size
-  final GlobalKey _selectorKey = GlobalKey();
-  // for overlay popup anchoring
-  final LayerLink _layerLink = LayerLink();
-  OverlayEntry? _monthOverlayEntry;
-
   final List<int> _options = [1, 2, 3, 6, 9, 12];
 
   @override
   void dispose() {
-    _removeMonthOverlay();
     _plateController.dispose();
     super.dispose();
   }
@@ -73,95 +64,6 @@ class _ParkingMonthlyScreenState extends State<ParkingMonthlyScreen> {
     // Optionally clear or keep values — leave as-is
   }
 
-  // Toggle using overlay popup anchored to selector
-  void _toggleMonthList() {
-    if (_isMonthListOpen) {
-      _removeMonthOverlay();
-    } else {
-      _showMonthOverlay();
-    }
-  }
-
-  void _showMonthOverlay() {
-    _removeMonthOverlay();
-
-    final RenderBox? renderBox = _selectorKey.currentContext?.findRenderObject() as RenderBox?;
-    final size = renderBox?.size ?? Size.zero;
-
-    _monthOverlayEntry = OverlayEntry(builder: (context) {
-      return Positioned.fill(
-        child: GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onTap: _removeMonthOverlay,
-          child: CompositedTransformFollower(
-            link: _layerLink,
-            showWhenUnlinked: false,
-            offset: Offset(0, size.height + 6), // place slightly below selector
-            child: Material(
-              color: Colors.transparent,
-              child: Container(
-                width: size.width,
-                margin: const EdgeInsets.symmetric(horizontal: 0),
-                decoration: BoxDecoration(
-                  color: Color.fromRGBO(255, 255, 255, 0.8), // white with opacity ~0.8
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Color.fromRGBO(0, 0, 0, 0.18),
-                      blurRadius: 12,
-                      offset: const Offset(0, 6), // shadow offset
-                    ),
-                  ],
-                ),
-                padding: const EdgeInsets.all(10),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: _options.map((m) {
-                    final selected = _selectedMonths == m;
-                    return InkWell(
-                      onTap: () {
-                        setState(() {
-                          _selectedMonths = m;
-                        });
-                        _removeMonthOverlay();
-                      },
-                      borderRadius: BorderRadius.circular(10),
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        margin: const EdgeInsets.only(bottom: 6),
-                        decoration: BoxDecoration(
-                          color: selected ? Color.fromRGBO(255, 255, 255, 0.95) : Colors.transparent,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text(
-                          '$m tháng',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.black87),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-    });
-
-    Overlay.of(context).insert(_monthOverlayEntry!);
-    setState(() => _isMonthListOpen = true);
-  }
-
-  void _removeMonthOverlay() {
-    if (_monthOverlayEntry != null) {
-      _monthOverlayEntry!.remove();
-      _monthOverlayEntry = null;
-    }
-    if (_isMonthListOpen) setState(() => _isMonthListOpen = false);
-  }
-
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -197,37 +99,51 @@ class _ParkingMonthlyScreenState extends State<ParkingMonthlyScreen> {
                       ),
                       const SizedBox(height: 12),
 
-                      // Single selector field that toggles a floating popup below it
-                      CompositedTransformTarget(
-                        link: _layerLink,
-                        child: Container(
-                          key: _selectorKey,
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(0),
-                          decoration: BoxDecoration(
-                            color: isDark ? Color.fromRGBO(255, 255, 255, 0.06) : Color.fromRGBO(255, 255, 255, 0.92),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: isDark ? Color.fromRGBO(255, 255, 255, 0.08) : Color.fromRGBO(0, 0, 0, 0.8)),
-                          ),
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(12),
-                            onTap: _toggleMonthList,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    _selectedMonths == null ? 'Chọn số tháng' : '$_selectedMonths tháng',
-                                    style: TextStyle(color: _selectedMonths == null ? (isDark ? Colors.white70 : Colors.black54) : (isDark ? Colors.white : Colors.black87), fontSize: 14),
+                      // Replaced custom overlay selector with standard DropdownButton
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(0),
+                        decoration: BoxDecoration(
+                          color: isDark ? Color.fromRGBO(255, 255, 255, 0.06) : Color.fromRGBO(255, 255, 255, 0.92),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: isDark ? Color.fromRGBO(255, 255, 255, 0.08) : Color.fromRGBO(0, 0, 0, 0.8)),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+                          child: DropdownButtonHideUnderline(
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: DropdownButton<int>(
+                                isExpanded: true,
+                                value: _selectedMonths,
+                                hint: Text('Chọn số tháng', style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontSize: 14)),
+                                // dropdown background set to white with 0.8 opacity
+                                dropdownColor: const Color.fromRGBO(255, 255, 255, 0.8),
+                                icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
+                                // displayed text color set to white (also ensure selected display matches hint)
+                                style: const TextStyle(fontSize: 14, color: Colors.white),
+                                // when an item is selected, show it with the same format as the hint
+                                selectedItemBuilder: (BuildContext context) {
+                                  return _options.map<Widget>((int item) {
+                                    return Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: Text('$item tháng', style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontSize: 14)),
+                                    );
+                                  }).toList();
+                                },
+                                items: _options.map((m) => DropdownMenuItem<int>(
+                                  value: m,
+                                  // item text dark for readability on white dropdown background
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+                                    child: Text('$m tháng', textAlign: TextAlign.center, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.black87)),
                                   ),
-                                  // rotate arrow when open
-                                  AnimatedRotation(
-                                    turns: _isMonthListOpen ? 0.5 : 0.0,
-                                    duration: const Duration(milliseconds: 200),
-                                    child: Icon(Icons.arrow_drop_down, color: isDark ? Colors.white70 : Colors.black54),
-                                  ),
-                                ],
+                                )).toList(),
+                                onChanged: (val) {
+                                  setState(() {
+                                    _selectedMonths = val;
+                                  });
+                                },
                               ),
                             ),
                           ),
@@ -242,10 +158,6 @@ class _ParkingMonthlyScreenState extends State<ParkingMonthlyScreen> {
 
                       TextField(
                         controller: _plateController,
-                        onTap: () {
-                          // if the visual arrow indicates menu open, reset it.
-                          if (_isMonthListOpen) setState(() => _isMonthListOpen = false);
-                        },
                         style: TextStyle(color: Colors.white, fontSize: 14),
                         decoration: InputDecoration(
                           hintText: 'Biển số xe Đăng ký',
@@ -258,7 +170,7 @@ class _ParkingMonthlyScreenState extends State<ParkingMonthlyScreen> {
                       ),
 
                       const SizedBox(height: 6),
-                      Text('Ví dụ: 47E1-123.45', style: TextStyle(color: isDark ? Colors.white70 : Colors.black87, fontSize: 13, fontStyle: FontStyle.italic)),
+                      Text('Ví dụ: 47E1-123.45\nNếu là xe đạp thì nhập Mã số sinh viên', style: TextStyle(color: isDark ? Colors.white70 : Colors.black87, fontSize: 13, fontStyle: FontStyle.italic)),
 
                       const SizedBox(height: 80), // space for fixed button
                     ],
