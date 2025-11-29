@@ -306,7 +306,8 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
   }
 
   Widget _buildInputArea(bool isDark) {
-    final provider = Provider.of<ChatbotProvider>(context, listen: false);
+    // Disable due to being unused
+    // final provider = Provider.of<ChatbotProvider>(context, listen: false);
 
     return Container(
       color: isDark ? const Color(0xFF0A0E27) : Colors.white,
@@ -749,7 +750,7 @@ class _MessageTileState extends State<MessageTile> with SingleTickerProviderStat
 /// Typing indicator (3 dots)
 class _AiTypingIndicator extends StatefulWidget {
   final bool isDark;
-  const _AiTypingIndicator({required this.isDark, super.key});
+  const _AiTypingIndicator({required this.isDark});
 
   @override
   State<_AiTypingIndicator> createState() => _AiTypingIndicatorState();

@@ -6,7 +6,6 @@ import '../providers/home_provider.dart';
 import '../theme/app_theme.dart';
 import '../utils/app_localizations.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:shimmer/shimmer.dart';
 import '../widgets/student_id_card.dart';
 
 /// HomeScreen - Trang chủ Light Theme với bố cục mới
