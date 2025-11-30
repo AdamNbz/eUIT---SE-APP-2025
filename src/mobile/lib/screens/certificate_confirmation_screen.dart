@@ -35,6 +35,9 @@ class _CertificateConfirmationScreenState extends State<CertificateConfirmationS
   // Form fields
   // Default to empty string so the dropdown shows the placeholder item when the screen opens
   String _certificateType = '';
+  // TOEIC specific controllers
+  final TextEditingController _toeicListeningController = TextEditingController();
+  final TextEditingController _toeicReadingController = TextEditingController();
   DateTime? _dateOfBirth;
   final TextEditingController _dobController = TextEditingController();
   final TextEditingController _idNumberController = TextEditingController();
@@ -71,6 +74,8 @@ class _CertificateConfirmationScreenState extends State<CertificateConfirmationS
     _dobController.dispose();
     _idNumberController.dispose();
     _totalScoreController.dispose();
+    _toeicListeningController.dispose();
+    _toeicReadingController.dispose();
     _examDateController.dispose();
     super.dispose();
   }
@@ -241,6 +246,48 @@ class _CertificateConfirmationScreenState extends State<CertificateConfirmationS
 
                           const SizedBox(height: 12),
 
+                          // TOEIC listening/reading fields (only for "Chứng chỉ TOEIC (Nghe-Đọc)")
+                          if (_certificateType == 'Chứng chỉ TOEIC (Nghe-Đọc)') ...[
+                            Text(loc.t('toeic_listening_label'), style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.w600)),
+                            const SizedBox(height: 8),
+                            TextFormField(
+                              controller: _toeicListeningController,
+                              keyboardType: TextInputType.numberWithOptions(decimal: true),
+                              decoration: InputDecoration(
+                                hintText: loc.t('toeic_listening_hint'),
+                                filled: true,
+                                fillColor: isDark ? Color.fromRGBO(0,0,0,0.3) : Colors.white,
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                              ),
+                              validator: (v) {
+                                if (v == null || v.trim().isEmpty) return null; // optional
+                                final parsed = double.tryParse(v.replaceAll(',', '.'));
+                                return parsed == null ? 'Không hợp lệ' : null;
+                              },
+                            ),
+                            const SizedBox(height: 12),
+                            Text(loc.t('toeic_reading_label'), style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.w600)),
+                            const SizedBox(height: 8),
+                            TextFormField(
+                              controller: _toeicReadingController,
+                              keyboardType: TextInputType.numberWithOptions(decimal: true),
+                              decoration: InputDecoration(
+                                hintText: loc.t('toeic_reading_hint'),
+                                filled: true,
+                                fillColor: isDark ? Color.fromRGBO(0,0,0,0.3) : Colors.white,
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                              ),
+                              validator: (v) {
+                                if (v == null || v.trim().isEmpty) return null; // optional
+                                final parsed = double.tryParse(v.replaceAll(',', '.'));
+                                return parsed == null ? 'Không hợp lệ' : null;
+                              },
+                            ),
+                            const SizedBox(height: 12),
+                          ],
+
                           // Default extra fields: total score and exam date
                           Text(loc.t('total_score'), style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.w600)),
                           const SizedBox(height: 8),
@@ -278,41 +325,41 @@ class _CertificateConfirmationScreenState extends State<CertificateConfirmationS
                           // File picker
                           // File picker (required)
                           _requiredLabel(loc.t('upload_file'), isDark),
-                           const SizedBox(height: 8),
-                           Row(
-                             children: [
-                               ElevatedButton.icon(
-                                 onPressed: _pickFile,
-                                 icon: const Icon(Icons.attach_file),
-                                 label: Text(loc.t('choose_file')),
-                                 style: ElevatedButton.styleFrom(backgroundColor: AppTheme.bluePrimary),
-                               ),
-                               const SizedBox(width: 12),
-                               Expanded(
-                                 child: Text(
-                                   _selectedFile?.name ?? loc.t('no_file_selected'),
-                                   style: TextStyle(color: isDark ? Colors.white70 : Colors.black87),
-                                   overflow: TextOverflow.ellipsis,
-                                 ),
-                               ),
-                             ],
-                           ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              ElevatedButton.icon(
+                                onPressed: _pickFile,
+                                icon: const Icon(Icons.attach_file),
+                                label: Text(loc.t('choose_file')),
+                                style: ElevatedButton.styleFrom(backgroundColor: AppTheme.bluePrimary),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  _selectedFile?.name ?? loc.t('no_file_selected'),
+                                  style: TextStyle(color: isDark ? Colors.white70 : Colors.black87),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
 
-                           const SizedBox(height: 18),
+                          const SizedBox(height: 18),
 
-                           // Save button
-                           SizedBox(
-                             width: double.infinity,
-                             child: ElevatedButton(
-                               onPressed: _submit,
-                               style: ElevatedButton.styleFrom(
-                                 backgroundColor: AppTheme.bluePrimary,
-                                 padding: const EdgeInsets.symmetric(vertical: 14),
-                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                               ),
-                               child: Text(loc.t('save'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
-                             ),
-                           ),
+                          // Save button
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: _submit,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppTheme.bluePrimary,
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              ),
+                              child: Text(loc.t('save'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                            ),
+                          ),
                         ],
                       ),
                     ),

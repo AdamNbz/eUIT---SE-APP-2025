@@ -149,6 +149,11 @@ class AppLocalizations {
       'save': 'Lưu',
       'saved_success': 'Đã lưu (mô phỏng). Đồng bộ với backend sau.',
       'choose_certificate_placeholder': '- Chọn loại chứng chỉ -',
+      // TOEIC specific fields
+      'toeic_listening_label': 'Điểm Nghe',
+      'toeic_listening_hint': 'Nhập điểm Nghe',
+      'toeic_reading_label': 'Điểm Đọc',
+      'toeic_reading_hint': 'Nhập điểm Đọc',
     },
     'en': {
       'login': 'Login',
@@ -281,6 +286,11 @@ class AppLocalizations {
       'save': 'Save',
       'saved_success': 'Saved (simulated). Will integrate with backend later.',
       'choose_certificate_placeholder': '- Choose certificate -',
+      // TOEIC specific fields
+      'toeic_listening_label': 'Listening score',
+      'toeic_listening_hint': 'Enter listening score',
+      'toeic_reading_label': 'Reading score',
+      'toeic_reading_hint': 'Enter reading score',
     },
   };
 
