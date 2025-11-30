@@ -2,9 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore; 
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
-
-
-using System.Data.Common;
 using eUIT.API.DTOs;
 using eUIT.API.Data;
 using eUIT.API.Services;
@@ -28,12 +25,12 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Login([FromBody] LoginRequestDto loginRequest)
     {
         // Kiểm tra input cơ bản
-        var role = (loginRequest.role ?? string.Empty).Trim().ToLower();
+        var role = loginRequest.role.Trim().ToLower();
         if (role != "student" && role != "lecturer" && role != "admin")
             return BadRequest(new { error = "Invalid role" });
 
-        var userId = loginRequest.userId ?? string.Empty;
-        var password = loginRequest.password ?? string.Empty;
+        var userId = loginRequest.userId;
+        var password = loginRequest.password;
 
         // Sử dụng kết nối ADO.NET có tham số để tránh SQL injection và để ép kiểu enum bên phía Postgres
         await using var connection = _context.Database.GetDbConnection();
@@ -59,13 +56,23 @@ public class AuthController : ControllerBase
         var scalar = await cmd.ExecuteScalarAsync();
         var isAuth = scalar is bool b && b;
 
-        if (isAuth)
+        if (!isAuth)
+            return Unauthorized(new { message = "Invalid credentials" });
+
+        // Tạo 2 access tokens với thời gian hết hạn khác nhau
+        // Token ngắn hạn: 1 ngày (dùng cho các thao tác quan trọng)
+        var accessToken = _tokenService.CreateAccessToken(userId, role, TimeSpan.FromDays(1));
+        
+        // Token dài hạn: 30 ngày (dùng để tránh phải login lại liên tục)
+        var refreshToken = _tokenService.CreateAccessToken(userId, role, TimeSpan.FromDays(30));
+
+        return Ok(new LoginResponseDto
         {
-            var token = _tokenService.CreateToken(loginRequest.userId, loginRequest.role);
-            return Ok(new { token = token });
-        }
-        return Unauthorized(new { message = "Invalid credentials" });
+            AccessToken = accessToken,
+            RefreshToken = refreshToken
+        });
     }
+
 
     [HttpGet("profile")]
     [Authorize] 
