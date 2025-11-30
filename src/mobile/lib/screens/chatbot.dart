@@ -550,7 +550,6 @@ class ChatbotProvider extends ChangeNotifier {
     setAiTyping(true);
 
     try {
-    try {
       String baseUrl = dotenv.env['CHATBOT_API_URL'] ?? '';
       if (baseUrl.isEmpty) {
         debugPrint('Warning: CHATBOT_API_URL not found in .env');
