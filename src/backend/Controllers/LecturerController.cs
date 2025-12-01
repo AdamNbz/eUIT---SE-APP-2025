@@ -183,8 +183,8 @@ public sealed class LecturerController : ControllerBase
                     "SELECT * FROM func_get_lecturer_schedule({0}, {1}, {2}, {3})",
                     lecturerId,
                     semester ?? "",
-                    startDate ?? DateTime.Now,
-                    endDate ?? DateTime.Now.AddDays(7))
+                    startDate?.ToUniversalTime() ?? DateTime.UtcNow,
+                    endDate?.ToUniversalTime() ?? DateTime.UtcNow.AddDays(7))
                 .ToListAsync();
 
             return Ok(schedule);
@@ -814,4 +814,3 @@ public sealed class LecturerController : ControllerBase
 
     #endregion
 }
-
