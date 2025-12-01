@@ -59,20 +59,124 @@ public class AuthController : ControllerBase
         if (!isAuth)
             return Unauthorized(new { message = "Invalid credentials" });
 
-        // Tạo 2 access tokens với thời gian hết hạn khác nhau
-        // Token ngắn hạn: 1 ngày (dùng cho các thao tác quan trọng)
-        var accessToken = _tokenService.CreateAccessToken(userId, role, TimeSpan.FromDays(1));
+        // Tạo access token (ngắn hạn)
+        var accessToken = _tokenService.CreateAccessToken(userId, role, TimeSpan.FromMinutes(15)); // 15 phút
         
-        // Token dài hạn: 30 ngày (dùng để tránh phải login lại liên tục)
-        var refreshToken = _tokenService.CreateAccessToken(userId, role, TimeSpan.FromDays(30));
+        // Tạo refresh token (dài hạn)
+        var refreshTokenValue = _tokenService.GenerateRefreshToken();
+        var refreshTokenHash = refreshTokenValue; // Trong thực tế nên hash, nhưng để đơn giản
+        
+        // Lưu refresh token vào database
+        await using var saveCmd = connection.CreateCommand();
+        saveCmd.CommandText = @"
+            INSERT INTO auth_refresh_tokens (user_role, user_id, token_hash, expires_at)
+            VALUES (@role::auth_user_role, @userId, @tokenHash, @expiresAt)";
+        
+        var pRoleSave = saveCmd.CreateParameter();
+        pRoleSave.ParameterName = "role";
+        pRoleSave.Value = role;
+        saveCmd.Parameters.Add(pRoleSave);
+        
+        var pUserIdSave = saveCmd.CreateParameter();
+        pUserIdSave.ParameterName = "userId";
+        pUserIdSave.Value = userId;
+        saveCmd.Parameters.Add(pUserIdSave);
+        
+        var pTokenHash = saveCmd.CreateParameter();
+        pTokenHash.ParameterName = "tokenHash";
+        pTokenHash.Value = refreshTokenHash;
+        saveCmd.Parameters.Add(pTokenHash);
+        
+        var pExpiresAt = saveCmd.CreateParameter();
+        pExpiresAt.ParameterName = "expiresAt";
+        pExpiresAt.Value = DateTime.UtcNow.AddDays(30);
+        saveCmd.Parameters.Add(pExpiresAt);
+        
+        await saveCmd.ExecuteNonQueryAsync();
 
         return Ok(new LoginResponseDto
         {
             AccessToken = accessToken,
-            RefreshToken = refreshToken
+            RefreshToken = refreshTokenValue
         });
     }
 
+    [HttpPost("refresh")]
+    public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequestDto refreshRequest)
+    {
+        var refreshToken = refreshRequest.RefreshToken;
+        
+        // Validate refresh token from database
+        await using var connection = _context.Database.GetDbConnection();
+        await connection.OpenAsync();
+        await using var cmd = connection.CreateCommand();
+        cmd.CommandText = @"
+            SELECT user_role, user_id 
+            FROM auth_refresh_tokens 
+            WHERE token_hash = @tokenHash 
+              AND expires_at > NOW() 
+              AND revoked = false";
+        
+        var pToken = cmd.CreateParameter();
+        pToken.ParameterName = "tokenHash";
+        pToken.Value = refreshToken;
+        cmd.Parameters.Add(pToken);
+        
+        await using var reader = await cmd.ExecuteReaderAsync();
+        if (!await reader.ReadAsync())
+        {
+            return Unauthorized(new { message = "Invalid or expired refresh token" });
+        }
+        
+        var role = reader.GetString(0);
+        var userId = reader.GetString(1);
+        
+        // Generate new access token
+        var newAccessToken = _tokenService.CreateAccessToken(userId, role, TimeSpan.FromMinutes(15));
+        
+        // Optionally, rotate refresh token (create new one and revoke old)
+        var newRefreshToken = _tokenService.GenerateRefreshToken();
+        
+        // Update database: revoke old token and insert new one
+        await using var updateCmd = connection.CreateCommand();
+        updateCmd.CommandText = @"
+            UPDATE auth_refresh_tokens SET revoked = true WHERE token_hash = @oldToken;
+            INSERT INTO auth_refresh_tokens (user_role, user_id, token_hash, expires_at)
+            VALUES (@role::auth_user_role, @userId, @newToken, @expiresAt)";
+        
+        var pOldToken = updateCmd.CreateParameter();
+        pOldToken.ParameterName = "oldToken";
+        pOldToken.Value = refreshToken;
+        updateCmd.Parameters.Add(pOldToken);
+        
+        var pRoleUpdate = updateCmd.CreateParameter();
+        pRoleUpdate.ParameterName = "role";
+        pRoleUpdate.Value = role;
+        updateCmd.Parameters.Add(pRoleUpdate);
+        
+        var pUserIdUpdate = updateCmd.CreateParameter();
+        pUserIdUpdate.ParameterName = "userId";
+        pUserIdUpdate.Value = userId;
+        updateCmd.Parameters.Add(pUserIdUpdate);
+        
+        var pNewToken = updateCmd.CreateParameter();
+        pNewToken.ParameterName = "newToken";
+        pNewToken.Value = newRefreshToken;
+        updateCmd.Parameters.Add(pNewToken);
+        
+        var pExpiresAtUpdate = updateCmd.CreateParameter();
+        pExpiresAtUpdate.ParameterName = "expiresAt";
+        pExpiresAtUpdate.Value = DateTime.UtcNow.AddDays(30);
+        updateCmd.Parameters.Add(pExpiresAtUpdate);
+        
+        await updateCmd.ExecuteNonQueryAsync();
+        
+        return Ok(new LoginResponseDto
+        {
+            AccessToken = newAccessToken,
+            RefreshToken = newRefreshToken
+        });
+    }
 
     [HttpGet("profile")]
     [Authorize] 

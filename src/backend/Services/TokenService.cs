@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
+using System.Security.Cryptography;
 
 namespace eUIT.API.Services;
 
@@ -9,6 +10,7 @@ public interface ITokenService
 {
     string CreateToken(string userId, string role);
     string CreateAccessToken(string userId, string role, TimeSpan? expiry = null);
+    string GenerateRefreshToken();
 }
 
 public sealed class TokenService : ITokenService
@@ -56,5 +58,12 @@ public sealed class TokenService : ITokenService
 
         // 6. Trả về chuỗi token đã được mã hóa
         return tokenHandler.WriteToken(token);
+    }
+
+    public string GenerateRefreshToken()
+    {
+        // Logic to generate a refresh token
+        // This is typically a long random string
+        return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
     }
 }
