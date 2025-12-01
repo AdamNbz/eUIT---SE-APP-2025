@@ -36,7 +36,7 @@ class _CertificateConfirmationScreenState extends State<CertificateConfirmationS
   // Form fields
   // Default to empty string so the dropdown shows the placeholder item when the screen opens
   String _certificateType = '';
-  // Scholarship checkbox state (only shown for TOEFL iBT)
+  // Scholarship checkbox state (shown for TOEFL iBT, IELTS, and Japanese certificates)
   bool _applyUitGlobalScholarship = false;
   // TOEIC specific controllers
   final TextEditingController _toeicListeningController = TextEditingController();
