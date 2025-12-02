@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'dart:ui';
 import '../../providers/lecturer_provider.dart';
 import '../../models/exam_schedule.dart';
+import '../../widgets/animated_background.dart';
 
 class LecturerExamScheduleScreen extends StatefulWidget {
   const LecturerExamScheduleScreen({super.key});
@@ -38,15 +39,17 @@ class _LecturerExamScheduleScreenState extends State<LecturerExamScheduleScreen>
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark
-          ? const Color(0xFF0A0E21)
-          : const Color(0xFFF5F7FA),
-      body: CustomScrollView(
-        slivers: [
-          _buildAppBar(isDark),
-          SliverToBoxAdapter(child: _buildFilters(isDark)),
-          _buildStatistics(isDark),
-          _buildExamsList(isDark),
+      body: Stack(
+        children: [
+          AnimatedBackground(isDark: isDark),
+          CustomScrollView(
+            slivers: [
+              _buildAppBar(isDark),
+              SliverToBoxAdapter(child: _buildFilters(isDark)),
+              _buildStatistics(isDark),
+              _buildExamsList(isDark),
+            ],
+          ),
         ],
       ),
     );
@@ -60,9 +63,20 @@ class _LecturerExamScheduleScreenState extends State<LecturerExamScheduleScreen>
       backgroundColor: isDark ? const Color(0xFF1E2746) : Colors.white,
       elevation: 0,
       flexibleSpace: FlexibleSpaceBar(
-        title: const Text(
-          'Lịch thi',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.assignment_turned_in,
+              size: 24,
+              color: isDark ? Colors.white : Colors.black87,
+            ),
+            const SizedBox(width: 8),
+            const Text(
+              'Lịch thi',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+          ],
         ),
         titlePadding: const EdgeInsets.only(left: 20, bottom: 16),
         background: Container(

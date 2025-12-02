@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'dart:ui';
 import '../../providers/lecturer_provider.dart';
 import '../../models/appeal.dart';
+import '../../widgets/animated_background.dart';
 
 class LecturerAppealsScreen extends StatefulWidget {
   const LecturerAppealsScreen({super.key});
@@ -41,14 +42,16 @@ class _LecturerAppealsScreenState extends State<LecturerAppealsScreen>
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark
-          ? const Color(0xFF0A0E21)
-          : const Color(0xFFF5F7FA),
-      body: CustomScrollView(
-        slivers: [
-          _buildAppBar(isDark),
-          SliverToBoxAdapter(child: _buildFilters(isDark)),
-          _buildAppealsList(isDark),
+      body: Stack(
+        children: [
+          AnimatedBackground(isDark: isDark),
+          CustomScrollView(
+            slivers: [
+              _buildAppBar(isDark),
+              SliverToBoxAdapter(child: _buildFilters(isDark)),
+              _buildAppealsList(isDark),
+            ],
+          ),
         ],
       ),
     );
@@ -62,9 +65,20 @@ class _LecturerAppealsScreenState extends State<LecturerAppealsScreen>
       backgroundColor: isDark ? const Color(0xFF1E2746) : Colors.white,
       elevation: 0,
       flexibleSpace: FlexibleSpaceBar(
-        title: const Text(
-          'Phúc khảo',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.rate_review,
+              size: 24,
+              color: isDark ? Colors.white : Colors.black87,
+            ),
+            const SizedBox(width: 8),
+            const Text(
+              'Phúc khảo',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+          ],
         ),
         titlePadding: const EdgeInsets.only(left: 20, bottom: 16),
         background: Container(
