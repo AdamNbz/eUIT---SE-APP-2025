@@ -17,7 +17,7 @@ class LecturerMainScreen extends StatefulWidget {
 }
 
 class _LecturerMainScreenState extends State<LecturerMainScreen> {
-  int _selectedIndex = 1; // home
+  int _selectedIndex = 0; // home (index 0 is now home)
 
   late final List<Widget> _pages;
   late final PageController _pageController;
@@ -26,8 +26,8 @@ class _LecturerMainScreenState extends State<LecturerMainScreen> {
   void initState() {
     super.initState();
     _pages = [
-      const KeepAliveWrapper(child: LecturerScheduleScreen()),
       const KeepAliveWrapper(child: LecturerHomeScreen()),
+      const KeepAliveWrapper(child: LecturerScheduleScreen()),
       const KeepAliveWrapper(child: LecturerClassListScreen()),
       const KeepAliveWrapper(child: SettingsScreen()),
     ];
@@ -59,8 +59,8 @@ class _LecturerMainScreenState extends State<LecturerMainScreen> {
 
     return WillPopScope(
       onWillPop: () async {
-        if (_selectedIndex != 1) {
-          _onNavTap(1);
+        if (_selectedIndex != 0) {
+          _onNavTap(0);
           return false;
         }
         return true;
@@ -169,16 +169,16 @@ class _LecturerMainScreenState extends State<LecturerMainScreen> {
                     _NavItem(
                       index: 0,
                       selectedIndex: _selectedIndex,
-                      iconData: Icons.calendar_month_rounded,
-                      label: 'Lịch giảng',
+                      iconData: Icons.home_rounded,
+                      label: 'Trang chủ',
                       isDark: isDark,
                       onTap: () => _onNavTap(0),
                     ),
                     _NavItem(
                       index: 1,
                       selectedIndex: _selectedIndex,
-                      iconData: Icons.home_rounded,
-                      label: 'Trang chủ',
+                      iconData: Icons.calendar_month_rounded,
+                      label: 'Lịch giảng',
                       isDark: isDark,
                       onTap: () => _onNavTap(1),
                     ),
@@ -276,7 +276,7 @@ class _NavItem extends StatelessWidget {
                               ? (isDark
                                   ? AppTheme.bluePrimary.withAlpha(200)
                                   : AppTheme.bluePrimary)
-                              : (index == 1
+                              : (index == 0
                                   ? AppTheme.bluePrimary
                                   : (isDark
                                       ? Colors.white.withAlpha(200)
@@ -302,7 +302,7 @@ class _NavItem extends StatelessWidget {
                                 ? (isDark
                                     ? Colors.blue.shade300
                                     : AppTheme.bluePrimary)
-                                : (index == 1
+                                : (index == 0
                                     ? AppTheme.bluePrimary
                                     : (isDark
                                         ? Colors.white.withAlpha(200)
@@ -329,7 +329,7 @@ class _NavItem extends StatelessWidget {
                     begin: Colors.grey.shade600,
                     end: selectedIndex == index
                         ? (isDark ? Colors.blue.shade300 : AppTheme.bluePrimary)
-                        : (index == 1
+                        : (index == 0
                             ? AppTheme.bluePrimary
                             : (isDark
                                 ? Colors.white.withAlpha(200)
