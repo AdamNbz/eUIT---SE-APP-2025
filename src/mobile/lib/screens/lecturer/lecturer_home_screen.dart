@@ -65,6 +65,9 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
       case 'lecturer_exam_schedule':
         Navigator.pushNamed(context, '/lecturer_exam_schedule');
         break;
+      case 'lecturer_confirmation_letter':
+        Navigator.pushNamed(context, '/lecturer_confirmation_letter');
+        break;
       default:
         break;
     }
@@ -506,6 +509,9 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
         break;
       case 'event_note':
         icon = Icons.event_note;
+        break;
+      case 'verified':
+        icon = Icons.verified;
         break;
       default:
         icon = Icons.circle_outlined;

@@ -112,6 +112,11 @@ class LecturerProvider extends ChangeNotifier {
         type: 'lecturer_exam_schedule',
         iconName: 'event_note',
       ),
+      QuickAction(
+        label: 'Giấy XN',
+        type: 'lecturer_confirmation_letter',
+        iconName: 'verified',
+      ),
     ];
   }
 
@@ -145,9 +150,16 @@ class LecturerProvider extends ChangeNotifier {
   }
 
   Future<void> fetchLecturerProfile() async {
+    _isLoading = true;
+    notifyListeners();
+
     try {
       final token = await auth.getToken();
-      if (token == null) return;
+      if (token == null) {
+        _isLoading = false;
+        notifyListeners();
+        return;
+      }
 
       final uri = auth.buildUri('/api/Lecturer/profile');
       final res = await http
@@ -163,13 +175,15 @@ class LecturerProvider extends ChangeNotifier {
       if (res.statusCode == 200) {
         final data = jsonDecode(res.body) as Map<String, dynamic>;
         _lecturerProfile = LecturerProfile.fromJson(data);
-        notifyListeners();
       }
     } catch (e) {
       developer.log(
         'Error fetching lecturer profile: $e',
         name: 'LecturerProvider',
       );
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
   }
 

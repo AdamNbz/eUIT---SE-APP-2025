@@ -47,14 +47,19 @@ class _LecturerProfileScreenState extends State<LecturerProfileScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildProfileHeader(profile, isDark),
+                  const SizedBox(height: 16),
+                  _buildQuickActions(isDark),
                   const SizedBox(height: 24),
                   _buildInfoSection('Thông tin cơ bản', [
                     _InfoRow('Mã giảng viên', profile.maGv),
                     _InfoRow('Họ và tên', profile.hoTen),
                     _InfoRow('Giới tính', profile.gioiTinh ?? 'N/A'),
-                    _InfoRow('Ngày sinh', profile.ngaySinh != null
-                        ? '${profile.ngaySinh!.day}/${profile.ngaySinh!.month}/${profile.ngaySinh!.year}'
-                        : 'N/A'),
+                    _InfoRow(
+                      'Ngày sinh',
+                      profile.ngaySinh != null
+                          ? '${profile.ngaySinh!.day}/${profile.ngaySinh!.month}/${profile.ngaySinh!.year}'
+                          : 'N/A',
+                    ),
                     _InfoRow('Email', profile.email ?? 'N/A'),
                     _InfoRow('Số điện thoại', profile.soDienThoai ?? 'N/A'),
                   ], isDark),
@@ -69,9 +74,12 @@ class _LecturerProfileScreenState extends State<LecturerProfileScreen> {
                   const SizedBox(height: 16),
                   _buildInfoSection('Thông tin cá nhân', [
                     _InfoRow('CCCD', profile.cccd ?? 'N/A'),
-                    _InfoRow('Ngày cấp', profile.ngayCapCccd != null
-                        ? '${profile.ngayCapCccd!.day}/${profile.ngayCapCccd!.month}/${profile.ngayCapCccd!.year}'
-                        : 'N/A'),
+                    _InfoRow(
+                      'Ngày cấp',
+                      profile.ngayCapCccd != null
+                          ? '${profile.ngayCapCccd!.day}/${profile.ngayCapCccd!.month}/${profile.ngayCapCccd!.year}'
+                          : 'N/A',
+                    ),
                     _InfoRow('Nơi cấp', profile.noiCapCccd ?? 'N/A'),
                     _InfoRow('Dân tộc', profile.danToc ?? 'N/A'),
                     _InfoRow('Tôn giáo', profile.tonGiao ?? 'N/A'),
@@ -79,7 +87,10 @@ class _LecturerProfileScreenState extends State<LecturerProfileScreen> {
                   ], isDark),
                   const SizedBox(height: 16),
                   _buildInfoSection('Địa chỉ', [
-                    _InfoRow('Địa chỉ thường trú', profile.diaChiThuongTru ?? 'N/A'),
+                    _InfoRow(
+                      'Địa chỉ thường trú',
+                      profile.diaChiThuongTru ?? 'N/A',
+                    ),
                     _InfoRow('Tỉnh/Thành phố', profile.tinhThanhPho ?? 'N/A'),
                     _InfoRow('Phường/Xã', profile.phuongXa ?? 'N/A'),
                   ], isDark),
@@ -176,6 +187,85 @@ class _LecturerProfileScreenState extends State<LecturerProfileScreen> {
     );
   }
 
+  Widget _buildQuickActions(bool isDark) {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildActionButton(
+            icon: Icons.edit,
+            label: 'Cập nhật',
+            onTap: () => Navigator.pushNamed(context, '/lecturer_edit_profile'),
+            isDark: isDark,
+            gradient: [Colors.blue, Colors.blue.shade700],
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildActionButton(
+            icon: Icons.lock_reset,
+            label: 'Đổi MK',
+            onTap: () =>
+                Navigator.pushNamed(context, '/lecturer_change_password'),
+            isDark: isDark,
+            gradient: [Colors.purple, Colors.purple.shade700],
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildActionButton(
+            icon: Icons.description,
+            label: 'Giấy XN',
+            onTap: () =>
+                Navigator.pushNamed(context, '/lecturer_confirmation_letter'),
+            isDark: isDark,
+            gradient: [Colors.green, Colors.green.shade700],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+    required bool isDark,
+    required List<Color> gradient,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(colors: gradient),
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: gradient[0].withOpacity(0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: Colors.white, size: 24),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildInfoSection(String title, List<_InfoRow> rows, bool isDark) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(16),
@@ -191,7 +281,9 @@ class _LecturerProfileScreenState extends State<LecturerProfileScreen> {
             ),
             boxShadow: [
               BoxShadow(
-                color: isDark ? Colors.black.withAlpha(51) : Colors.black.withAlpha(25),
+                color: isDark
+                    ? Colors.black.withAlpha(51)
+                    : Colors.black.withAlpha(25),
                 blurRadius: 8,
                 offset: const Offset(0, 4),
               ),
@@ -209,34 +301,38 @@ class _LecturerProfileScreenState extends State<LecturerProfileScreen> {
                 ),
               ),
               const SizedBox(height: 12),
-              ...rows.map((row) => Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(
-                          width: 140,
-                          child: Text(
-                            row.label,
-                            style: TextStyle(
-                              color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
-                              fontSize: 14,
-                            ),
+              ...rows.map(
+                (row) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        width: 140,
+                        child: Text(
+                          row.label,
+                          style: TextStyle(
+                            color: isDark
+                                ? Colors.grey.shade400
+                                : Colors.grey.shade600,
+                            fontSize: 14,
                           ),
                         ),
-                        Expanded(
-                          child: Text(
-                            row.value,
-                            style: TextStyle(
-                              color: isDark ? Colors.white : Colors.black87,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
+                      ),
+                      Expanded(
+                        child: Text(
+                          row.value,
+                          style: TextStyle(
+                            color: isDark ? Colors.white : Colors.black87,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
-                      ],
-                    ),
-                  )),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
         ),
