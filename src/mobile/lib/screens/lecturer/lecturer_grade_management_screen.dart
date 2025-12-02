@@ -6,6 +6,7 @@ import '../../providers/lecturer_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../models/teaching_class.dart';
 import '../../models/class_student.dart';
+import '../../widgets/animated_background.dart';
 import 'package:shimmer/shimmer.dart';
 
 /// LecturerGradeManagementScreen - Quản lý điểm số
@@ -55,8 +56,16 @@ class _LecturerGradeManagementScreenState
       setState(() {
         _students = List.generate(45, (index) {
           final names = [
-            'Nguyễn Văn A', 'Trần Thị B', 'Lê Văn C', 'Phạm Thị D', 'Hoàng Văn E',
-            'Vũ Thị F', 'Đặng Văn G', 'Bùi Thị H', 'Đỗ Văn I', 'Ngô Thị K',
+            'Nguyễn Văn A',
+            'Trần Thị B',
+            'Lê Văn C',
+            'Phạm Thị D',
+            'Hoàng Văn E',
+            'Vũ Thị F',
+            'Đặng Văn G',
+            'Bùi Thị H',
+            'Đỗ Văn I',
+            'Ngô Thị K',
           ];
           return ClassStudent(
             mssv: '${21520000 + index}',
@@ -82,21 +91,25 @@ class _LecturerGradeManagementScreenState
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(isDark),
-            if (_selectedClass != null) _buildGradeTypeFilter(isDark),
-            Expanded(
-              child: _selectedClass == null
-                  ? _buildClassSelection(provider, isDark)
-                  : _isLoading
+      body: Stack(
+        children: [
+          AnimatedBackground(isDark: isDark),
+          SafeArea(
+            child: Column(
+              children: [
+                _buildHeader(isDark),
+                if (_selectedClass != null) _buildGradeTypeFilter(isDark),
+                Expanded(
+                  child: _selectedClass == null
+                      ? _buildClassSelection(provider, isDark)
+                      : _isLoading
                       ? _buildShimmerLoading(isDark)
                       : _buildGradeTable(isDark),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
       floatingActionButton: _selectedClass != null && _isEditing
           ? _buildSaveButton(isDark)
@@ -166,7 +179,9 @@ class _LecturerGradeManagementScreenState
                           ? 'Chọn lớp để nhập điểm'
                           : 'Nhóm ${_selectedClass!.nhom} • ${_selectedClass!.siSo} sinh viên',
                       style: AppTheme.bodySmall.copyWith(
-                        color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                        color: isDark
+                            ? Colors.grey.shade400
+                            : Colors.grey.shade600,
                       ),
                     ),
                   ],
@@ -249,7 +264,9 @@ class _LecturerGradeManagementScreenState
             const SizedBox(height: 12),
             Container(
               decoration: BoxDecoration(
-                color: (isDark ? AppTheme.darkCard : Colors.white).withOpacity(0.5),
+                color: (isDark ? AppTheme.darkCard : Colors.white).withOpacity(
+                  0.5,
+                ),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: (isDark ? AppTheme.darkBorder : AppTheme.lightBorder)
@@ -258,9 +275,7 @@ class _LecturerGradeManagementScreenState
               ),
               child: TextField(
                 controller: _searchController,
-                style: TextStyle(
-                  color: isDark ? Colors.white : Colors.black87,
-                ),
+                style: TextStyle(color: isDark ? Colors.white : Colors.black87),
                 decoration: InputDecoration(
                   hintText: 'Tìm kiếm sinh viên...',
                   hintStyle: TextStyle(
@@ -274,7 +289,9 @@ class _LecturerGradeManagementScreenState
                       ? IconButton(
                           icon: Icon(
                             Icons.clear,
-                            color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                            color: isDark
+                                ? Colors.grey.shade400
+                                : Colors.grey.shade600,
                           ),
                           onPressed: () {
                             setState(() {
@@ -344,7 +361,8 @@ class _LecturerGradeManagementScreenState
           border: Border.all(
             color: isSelected
                 ? Colors.transparent
-                : (isDark ? AppTheme.darkBorder : AppTheme.lightBorder).withOpacity(0.3),
+                : (isDark ? AppTheme.darkBorder : AppTheme.lightBorder)
+                      .withOpacity(0.3),
           ),
         ),
         child: Text(
@@ -428,7 +446,9 @@ class _LecturerGradeManagementScreenState
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: (isDark ? AppTheme.darkCard : Colors.white).withOpacity(0.5),
+                color: (isDark ? AppTheme.darkCard : Colors.white).withOpacity(
+                  0.5,
+                ),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                   color: (isDark ? AppTheme.darkBorder : AppTheme.lightBorder)
@@ -467,21 +487,27 @@ class _LecturerGradeManagementScreenState
                             Text(
                               teachingClass.maMon,
                               style: AppTheme.bodySmall.copyWith(
-                                color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                                color: isDark
+                                    ? Colors.grey.shade400
+                                    : Colors.grey.shade600,
                               ),
                             ),
                             const SizedBox(width: 12),
                             Text(
                               'Nhóm ${teachingClass.nhom}',
                               style: AppTheme.bodySmall.copyWith(
-                                color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                                color: isDark
+                                    ? Colors.grey.shade400
+                                    : Colors.grey.shade600,
                               ),
                             ),
                             const SizedBox(width: 12),
                             Text(
                               '${teachingClass.siSo} SV',
                               style: AppTheme.bodySmall.copyWith(
-                                color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                                color: isDark
+                                    ? Colors.grey.shade400
+                                    : Colors.grey.shade600,
                               ),
                             ),
                           ],
@@ -528,12 +554,15 @@ class _LecturerGradeManagementScreenState
           filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
           child: Container(
             decoration: BoxDecoration(
-              color: (isDark ? AppTheme.darkCard : Colors.white).withOpacity(0.5),
+              color: (isDark ? AppTheme.darkCard : Colors.white).withOpacity(
+                0.5,
+              ),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: student.isAtRisk
                     ? Colors.red.withOpacity(0.5)
-                    : (isDark ? AppTheme.darkBorder : AppTheme.lightBorder).withOpacity(0.3),
+                    : (isDark ? AppTheme.darkBorder : AppTheme.lightBorder)
+                          .withOpacity(0.3),
                 width: student.isAtRisk ? 2 : 1,
               ),
             ),
@@ -553,9 +582,13 @@ class _LecturerGradeManagementScreenState
                           )
                         : LinearGradient(
                             colors: [
-                              (isDark ? Colors.grey.shade800 : Colors.grey.shade100)
+                              (isDark
+                                      ? Colors.grey.shade800
+                                      : Colors.grey.shade100)
                                   .withOpacity(0.5),
-                              (isDark ? Colors.grey.shade800 : Colors.grey.shade100)
+                              (isDark
+                                      ? Colors.grey.shade800
+                                      : Colors.grey.shade100)
                                   .withOpacity(0.3),
                             ],
                           ),
@@ -592,14 +625,18 @@ class _LecturerGradeManagementScreenState
                                 Text(
                                   '$stt. ',
                                   style: AppTheme.bodySmall.copyWith(
-                                    color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                                    color: isDark
+                                        ? Colors.grey.shade400
+                                        : Colors.grey.shade600,
                                   ),
                                 ),
                                 Expanded(
                                   child: Text(
                                     student.hoTen,
                                     style: AppTheme.bodyMedium.copyWith(
-                                      color: isDark ? Colors.white : Colors.black87,
+                                      color: isDark
+                                          ? Colors.white
+                                          : Colors.black87,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -612,13 +649,17 @@ class _LecturerGradeManagementScreenState
                                 Icon(
                                   Icons.badge_outlined,
                                   size: 14,
-                                  color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                                  color: isDark
+                                      ? Colors.grey.shade400
+                                      : Colors.grey.shade600,
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
                                   student.mssv,
                                   style: AppTheme.bodySmall.copyWith(
-                                    color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                                    color: isDark
+                                        ? Colors.grey.shade400
+                                        : Colors.grey.shade600,
                                   ),
                                 ),
                                 if (student.isAtRisk) ...[
@@ -715,13 +756,34 @@ class _LecturerGradeManagementScreenState
                           ],
                         ),
                       ] else if (_selectedGradeType == 'TX')
-                        _buildGradeItem('TX', student.diemThuongXuyen, student, isDark)
+                        _buildGradeItem(
+                          'TX',
+                          student.diemThuongXuyen,
+                          student,
+                          isDark,
+                        )
                       else if (_selectedGradeType == 'GK')
-                        _buildGradeItem('GK', student.diemGiuaKy, student, isDark)
+                        _buildGradeItem(
+                          'GK',
+                          student.diemGiuaKy,
+                          student,
+                          isDark,
+                        )
                       else if (_selectedGradeType == 'CK')
-                        _buildGradeItem('CK', student.diemCuoiKy, student, isDark)
+                        _buildGradeItem(
+                          'CK',
+                          student.diemCuoiKy,
+                          student,
+                          isDark,
+                        )
                       else if (_selectedGradeType == 'TK')
-                        _buildGradeItem('TK', student.diemTongKet, student, isDark, isTotal: true),
+                        _buildGradeItem(
+                          'TK',
+                          student.diemTongKet,
+                          student,
+                          isDark,
+                          isTotal: true,
+                        ),
                     ],
                   ),
                 ),
@@ -741,7 +803,7 @@ class _LecturerGradeManagementScreenState
     bool isTotal = false,
   }) {
     final gradeColor = _getGradeColor(grade);
-    
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -750,7 +812,8 @@ class _LecturerGradeManagementScreenState
         border: Border.all(
           color: isTotal
               ? AppTheme.bluePrimary.withOpacity(0.5)
-              : (isDark ? AppTheme.darkBorder : AppTheme.lightBorder).withOpacity(0.3),
+              : (isDark ? AppTheme.darkBorder : AppTheme.lightBorder)
+                    .withOpacity(0.3),
           width: isTotal ? 2 : 1,
         ),
       ),
@@ -769,7 +832,10 @@ class _LecturerGradeManagementScreenState
               const Spacer(),
               if (isTotal)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     gradient: AppTheme.primaryGradient,
                     borderRadius: BorderRadius.circular(8),
@@ -791,12 +857,12 @@ class _LecturerGradeManagementScreenState
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    (isDark 
-                      ? const Color(0xFF1E3A8A).withOpacity(0.2)
-                      : const Color(0xFFEBF4FF)),
-                    (isDark 
-                      ? const Color(0xFF3B82F6).withOpacity(0.15)
-                      : const Color(0xFFDEEDFF)),
+                    (isDark
+                        ? const Color(0xFF1E3A8A).withOpacity(0.2)
+                        : const Color(0xFFEBF4FF)),
+                    (isDark
+                        ? const Color(0xFF3B82F6).withOpacity(0.15)
+                        : const Color(0xFFDEEDFF)),
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
@@ -816,7 +882,9 @@ class _LecturerGradeManagementScreenState
               ),
               child: TextFormField(
                 initialValue: grade?.toStringAsFixed(1) ?? '',
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 style: AppTheme.bodyLarge.copyWith(
                   color: isDark ? Colors.white : Colors.black87,
                   fontWeight: FontWeight.bold,
@@ -824,11 +892,16 @@ class _LecturerGradeManagementScreenState
                 ),
                 decoration: InputDecoration(
                   isDense: true,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
                   filled: false,
                   hintText: '0.0',
                   hintStyle: TextStyle(
-                    color: (isDark ? Colors.grey.shade600 : Colors.grey.shade400),
+                    color: (isDark
+                        ? Colors.grey.shade600
+                        : Colors.grey.shade400),
                     fontWeight: FontWeight.normal,
                   ),
                   border: InputBorder.none,
@@ -880,7 +953,9 @@ class _LecturerGradeManagementScreenState
                   child: Text(
                     '/10',
                     style: AppTheme.bodySmall.copyWith(
-                      color: isDark ? Colors.grey.shade500 : Colors.grey.shade600,
+                      color: isDark
+                          ? Colors.grey.shade500
+                          : Colors.grey.shade600,
                     ),
                   ),
                 ),
@@ -891,7 +966,12 @@ class _LecturerGradeManagementScreenState
     );
   }
 
-  Widget _buildGradeCell(ClassStudent student, String gradeType, double? currentGrade, bool isDark) {
+  Widget _buildGradeCell(
+    ClassStudent student,
+    String gradeType,
+    double? currentGrade,
+    bool isDark,
+  ) {
     // This method is no longer used with the new card-based layout
     return const SizedBox.shrink();
   }
@@ -951,7 +1031,7 @@ class _LecturerGradeManagementScreenState
     //     'grades': _gradeChanges,
     //   }),
     // );
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
@@ -962,7 +1042,11 @@ class _LecturerGradeManagementScreenState
                 color: Colors.white.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Icon(Icons.check_circle, color: Colors.white, size: 20),
+              child: const Icon(
+                Icons.check_circle,
+                color: Colors.white,
+                size: 20,
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -978,14 +1062,12 @@ class _LecturerGradeManagementScreenState
         ),
         backgroundColor: Colors.green,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         margin: const EdgeInsets.all(16),
         duration: const Duration(seconds: 2),
       ),
     );
-    
+
     setState(() {
       _isEditing = false;
       _gradeChanges.clear();
@@ -1025,10 +1107,18 @@ class _LecturerGradeManagementScreenState
   }
 
   void _showStatsDialog() {
-    final avgTX = _students.map((s) => s.diemThuongXuyen ?? 0).reduce((a, b) => a + b) / _students.length;
-    final avgGK = _students.map((s) => s.diemGiuaKy ?? 0).reduce((a, b) => a + b) / _students.length;
-    final avgCK = _students.map((s) => s.diemCuoiKy ?? 0).reduce((a, b) => a + b) / _students.length;
-    final avgTK = _students.map((s) => s.diemTongKet ?? 0).reduce((a, b) => a + b) / _students.length;
+    final avgTX =
+        _students.map((s) => s.diemThuongXuyen ?? 0).reduce((a, b) => a + b) /
+        _students.length;
+    final avgGK =
+        _students.map((s) => s.diemGiuaKy ?? 0).reduce((a, b) => a + b) /
+        _students.length;
+    final avgCK =
+        _students.map((s) => s.diemCuoiKy ?? 0).reduce((a, b) => a + b) /
+        _students.length;
+    final avgTK =
+        _students.map((s) => s.diemTongKet ?? 0).reduce((a, b) => a + b) /
+        _students.length;
 
     showDialog(
       context: context,

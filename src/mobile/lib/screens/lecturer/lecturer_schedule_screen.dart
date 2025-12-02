@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../providers/lecturer_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../models/lecturer_models.dart';
+import '../../widgets/animated_background.dart';
 import 'package:shimmer/shimmer.dart';
 
 /// LecturerScheduleScreen - Lịch giảng dạy đầy đủ
@@ -45,23 +46,27 @@ class _LecturerScheduleScreenState extends State<LecturerScheduleScreen>
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(isDark),
-            _buildTabBar(isDark),
-            Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  _buildWeekView(provider, isDark),
-                  _buildMonthView(provider, isDark),
-                ],
-              ),
+      body: Stack(
+        children: [
+          AnimatedBackground(isDark: isDark),
+          SafeArea(
+            child: Column(
+              children: [
+                _buildHeader(isDark),
+                _buildTabBar(isDark),
+                Expanded(
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: [
+                      _buildWeekView(provider, isDark),
+                      _buildMonthView(provider, isDark),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -109,7 +114,9 @@ class _LecturerScheduleScreenState extends State<LecturerScheduleScreen>
                     Text(
                       'Học kỳ 1 - Năm học 2024-2025',
                       style: AppTheme.bodySmall.copyWith(
-                        color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                        color: isDark
+                            ? Colors.grey.shade400
+                            : Colors.grey.shade600,
                       ),
                     ),
                   ],
@@ -133,7 +140,9 @@ class _LecturerScheduleScreenState extends State<LecturerScheduleScreen>
           // Search bar
           Container(
             decoration: BoxDecoration(
-              color: (isDark ? AppTheme.darkCard : Colors.white).withOpacity(0.5),
+              color: (isDark ? AppTheme.darkCard : Colors.white).withOpacity(
+                0.5,
+              ),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: (isDark ? AppTheme.darkBorder : AppTheme.lightBorder)
@@ -142,9 +151,7 @@ class _LecturerScheduleScreenState extends State<LecturerScheduleScreen>
             ),
             child: TextField(
               controller: _searchController,
-              style: TextStyle(
-                color: isDark ? Colors.white : Colors.black87,
-              ),
+              style: TextStyle(color: isDark ? Colors.white : Colors.black87),
               decoration: InputDecoration(
                 hintText: 'Tìm kiếm lớp học...',
                 hintStyle: TextStyle(
@@ -158,7 +165,9 @@ class _LecturerScheduleScreenState extends State<LecturerScheduleScreen>
                     ? IconButton(
                         icon: Icon(
                           Icons.clear,
-                          color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                          color: isDark
+                              ? Colors.grey.shade400
+                              : Colors.grey.shade600,
                         ),
                         onPressed: () {
                           setState(() {
@@ -204,7 +213,9 @@ class _LecturerScheduleScreenState extends State<LecturerScheduleScreen>
           borderRadius: BorderRadius.circular(10),
         ),
         labelColor: Colors.white,
-        unselectedLabelColor: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+        unselectedLabelColor: isDark
+            ? Colors.grey.shade400
+            : Colors.grey.shade600,
         labelStyle: AppTheme.bodyMedium.copyWith(fontWeight: FontWeight.w600),
         unselectedLabelStyle: AppTheme.bodyMedium,
         indicatorSize: TabBarIndicatorSize.tab,
@@ -232,7 +243,9 @@ class _LecturerScheduleScreenState extends State<LecturerScheduleScreen>
             padding: const EdgeInsets.symmetric(horizontal: 16),
             itemCount: 7,
             itemBuilder: (context, index) {
-              final day = _selectedDate.add(Duration(days: index - _selectedDate.weekday + 1));
+              final day = _selectedDate.add(
+                Duration(days: index - _selectedDate.weekday + 1),
+              );
               final daySchedule = weekSchedule[index] ?? [];
               return _buildDayCard(day, daySchedule, isDark);
             },
@@ -291,10 +304,15 @@ class _LecturerScheduleScreenState extends State<LecturerScheduleScreen>
     );
   }
 
-  Widget _buildDayCard(DateTime day, List<TeachingScheduleItem> schedule, bool isDark) {
+  Widget _buildDayCard(
+    DateTime day,
+    List<TeachingScheduleItem> schedule,
+    bool isDark,
+  ) {
     final dayName = DateFormat('EEEE', 'vi').format(day);
     final dateStr = DateFormat('dd/MM/yyyy').format(day);
-    final isToday = day.day == DateTime.now().day &&
+    final isToday =
+        day.day == DateTime.now().day &&
         day.month == DateTime.now().month &&
         day.year == DateTime.now().year;
 
@@ -313,12 +331,15 @@ class _LecturerScheduleScreenState extends State<LecturerScheduleScreen>
           filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
           child: Container(
             decoration: BoxDecoration(
-              color: (isDark ? AppTheme.darkCard : Colors.white).withOpacity(0.5),
+              color: (isDark ? AppTheme.darkCard : Colors.white).withOpacity(
+                0.5,
+              ),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: isToday
                     ? AppTheme.bluePrimary.withOpacity(0.5)
-                    : (isDark ? AppTheme.darkBorder : AppTheme.lightBorder).withOpacity(0.3),
+                    : (isDark ? AppTheme.darkBorder : AppTheme.lightBorder)
+                          .withOpacity(0.3),
                 width: isToday ? 2 : 1,
               ),
             ),
@@ -332,9 +353,13 @@ class _LecturerScheduleScreenState extends State<LecturerScheduleScreen>
                         ? AppTheme.primaryGradient
                         : LinearGradient(
                             colors: [
-                              (isDark ? Colors.grey.shade800 : Colors.grey.shade200)
+                              (isDark
+                                      ? Colors.grey.shade800
+                                      : Colors.grey.shade200)
                                   .withOpacity(0.5),
-                              (isDark ? Colors.grey.shade800 : Colors.grey.shade200)
+                              (isDark
+                                      ? Colors.grey.shade800
+                                      : Colors.grey.shade200)
                                   .withOpacity(0.3),
                             ],
                           ),
@@ -349,7 +374,9 @@ class _LecturerScheduleScreenState extends State<LecturerScheduleScreen>
                         size: 16,
                         color: isToday
                             ? Colors.white
-                            : (isDark ? Colors.grey.shade400 : Colors.grey.shade600),
+                            : (isDark
+                                  ? Colors.grey.shade400
+                                  : Colors.grey.shade600),
                       ),
                       const SizedBox(width: 8),
                       Text(
@@ -367,16 +394,22 @@ class _LecturerScheduleScreenState extends State<LecturerScheduleScreen>
                         style: AppTheme.bodySmall.copyWith(
                           color: isToday
                               ? Colors.white.withOpacity(0.9)
-                              : (isDark ? Colors.grey.shade400 : Colors.grey.shade600),
+                              : (isDark
+                                    ? Colors.grey.shade400
+                                    : Colors.grey.shade600),
                         ),
                       ),
                       const Spacer(),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: isToday
                               ? Colors.white.withOpacity(0.2)
-                              : (isDark ? AppTheme.darkCard : Colors.white).withOpacity(0.5),
+                              : (isDark ? AppTheme.darkCard : Colors.white)
+                                    .withOpacity(0.5),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
@@ -399,14 +432,18 @@ class _LecturerScheduleScreenState extends State<LecturerScheduleScreen>
                       child: Text(
                         'Không có lịch giảng',
                         style: AppTheme.bodySmall.copyWith(
-                          color: isDark ? Colors.grey.shade500 : Colors.grey.shade600,
+                          color: isDark
+                              ? Colors.grey.shade500
+                              : Colors.grey.shade600,
                           fontStyle: FontStyle.italic,
                         ),
                       ),
                     ),
                   )
                 else
-                  ...filteredSchedule.map((item) => _buildScheduleItem(item, isDark)),
+                  ...filteredSchedule.map(
+                    (item) => _buildScheduleItem(item, isDark),
+                  ),
               ],
             ),
           ),
@@ -421,7 +458,8 @@ class _LecturerScheduleScreenState extends State<LecturerScheduleScreen>
       decoration: BoxDecoration(
         border: Border(
           top: BorderSide(
-            color: (isDark ? AppTheme.darkBorder : AppTheme.lightBorder).withOpacity(0.3),
+            color: (isDark ? AppTheme.darkBorder : AppTheme.lightBorder)
+                .withOpacity(0.3),
           ),
         ),
       ),
@@ -472,26 +510,34 @@ class _LecturerScheduleScreenState extends State<LecturerScheduleScreen>
                     Icon(
                       Icons.group_outlined,
                       size: 14,
-                      color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                      color: isDark
+                          ? Colors.grey.shade400
+                          : Colors.grey.shade600,
                     ),
                     const SizedBox(width: 4),
                     Text(
                       'Nhóm ${item.nhom}',
                       style: AppTheme.bodySmall.copyWith(
-                        color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                        color: isDark
+                            ? Colors.grey.shade400
+                            : Colors.grey.shade600,
                       ),
                     ),
                     const SizedBox(width: 12),
                     Icon(
                       Icons.people_outline,
                       size: 14,
-                      color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                      color: isDark
+                          ? Colors.grey.shade400
+                          : Colors.grey.shade600,
                     ),
                     const SizedBox(width: 4),
                     Text(
                       '${item.siSo} SV',
                       style: AppTheme.bodySmall.copyWith(
-                        color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                        color: isDark
+                            ? Colors.grey.shade400
+                            : Colors.grey.shade600,
                       ),
                     ),
                   ],
@@ -502,13 +548,17 @@ class _LecturerScheduleScreenState extends State<LecturerScheduleScreen>
                     Icon(
                       Icons.location_on_outlined,
                       size: 14,
-                      color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                      color: isDark
+                          ? Colors.grey.shade400
+                          : Colors.grey.shade600,
                     ),
                     const SizedBox(width: 4),
                     Text(
                       item.phong ?? 'TBA',
                       style: AppTheme.bodySmall.copyWith(
-                        color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                        color: isDark
+                            ? Colors.grey.shade400
+                            : Colors.grey.shade600,
                       ),
                     ),
                   ],
@@ -573,7 +623,9 @@ class _LecturerScheduleScreenState extends State<LecturerScheduleScreen>
     );
   }
 
-  Map<int, List<TeachingScheduleItem>> _getWeekSchedule(List<TeachingScheduleItem> schedule) {
+  Map<int, List<TeachingScheduleItem>> _getWeekSchedule(
+    List<TeachingScheduleItem> schedule,
+  ) {
     final Map<int, List<TeachingScheduleItem>> weekSchedule = {};
     for (int i = 0; i < 7; i++) {
       weekSchedule[i] = schedule.where((item) => item.thu == i + 1).toList();

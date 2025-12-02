@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../providers/lecturer_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../models/teaching_class.dart';
+import '../../widgets/animated_background.dart';
 import 'package:shimmer/shimmer.dart';
 
 /// LecturerClassListScreen - Danh sách lớp giảng dạy
@@ -49,21 +50,25 @@ class _LecturerClassListScreenState extends State<LecturerClassListScreen>
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Header with search and filter
-            _buildHeader(isDark),
+      body: Stack(
+        children: [
+          AnimatedBackground(isDark: isDark),
+          SafeArea(
+            child: Column(
+              children: [
+                // Header with search and filter
+                _buildHeader(isDark),
 
-            // Class list
-            Expanded(
-              child: provider.isLoading
-                  ? _buildShimmerLoading(isDark)
-                  : _buildClassList(provider, isDark),
+                // Class list
+                Expanded(
+                  child: provider.isLoading
+                      ? _buildShimmerLoading(isDark)
+                      : _buildClassList(provider, isDark),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -142,10 +147,11 @@ class _LecturerClassListScreenState extends State<LecturerClassListScreen>
                   decoration: InputDecoration(
                     hintText: 'Tìm kiếm môn học, mã môn...',
                     hintStyle: TextStyle(
-                      color: (isDark
-                              ? AppTheme.darkTextSecondary
-                              : AppTheme.lightTextSecondary)
-                          .withOpacity(0.6),
+                      color:
+                          (isDark
+                                  ? AppTheme.darkTextSecondary
+                                  : AppTheme.lightTextSecondary)
+                              .withOpacity(0.6),
                       fontSize: 15,
                     ),
                     prefixIcon: Icon(
@@ -218,14 +224,15 @@ class _LecturerClassListScreenState extends State<LecturerClassListScreen>
           gradient: isSelected ? AppTheme.primaryGradient : null,
           color: isSelected
               ? null
-              : (isDark ? AppTheme.darkCard : AppTheme.lightCard)
-                  .withOpacity(0.6),
+              : (isDark ? AppTheme.darkCard : AppTheme.lightCard).withOpacity(
+                  0.6,
+                ),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected
                 ? Colors.transparent
                 : (isDark ? AppTheme.darkBorder : AppTheme.lightBorder)
-                    .withOpacity(0.3),
+                      .withOpacity(0.3),
           ),
         ),
         child: Text(
@@ -293,8 +300,9 @@ class _LecturerClassListScreenState extends State<LecturerClassListScreen>
           filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
           child: Container(
             decoration: BoxDecoration(
-              color: (isDark ? AppTheme.darkCard : Colors.white)
-                  .withOpacity(0.8),
+              color: (isDark ? AppTheme.darkCard : Colors.white).withOpacity(
+                0.8,
+              ),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
                 color: (isDark ? AppTheme.darkBorder : AppTheme.lightBorder)
@@ -349,20 +357,20 @@ class _LecturerClassListScreenState extends State<LecturerClassListScreen>
                                 vertical: 6,
                               ),
                               decoration: BoxDecoration(
-                                color: _getStatusColor(classItem.statusColor)
-                                    .withOpacity(0.15),
+                                color: _getStatusColor(
+                                  classItem.statusColor,
+                                ).withOpacity(0.15),
                                 borderRadius: BorderRadius.circular(8),
                                 border: Border.all(
-                                  color:
-                                      _getStatusColor(classItem.statusColor)
-                                          .withOpacity(0.3),
+                                  color: _getStatusColor(
+                                    classItem.statusColor,
+                                  ).withOpacity(0.3),
                                 ),
                               ),
                               child: Text(
                                 classItem.trangThai!,
                                 style: TextStyle(
-                                  color:
-                                      _getStatusColor(classItem.statusColor),
+                                  color: _getStatusColor(classItem.statusColor),
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -389,7 +397,9 @@ class _LecturerClassListScreenState extends State<LecturerClassListScreen>
                         style: TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.bold,
-                          color: isDark ? AppTheme.darkText : AppTheme.lightText,
+                          color: isDark
+                              ? AppTheme.darkText
+                              : AppTheme.lightText,
                           height: 1.3,
                         ),
                         maxLines: 2,
@@ -493,8 +503,9 @@ class _LecturerClassListScreenState extends State<LecturerClassListScreen>
         Icon(
           icon,
           size: 16,
-          color:
-              isDark ? AppTheme.darkTextSecondary : AppTheme.lightTextSecondary,
+          color: isDark
+              ? AppTheme.darkTextSecondary
+              : AppTheme.lightTextSecondary,
         ),
         const SizedBox(width: 6),
         Expanded(
@@ -533,8 +544,11 @@ class _LecturerClassListScreenState extends State<LecturerClassListScreen>
           Icon(
             Icons.class_outlined,
             size: 80,
-            color: (isDark ? AppTheme.darkTextSecondary : AppTheme.lightTextSecondary)
-                .withOpacity(0.3),
+            color:
+                (isDark
+                        ? AppTheme.darkTextSecondary
+                        : AppTheme.lightTextSecondary)
+                    .withOpacity(0.3),
           ),
           const SizedBox(height: 16),
           Text(
@@ -550,8 +564,9 @@ class _LecturerClassListScreenState extends State<LecturerClassListScreen>
             'Thử thay đổi bộ lọc hoặc tìm kiếm',
             style: TextStyle(
               fontSize: 14,
-              color:
-                  isDark ? AppTheme.darkTextSecondary : AppTheme.lightTextSecondary,
+              color: isDark
+                  ? AppTheme.darkTextSecondary
+                  : AppTheme.lightTextSecondary,
             ),
           ),
         ],
@@ -582,9 +597,7 @@ class _LecturerClassListScreenState extends State<LecturerClassListScreen>
                   ),
                 ),
                 child: Shimmer.fromColors(
-                  baseColor: isDark
-                      ? Colors.grey[800]!
-                      : Colors.grey[300]!,
+                  baseColor: isDark ? Colors.grey[800]! : Colors.grey[300]!,
                   highlightColor: isDark
                       ? Colors.grey[700]!
                       : Colors.grey[100]!,
