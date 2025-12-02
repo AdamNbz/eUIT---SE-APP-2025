@@ -7,6 +7,9 @@ import 'screens/lecturer/lecturer_main_screen.dart';
 import 'screens/lecturer/lecturer_profile_screen.dart';
 import 'screens/lecturer/lecturer_class_detail_screen.dart';
 import 'screens/lecturer/lecturer_grade_management_screen.dart';
+import 'screens/lecturer/lecturer_appeals_screen.dart';
+import 'screens/lecturer/lecturer_documents_screen.dart';
+import 'screens/lecturer/lecturer_exam_schedule_screen.dart';
 import 'screens/chatbot.dart';
 import 'screens/notifications_screen.dart';
 import 'services/theme_controller.dart';
@@ -38,8 +41,13 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => ThemeController()),
         ChangeNotifierProvider(create: (_) => LanguageController()),
         // Inject the shared AuthService into HomeProvider so it doesn't create its own
-        ChangeNotifierProvider(create: (context) => HomeProvider(auth: context.read<AuthService>())),
-        ChangeNotifierProvider(create: (context) => LecturerProvider(auth: context.read<AuthService>())),
+        ChangeNotifierProvider(
+          create: (context) => HomeProvider(auth: context.read<AuthService>()),
+        ),
+        ChangeNotifierProvider(
+          create: (context) =>
+              LecturerProvider(auth: context.read<AuthService>()),
+        ),
         ChangeNotifierProvider(create: (_) => ChatbotProvider()),
       ],
       child: const MyApp(),
@@ -58,14 +66,20 @@ class MyApp extends StatelessWidget {
 
     final ThemeData lightTheme = ThemeData(
       brightness: Brightness.light,
-      colorScheme: ColorScheme.fromSeed(seedColor: AppColors.bluePrimary, brightness: Brightness.light),
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: AppColors.bluePrimary,
+        brightness: Brightness.light,
+      ),
       scaffoldBackgroundColor: Colors.grey.shade100,
       fontFamily: null,
     );
 
     final ThemeData darkTheme = ThemeData(
       brightness: Brightness.dark,
-      colorScheme: ColorScheme.fromSeed(seedColor: AppColors.bluePrimary, brightness: Brightness.dark),
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: AppColors.bluePrimary,
+        brightness: Brightness.dark,
+      ),
       scaffoldBackgroundColor: AppColors.navyDark,
       fontFamily: null,
     );
@@ -90,18 +104,25 @@ class MyApp extends StatelessWidget {
         '/home': (context) => const MainScreen(),
         '/lecturer_home': (context) => const LecturerMainScreen(),
         '/lecturer_profile': (context) => const LecturerProfileScreen(),
-        '/lecturer_grade_management': (context) => const LecturerGradeManagementScreen(),
+        '/lecturer_grade_management': (context) =>
+            const LecturerGradeManagementScreen(),
+        '/lecturer_appeals': (context) => const LecturerAppealsScreen(),
+        '/lecturer_documents': (context) => const LecturerDocumentsScreen(),
+        '/lecturer_exam_schedule': (context) =>
+            const LecturerExamScheduleScreen(),
         '/chatbot': (context) => const ChatbotScreen(),
         '/notifications': (context) => const NotificationsScreen(),
         '/settings': (context) => const SettingsScreen(),
         '/profile': (context) => const ProfileScreen(),
-        '/notification_preferences': (context) => const NotificationPreferencesScreen(),
+        '/notification_preferences': (context) =>
+            const NotificationPreferencesScreen(),
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/lecturer_class_detail') {
           final classInfo = settings.arguments as TeachingClass;
           return MaterialPageRoute(
-            builder: (context) => LecturerClassDetailScreen(classInfo: classInfo),
+            builder: (context) =>
+                LecturerClassDetailScreen(classInfo: classInfo),
           );
         }
         return null;

@@ -47,8 +47,8 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
         break;
       case 'lecturer_classes':
         // Navigate to class list screen
-        final mainScreenState =
-            context.findAncestorStateOfType<State<StatefulWidget>>();
+        final mainScreenState = context
+            .findAncestorStateOfType<State<StatefulWidget>>();
         if (mainScreenState != null && mainScreenState.mounted) {
           // Change to class list tab (index 2)
           (mainScreenState as dynamic)._onNavTap(2);
@@ -56,21 +56,24 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
         break;
       case 'lecturer_schedule':
         // Navigate to schedule screen
-        final mainScreenState =
-            context.findAncestorStateOfType<State<StatefulWidget>>();
+        final mainScreenState = context
+            .findAncestorStateOfType<State<StatefulWidget>>();
         if (mainScreenState != null && mainScreenState.mounted) {
-          // Change to schedule tab (index 0)
-          (mainScreenState as dynamic)._onNavTap(0);
+          // Change to schedule tab (index 1)
+          (mainScreenState as dynamic)._onNavTap(1);
         }
         break;
       case 'lecturer_grading':
         Navigator.pushNamed(context, '/lecturer_grade_management');
         break;
-      case 'lecturer_attendance':
-        // TODO: Navigate to attendance screen
+      case 'lecturer_appeals':
+        Navigator.pushNamed(context, '/lecturer_appeals');
         break;
       case 'lecturer_documents':
-        // TODO: Navigate to documents screen
+        Navigator.pushNamed(context, '/lecturer_documents');
+        break;
+      case 'lecturer_exam_schedule':
+        Navigator.pushNamed(context, '/lecturer_exam_schedule');
         break;
       default:
         break;
@@ -124,7 +127,12 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
                       // Notifications
                       _buildSectionTitle('Thông báo mới', isDark),
                       const SizedBox(height: 12),
-                      _buildNotificationsList(provider, isDark, loc, maxItems: 1),
+                      _buildNotificationsList(
+                        provider,
+                        isDark,
+                        loc,
+                        maxItems: 1,
+                      ),
                       const SizedBox(height: 16),
 
                       // Quick Actions
@@ -154,7 +162,9 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: isDark ? AppTheme.darkCard.withAlpha(160) : Colors.white.withAlpha(200),
+            color: isDark
+                ? AppTheme.darkCard.withAlpha(160)
+                : Colors.white.withAlpha(200),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: isDark ? Colors.white.withAlpha(18) : AppTheme.lightBorder,
@@ -167,7 +177,8 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
               Row(
                 children: [
                   GestureDetector(
-                    onTap: () => Navigator.pushNamed(context, '/lecturer_profile'),
+                    onTap: () =>
+                        Navigator.pushNamed(context, '/lecturer_profile'),
                     child: Container(
                       width: 48,
                       height: 48,
@@ -213,7 +224,9 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
                       Text(
                         'Mã GV: ${provider.lecturerCard?.maGv ?? ''}',
                         style: TextStyle(
-                          color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                          color: isDark
+                              ? Colors.grey.shade400
+                              : Colors.grey.shade600,
                           fontSize: 12,
                         ),
                       ),
@@ -227,7 +240,8 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
                     clipBehavior: Clip.none,
                     children: [
                       IconButton(
-                        onPressed: () => Navigator.pushNamed(context, '/notifications'),
+                        onPressed: () =>
+                            Navigator.pushNamed(context, '/notifications'),
                         icon: Icon(
                           Icons.notifications_outlined,
                           color: isDark ? Colors.white : Colors.black87,
@@ -287,7 +301,7 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
     bool isDark,
   ) {
     final nextClass = provider.nextClass;
-    
+
     if (nextClass == null) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(20),
@@ -296,10 +310,14 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
           child: Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: isDark ? AppTheme.darkCard.withAlpha(140) : Colors.white.withAlpha(180),
+              color: isDark
+                  ? AppTheme.darkCard.withAlpha(140)
+                  : Colors.white.withAlpha(180),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: isDark ? Colors.white.withAlpha(18) : AppTheme.lightBorder,
+                color: isDark
+                    ? Colors.white.withAlpha(18)
+                    : AppTheme.lightBorder,
               ),
             ),
             child: Center(
@@ -368,7 +386,9 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
                         Text(
                           '${nextClass.tietBatDau ?? ''} - ${nextClass.tietKetThuc ?? ''}',
                           style: TextStyle(
-                            color: isDark ? AppTheme.bluePrimary : AppTheme.bluePrimary,
+                            color: isDark
+                                ? AppTheme.bluePrimary
+                                : AppTheme.bluePrimary,
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
                           ),
@@ -403,7 +423,10 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
                 spacing: 8,
                 runSpacing: 8,
                 children: [
-                  _buildDetailChip('Phòng: ${nextClass.phong ?? 'N/A'}', isDark),
+                  _buildDetailChip(
+                    'Phòng: ${nextClass.phong ?? 'N/A'}',
+                    isDark,
+                  ),
                   _buildDetailChip('Nhóm: ${nextClass.nhom ?? 'N/A'}', isDark),
                   _buildDetailChip('Sĩ số: ${nextClass.siSo ?? 0}', isDark),
                 ],
@@ -520,9 +543,7 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
                   ),
                 ],
               ),
-              child: Center(
-                child: Icon(icon, color: Colors.white, size: 28),
-              ),
+              child: Center(child: Icon(icon, color: Colors.white, size: 28)),
             ),
           ),
           const SizedBox(height: 8),
@@ -571,7 +592,9 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
                           : Colors.white.withAlpha(204),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: isDark ? Colors.white.withAlpha(13) : Colors.grey.shade100,
+                        color: isDark
+                            ? Colors.white.withAlpha(13)
+                            : Colors.grey.shade100,
                       ),
                     ),
                     child: ListTile(
@@ -582,10 +605,16 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
                         decoration: BoxDecoration(
                           gradient: notifications[0].isUnread
                               ? const LinearGradient(
-                                  colors: [AppTheme.bluePrimary, AppTheme.blueLight],
+                                  colors: [
+                                    AppTheme.bluePrimary,
+                                    AppTheme.blueLight,
+                                  ],
                                 )
                               : LinearGradient(
-                                  colors: [Colors.grey.shade300, Colors.grey.shade200],
+                                  colors: [
+                                    Colors.grey.shade300,
+                                    Colors.grey.shade200,
+                                  ],
                                 ),
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -632,7 +661,8 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
                               ),
                             )
                           : null,
-                      onTap: () => Navigator.pushNamed(context, '/notifications'),
+                      onTap: () =>
+                          Navigator.pushNamed(context, '/notifications'),
                     ),
                   ),
                 ),
@@ -705,7 +735,9 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
               border: Border.all(
                 color: _hoverLecturerCard
                     ? AppTheme.bluePrimary
-                    : (isDark ? Colors.white.withAlpha(26) : AppTheme.lightBorder),
+                    : (isDark
+                          ? Colors.white.withAlpha(26)
+                          : AppTheme.lightBorder),
               ),
             ),
             child: const Icon(
@@ -717,10 +749,7 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
           const Expanded(
             child: Text(
               'Thẻ GV',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
           ),
         ],
@@ -778,11 +807,7 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
               ],
             ),
           ),
-          Icon(
-            Icons.groups_outlined,
-            color: secondary,
-            size: 32,
-          ),
+          Icon(Icons.groups_outlined, color: secondary, size: 32),
         ],
       ),
     );
@@ -795,7 +820,9 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
     required VoidCallback onTap,
     required ValueChanged<bool> onHover,
   }) {
-    final baseBorder = isDark ? Colors.white.withAlpha(26) : AppTheme.lightBorder;
+    final baseBorder = isDark
+        ? Colors.white.withAlpha(26)
+        : AppTheme.lightBorder;
     final borderColor = isHover ? AppTheme.bluePrimary : baseBorder;
     final boxShadowColor = isHover
         ? AppTheme.bluePrimary.withAlpha(76)
@@ -827,10 +854,7 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
             onTap: onTap,
             splashColor: AppTheme.bluePrimary.withAlpha(38),
             highlightColor: AppTheme.bluePrimary.withAlpha(20),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: child,
-            ),
+            child: Padding(padding: const EdgeInsets.all(16), child: child),
           ),
         ),
       ),
@@ -846,7 +870,10 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
       builder: (context) {
         final screenWidth = MediaQuery.of(context).size.width;
         return Dialog(
-          insetPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 24),
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 24,
+          ),
           backgroundColor: Colors.transparent,
           child: ConstrainedBox(
             constraints: BoxConstraints(maxWidth: screenWidth - 24),
