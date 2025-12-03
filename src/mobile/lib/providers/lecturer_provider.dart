@@ -78,11 +78,6 @@ class LecturerProvider extends ChangeNotifier {
   void _initQuickActions() {
     _quickActions = [
       QuickAction(
-        label: 'Thẻ GV',
-        type: 'lecturer_card',
-        iconName: 'badge_outlined',
-      ),
-      QuickAction(
         label: 'Lịch giảng',
         type: 'lecturer_schedule',
         iconName: 'calendar_today_outlined',
@@ -175,22 +170,50 @@ class LecturerProvider extends ChangeNotifier {
       if (res.statusCode == 200) {
         final data = jsonDecode(res.body) as Map<String, dynamic>;
         _lecturerProfile = LecturerProfile.fromJson(data);
+      } else {
+        // Mock data when API fails
+        _createMockProfile();
       }
     } catch (e) {
       developer.log(
         'Error fetching lecturer profile: $e',
         name: 'LecturerProvider',
       );
+      // Mock data for development
+      _createMockProfile();
     } finally {
       _isLoading = false;
       notifyListeners();
     }
   }
 
+  void _createMockProfile() {
+    _lecturerProfile = LecturerProfile(
+      maGv: '80001',
+      hoTen: 'Nguyễn Minh Nam',
+      khoaBoMon: 'HTTT',
+      ngaySinh: DateTime(1970, 12, 9),
+      noiSinh: 'Tỉnh Lạng Sơn',
+      email: 'nguyenminhnam@uit.edu.vn',
+      soDienThoai: '0901338908',
+      cccd: '048170181960',
+      ngayCapCccd: DateTime(1991, 2, 26),
+      noiCapCccd: 'Công an tỉnh Bình Dương',
+      danToc: 'Tày',
+      tonGiao: 'Phật giáo',
+      diaChiThuongTru: '734 đường Cách Mạng Tháng 8, Xã Ba Sơn',
+      tinhThanhPho: 'Tỉnh Lạng Sơn',
+      phuongXa: 'Xã Ba Sơn',
+    );
+  }
+
   Future<void> _fetchNextClass() async {
     try {
       final token = await auth.getToken();
-      if (token == null) return;
+      if (token == null) {
+        _createMockNextClass();
+        return;
+      }
 
       final uri = auth.buildUri('/api/Lecturer/next-class');
       final res = await http
@@ -207,10 +230,37 @@ class LecturerProvider extends ChangeNotifier {
         final data = jsonDecode(res.body) as Map<String, dynamic>;
         _nextClass = TeachingScheduleItem.fromJson(data);
         notifyListeners();
+      } else {
+        // Mock data when API returns non-200
+        _createMockNextClass();
       }
     } catch (e) {
       developer.log('Error fetching next class: $e', name: 'LecturerProvider');
+      // Mock data for development
+      _createMockNextClass();
     }
+  }
+
+  void _createMockNextClass() {
+    final now = DateTime.now();
+    // Tính ngày thứ 2 tiếp theo
+    final daysUntilMonday = (DateTime.monday - now.weekday + 7) % 7;
+    final nextMonday = now.add(
+      Duration(days: daysUntilMonday == 0 ? 7 : daysUntilMonday),
+    );
+
+    _nextClass = TeachingScheduleItem(
+      maMon: 'NT101',
+      tenMon: 'Mạng máy tính',
+      nhom: 'O11',
+      phong: 'E4.1',
+      thu: '2',
+      tietBatDau: '1',
+      tietKetThuc: '3',
+      ngayBatDau: nextMonday,
+      siSo: 45,
+    );
+    notifyListeners();
   }
 
   Future<void> fetchTeachingSchedule() async {

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/lecturer_provider.dart';
 import '../../theme/app_theme.dart';
-import '../../utils/app_localizations.dart';
+import '../../widgets/animated_background.dart';
 
 class LecturerProfileScreen extends StatefulWidget {
   const LecturerProfileScreen({super.key});
@@ -24,163 +24,202 @@ class _LecturerProfileScreenState extends State<LecturerProfileScreen> {
     });
   }
 
+  String _formatDate(DateTime? date) {
+    if (date == null) return 'N/A';
+    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+  }
+
   @override
   Widget build(BuildContext context) {
-    final loc = AppLocalizations.of(context);
     final provider = context.watch<LecturerProvider>();
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final profile = provider.lecturerProfile;
 
     return Scaffold(
-      backgroundColor: isDark ? AppTheme.darkBackground : Colors.grey.shade100,
-      appBar: AppBar(
-        title: const Text('Thông tin giảng viên'),
-        backgroundColor: isDark ? AppTheme.darkCard : AppTheme.bluePrimary,
-        foregroundColor: Colors.white,
-        elevation: 0,
-      ),
-      body: profile == null
-          ? _buildLoading(isDark)
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildProfileHeader(profile, isDark),
-                  const SizedBox(height: 16),
-                  _buildQuickActions(isDark),
-                  const SizedBox(height: 24),
-                  _buildInfoSection('Thông tin cơ bản', [
-                    _InfoRow('Mã giảng viên', profile.maGv),
-                    _InfoRow('Họ và tên', profile.hoTen),
-                    _InfoRow('Giới tính', profile.gioiTinh ?? 'N/A'),
-                    _InfoRow(
-                      'Ngày sinh',
-                      profile.ngaySinh != null
-                          ? '${profile.ngaySinh!.day}/${profile.ngaySinh!.month}/${profile.ngaySinh!.year}'
-                          : 'N/A',
-                    ),
-                    _InfoRow('Email', profile.email ?? 'N/A'),
-                    _InfoRow('Số điện thoại', profile.soDienThoai ?? 'N/A'),
-                  ], isDark),
-                  const SizedBox(height: 16),
-                  _buildInfoSection('Thông tin công tác', [
-                    _InfoRow('Khoa', profile.khoa ?? 'N/A'),
-                    _InfoRow('Bộ môn', profile.boMon ?? 'N/A'),
-                    _InfoRow('Học vị', profile.hocVi ?? 'N/A'),
-                    _InfoRow('Chức danh', profile.chucDanh ?? 'N/A'),
-                    _InfoRow('Chuyên ngành', profile.chuyenNganh ?? 'N/A'),
-                  ], isDark),
-                  const SizedBox(height: 16),
-                  _buildInfoSection('Thông tin cá nhân', [
-                    _InfoRow('CCCD', profile.cccd ?? 'N/A'),
-                    _InfoRow(
-                      'Ngày cấp',
-                      profile.ngayCapCccd != null
-                          ? '${profile.ngayCapCccd!.day}/${profile.ngayCapCccd!.month}/${profile.ngayCapCccd!.year}'
-                          : 'N/A',
-                    ),
-                    _InfoRow('Nơi cấp', profile.noiCapCccd ?? 'N/A'),
-                    _InfoRow('Dân tộc', profile.danToc ?? 'N/A'),
-                    _InfoRow('Tôn giáo', profile.tonGiao ?? 'N/A'),
-                    _InfoRow('Quốc tịch', profile.quocTich ?? 'N/A'),
-                  ], isDark),
-                  const SizedBox(height: 16),
-                  _buildInfoSection('Địa chỉ', [
-                    _InfoRow(
-                      'Địa chỉ thường trú',
-                      profile.diaChiThuongTru ?? 'N/A',
-                    ),
-                    _InfoRow('Tỉnh/Thành phố', profile.tinhThanhPho ?? 'N/A'),
-                    _InfoRow('Phường/Xã', profile.phuongXa ?? 'N/A'),
-                  ], isDark),
-                ],
-              ),
-            ),
-    );
-  }
-
-  Widget _buildProfileHeader(dynamic profile, bool isDark) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-        child: Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: isDark
-                  ? [AppTheme.bluePrimary, AppTheme.bluePrimary.withAlpha(200)]
-                  : [AppTheme.bluePrimary, AppTheme.blueLight],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: AppTheme.bluePrimary.withAlpha(76),
-                blurRadius: 12,
-                offset: const Offset(0, 6),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withAlpha(51),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: const Icon(
-                  Icons.person,
-                  size: 48,
-                  color: AppTheme.bluePrimary,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      profile.hoTen,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Mã GV: ${profile.maGv}',
-                      style: TextStyle(
-                        color: Colors.white.withAlpha(230),
-                        fontSize: 14,
-                      ),
-                    ),
-                    if (profile.chucDanh != null) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        profile.chucDanh!,
-                        style: TextStyle(
-                          color: Colors.white.withAlpha(230),
-                          fontSize: 12,
+      backgroundColor: Colors.transparent,
+      body: Stack(
+        children: [
+          AnimatedBackground(isDark: isDark),
+          SafeArea(
+            child: profile == null
+                ? _buildLoading(isDark)
+                : CustomScrollView(
+                    slivers: [
+                      _buildAppBar(profile, isDark),
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            children: [
+                              _buildQuickActions(isDark),
+                              const SizedBox(height: 20),
+                              _buildInfoCard(
+                                'Thông tin cơ bản',
+                                Icons.person_outline,
+                                [
+                                  _InfoRow('Mã giảng viên', profile.maGv),
+                                  _InfoRow('Họ và tên', profile.hoTen),
+                                  _InfoRow(
+                                    'Khoa/Bộ môn',
+                                    profile.khoaBoMon ?? 'N/A',
+                                  ),
+                                  _InfoRow(
+                                    'Ngày sinh',
+                                    _formatDate(profile.ngaySinh),
+                                  ),
+                                  _InfoRow(
+                                    'Nơi sinh',
+                                    profile.noiSinh ?? 'N/A',
+                                  ),
+                                ],
+                                isDark,
+                              ),
+                              const SizedBox(height: 16),
+                              _buildInfoCard(
+                                'Liên hệ',
+                                Icons.contact_phone_outlined,
+                                [
+                                  _InfoRow(
+                                    'Số điện thoại',
+                                    profile.soDienThoai ?? 'N/A',
+                                  ),
+                                  _InfoRow('Email', profile.email ?? 'N/A'),
+                                  _InfoRow(
+                                    'Địa chỉ',
+                                    profile.diaChiThuongTru ?? 'N/A',
+                                  ),
+                                  _InfoRow(
+                                    'Phường/Xã',
+                                    profile.phuongXa ?? 'N/A',
+                                  ),
+                                  _InfoRow(
+                                    'Tỉnh/TP',
+                                    profile.tinhThanhPho ?? 'N/A',
+                                  ),
+                                ],
+                                isDark,
+                              ),
+                              const SizedBox(height: 16),
+                              _buildInfoCard(
+                                'Giấy tờ tùy thân',
+                                Icons.badge_outlined,
+                                [
+                                  _InfoRow('CCCD', profile.cccd ?? 'N/A'),
+                                  _InfoRow(
+                                    'Ngày cấp',
+                                    _formatDate(profile.ngayCapCccd),
+                                  ),
+                                  _InfoRow(
+                                    'Nơi cấp',
+                                    profile.noiCapCccd ?? 'N/A',
+                                  ),
+                                ],
+                                isDark,
+                              ),
+                              const SizedBox(height: 16),
+                              _buildInfoCard(
+                                'Thông tin khác',
+                                Icons.info_outline,
+                                [
+                                  _InfoRow('Dân tộc', profile.danToc ?? 'N/A'),
+                                  _InfoRow(
+                                    'Tôn giáo',
+                                    profile.tonGiao ?? 'N/A',
+                                  ),
+                                ],
+                                isDark,
+                              ),
+                              const SizedBox(height: 20),
+                            ],
+                          ),
                         ),
                       ),
                     ],
-                  ],
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAppBar(dynamic profile, bool isDark) {
+    return SliverAppBar(
+      expandedHeight: 200,
+      floating: false,
+      pinned: true,
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      flexibleSpace: FlexibleSpaceBar(
+        background: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                AppTheme.bluePrimary.withOpacity(0.6),
+                AppTheme.blueLight.withOpacity(0.6),
+              ],
+            ),
+          ),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      colors: [Colors.white, Colors.blue.shade50],
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    Icons.person,
+                    size: 60,
+                    color: AppTheme.bluePrimary,
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 16),
+                Text(
+                  profile.hoTen,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black26,
+                        blurRadius: 4,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Mã GV: ${profile.maGv}',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.9),
+                    fontSize: 14,
+                    shadows: const [
+                      Shadow(
+                        color: Colors.black26,
+                        blurRadius: 4,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -196,7 +235,7 @@ class _LecturerProfileScreenState extends State<LecturerProfileScreen> {
             label: 'Cập nhật',
             onTap: () => Navigator.pushNamed(context, '/lecturer_edit_profile'),
             isDark: isDark,
-            gradient: [Colors.blue, Colors.blue.shade700],
+            gradient: [Colors.blue.shade400, Colors.blue.shade600],
           ),
         ),
         const SizedBox(width: 12),
@@ -207,7 +246,7 @@ class _LecturerProfileScreenState extends State<LecturerProfileScreen> {
             onTap: () =>
                 Navigator.pushNamed(context, '/lecturer_change_password'),
             isDark: isDark,
-            gradient: [Colors.purple, Colors.purple.shade700],
+            gradient: [Colors.purple.shade400, Colors.purple.shade600],
           ),
         ),
         const SizedBox(width: 12),
@@ -218,7 +257,7 @@ class _LecturerProfileScreenState extends State<LecturerProfileScreen> {
             onTap: () =>
                 Navigator.pushNamed(context, '/lecturer_confirmation_letter'),
             isDark: isDark,
-            gradient: [Colors.green, Colors.green.shade700],
+            gradient: [Colors.green.shade400, Colors.green.shade600],
           ),
         ),
       ],
@@ -234,81 +273,124 @@ class _LecturerProfileScreenState extends State<LecturerProfileScreen> {
   }) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(colors: gradient),
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: gradient[0].withOpacity(0.3),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
+      borderRadius: BorderRadius.circular(16),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(colors: gradient),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: gradient[0].withOpacity(0.4),
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
+                ),
+              ],
             ),
-          ],
-        ),
-        child: Column(
-          children: [
-            Icon(icon, color: Colors.white, size: 24),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-              ),
+            child: Column(
+              children: [
+                Icon(icon, color: Colors.white, size: 28),
+                const SizedBox(height: 8),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildInfoSection(String title, List<_InfoRow> rows, bool isDark) {
+  Widget _buildInfoCard(
+    String title,
+    IconData icon,
+    List<_InfoRow> rows,
+    bool isDark,
+  ) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(20),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: isDark ? AppTheme.darkCard.withAlpha(191) : Colors.white,
-            borderRadius: BorderRadius.circular(16),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: isDark
+                  ? [
+                      AppTheme.darkCard.withOpacity(0.6),
+                      AppTheme.darkCard.withOpacity(0.4),
+                    ]
+                  : [
+                      Colors.white.withOpacity(0.7),
+                      Colors.white.withOpacity(0.5),
+                    ],
+            ),
+            borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: isDark ? Colors.white.withAlpha(26) : AppTheme.lightBorder,
+              color: isDark
+                  ? Colors.white.withOpacity(0.1)
+                  : Colors.white.withOpacity(0.5),
             ),
             boxShadow: [
               BoxShadow(
-                color: isDark
-                    ? Colors.black.withAlpha(51)
-                    : Colors.black.withAlpha(25),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
               ),
             ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                title,
-                style: TextStyle(
-                  color: isDark ? Colors.white : Colors.black87,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      gradient: AppTheme.primaryGradient,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppTheme.bluePrimary.withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Icon(icon, color: Colors.white, size: 24),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    title,
+                    style: TextStyle(
+                      color: isDark ? Colors.white : Colors.black87,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
               ...rows.map(
                 (row) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
+                  padding: const EdgeInsets.only(bottom: 12),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       SizedBox(
-                        width: 140,
+                        width: 130,
                         child: Text(
                           row.label,
                           style: TextStyle(
@@ -316,16 +398,18 @@ class _LecturerProfileScreenState extends State<LecturerProfileScreen> {
                                 ? Colors.grey.shade400
                                 : Colors.grey.shade600,
                             fontSize: 14,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           row.value,
                           style: TextStyle(
                             color: isDark ? Colors.white : Colors.black87,
                             fontSize: 14,
-                            fontWeight: FontWeight.w500,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),

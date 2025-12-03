@@ -2,47 +2,39 @@
 class LecturerProfile {
   final String maGv;
   final String hoTen;
+  final String? khoaBoMon; // Khỏa/Bộ môn (HTTT, CNTT...)
   final DateTime? ngaySinh;
+  final String? noiSinh;
   final String? gioiTinh;
   final String? email;
   final String? soDienThoai;
-  final String? khoa;
-  final String? boMon;
-  final String? hocVi;
-  final String? chucDanh;
-  final String? chuyenNganh;
   final String? cccd;
   final DateTime? ngayCapCccd;
   final String? noiCapCccd;
+  final String? danToc;
+  final String? tonGiao;
   final String? diaChiThuongTru;
   final String? tinhThanhPho;
   final String? phuongXa;
-  final String? danToc;
-  final String? tonGiao;
-  final String? quocTich;
   final String? anhTheUrl;
 
   LecturerProfile({
     required this.maGv,
     required this.hoTen,
+    this.khoaBoMon,
     this.ngaySinh,
+    this.noiSinh,
     this.gioiTinh,
     this.email,
     this.soDienThoai,
-    this.khoa,
-    this.boMon,
-    this.hocVi,
-    this.chucDanh,
-    this.chuyenNganh,
     this.cccd,
     this.ngayCapCccd,
     this.noiCapCccd,
+    this.danToc,
+    this.tonGiao,
     this.diaChiThuongTru,
     this.tinhThanhPho,
     this.phuongXa,
-    this.danToc,
-    this.tonGiao,
-    this.quocTich,
     this.anhTheUrl,
   });
 
@@ -50,28 +42,24 @@ class LecturerProfile {
     return LecturerProfile(
       maGv: json['maGv'] as String,
       hoTen: json['hoTen'] as String,
+      khoaBoMon: json['khoaBoMon'] as String?,
       ngaySinh: json['ngaySinh'] != null
           ? DateTime.tryParse(json['ngaySinh'] as String)
           : null,
+      noiSinh: json['noiSinh'] as String?,
       gioiTinh: json['gioiTinh'] as String?,
       email: json['email'] as String?,
       soDienThoai: json['soDienThoai'] as String?,
-      khoa: json['khoa'] as String?,
-      boMon: json['boMon'] as String?,
-      hocVi: json['hocVi'] as String?,
-      chucDanh: json['chucDanh'] as String?,
-      chuyenNganh: json['chuyenNganh'] as String?,
       cccd: json['cccd'] as String?,
       ngayCapCccd: json['ngayCapCccd'] != null
           ? DateTime.tryParse(json['ngayCapCccd'] as String)
           : null,
       noiCapCccd: json['noiCapCccd'] as String?,
+      danToc: json['danToc'] as String?,
+      tonGiao: json['tonGiao'] as String?,
       diaChiThuongTru: json['diaChiThuongTru'] as String?,
       tinhThanhPho: json['tinhThanhPho'] as String?,
       phuongXa: json['phuongXa'] as String?,
-      danToc: json['danToc'] as String?,
-      tonGiao: json['tonGiao'] as String?,
-      quocTich: json['quocTich'] as String?,
       anhTheUrl: json['anhTheUrl'] as String?,
     );
   }
@@ -80,24 +68,20 @@ class LecturerProfile {
     return {
       'maGv': maGv,
       'hoTen': hoTen,
+      'khoaBoMon': khoaBoMon,
       'ngaySinh': ngaySinh?.toIso8601String(),
+      'noiSinh': noiSinh,
       'gioiTinh': gioiTinh,
       'email': email,
       'soDienThoai': soDienThoai,
-      'khoa': khoa,
-      'boMon': boMon,
-      'hocVi': hocVi,
-      'chucDanh': chucDanh,
-      'chuyenNganh': chuyenNganh,
       'cccd': cccd,
       'ngayCapCccd': ngayCapCccd?.toIso8601String(),
       'noiCapCccd': noiCapCccd,
+      'danToc': danToc,
+      'tonGiao': tonGiao,
       'diaChiThuongTru': diaChiThuongTru,
       'tinhThanhPho': tinhThanhPho,
       'phuongXa': phuongXa,
-      'danToc': danToc,
-      'tonGiao': tonGiao,
-      'quocTich': quocTich,
       'anhTheUrl': anhTheUrl,
     };
   }
