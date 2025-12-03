@@ -148,6 +148,14 @@ class _LecturerGradeManagementScreenState
                     Icons.arrow_back,
                     color: isDark ? Colors.white : Colors.black87,
                   ),
+                )
+              else
+                IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: Icon(
+                    Icons.arrow_back,
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
                 ),
               Container(
                 padding: const EdgeInsets.all(8),
