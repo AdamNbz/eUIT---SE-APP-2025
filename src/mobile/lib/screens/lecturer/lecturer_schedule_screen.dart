@@ -10,7 +10,9 @@ import 'package:shimmer/shimmer.dart';
 
 /// LecturerScheduleScreen - Lịch giảng dạy đầy đủ
 class LecturerScheduleScreen extends StatefulWidget {
-  const LecturerScheduleScreen({super.key});
+  final bool showBackButton;
+
+  const LecturerScheduleScreen({super.key, this.showBackButton = false});
 
   @override
   State<LecturerScheduleScreen> createState() => _LecturerScheduleScreenState();
@@ -88,13 +90,14 @@ class _LecturerScheduleScreenState extends State<LecturerScheduleScreen>
         children: [
           Row(
             children: [
-              IconButton(
-                onPressed: () => Navigator.pop(context),
-                icon: Icon(
-                  Icons.arrow_back,
-                  color: isDark ? Colors.white : Colors.black87,
+              if (widget.showBackButton)
+                IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: Icon(
+                    Icons.arrow_back,
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
                 ),
-              ),
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
@@ -264,9 +267,12 @@ class _LecturerScheduleScreenState extends State<LecturerScheduleScreen>
             padding: const EdgeInsets.symmetric(horizontal: 16),
             itemCount: 7,
             itemBuilder: (context, index) {
-              final day = _selectedDate.add(
-                Duration(days: index - _selectedDate.weekday + 1),
+              // Tính ngày bắt đầu tuần (Thứ 2)
+              final startOfWeek = _selectedDate.subtract(
+                Duration(days: _selectedDate.weekday - 1),
               );
+              // Lấy ngày tương ứng (index 0 = Thứ 2, index 6 = Chủ nhật)
+              final day = startOfWeek.add(Duration(days: index));
               final daySchedule = weekSchedule[index] ?? [];
               return _buildDayCard(day, daySchedule, isDark);
             },
@@ -850,11 +856,22 @@ class _LecturerScheduleScreenState extends State<LecturerScheduleScreen>
   }
 
   int _getCurrentWeek() {
-    // Calculate current week number (simple implementation)
+    // Tính tuần học từ đầu năm học (giả sử bắt đầu từ tuần 1 tháng 9)
     final now = DateTime.now();
-    final startOfYear = DateTime(now.year, 1, 1);
-    final difference = now.difference(startOfYear).inDays;
-    return (difference / 7).ceil();
+    final currentYear = now.month >= 9 ? now.year : now.year - 1;
+    final startOfAcademicYear = DateTime(currentYear, 9, 1);
+
+    // Tìm thứ 2 đầu tiên của năm học
+    final firstMonday = startOfAcademicYear.add(
+      Duration(days: (8 - startOfAcademicYear.weekday) % 7),
+    );
+
+    if (now.isBefore(firstMonday)) {
+      return 1;
+    }
+
+    final difference = now.difference(firstMonday).inDays;
+    return (difference / 7).floor() + 1;
   }
 
   void _showDayScheduleDialog(

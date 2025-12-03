@@ -9,7 +9,9 @@ import 'package:shimmer/shimmer.dart';
 
 /// LecturerClassListScreen - Danh sách lớp giảng dạy
 class LecturerClassListScreen extends StatefulWidget {
-  const LecturerClassListScreen({super.key});
+  final bool showBackButton;
+
+  const LecturerClassListScreen({super.key, this.showBackButton = false});
 
   @override
   State<LecturerClassListScreen> createState() =>
@@ -91,13 +93,14 @@ class _LecturerClassListScreenState extends State<LecturerClassListScreen>
           // Title
           Row(
             children: [
-              IconButton(
-                onPressed: () => Navigator.pop(context),
-                icon: Icon(
-                  Icons.arrow_back,
-                  color: isDark ? Colors.white : Colors.black87,
+              if (widget.showBackButton)
+                IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: Icon(
+                    Icons.arrow_back,
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
                 ),
-              ),
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(

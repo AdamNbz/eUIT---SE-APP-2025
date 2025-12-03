@@ -109,8 +109,6 @@ class MyApp extends StatelessWidget {
         '/home': (context) => const MainScreen(),
         '/lecturer_home': (context) => const LecturerMainScreen(),
         '/lecturer_profile': (context) => const LecturerProfileScreen(),
-        '/lecturer_class_list': (context) => const LecturerClassListScreen(),
-        '/lecturer_schedule': (context) => const LecturerScheduleScreen(),
         '/lecturer_grade_management': (context) =>
             const LecturerGradeManagementScreen(),
         '/lecturer_appeals': (context) => const LecturerAppealsScreen(),
@@ -131,6 +129,20 @@ class MyApp extends StatelessWidget {
             const NotificationPreferencesScreen(),
       },
       onGenerateRoute: (settings) {
+        // Routes with showBackButton parameter
+        if (settings.name == '/lecturer_class_list') {
+          return MaterialPageRoute(
+            builder: (context) =>
+                const LecturerClassListScreen(showBackButton: true),
+          );
+        }
+        if (settings.name == '/lecturer_schedule') {
+          return MaterialPageRoute(
+            builder: (context) =>
+                const LecturerScheduleScreen(showBackButton: true),
+          );
+        }
+        // Route with custom arguments
         if (settings.name == '/lecturer_class_detail') {
           final classInfo = settings.arguments as TeachingClass;
           return MaterialPageRoute(
