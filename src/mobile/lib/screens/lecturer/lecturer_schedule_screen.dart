@@ -22,13 +22,14 @@ class _LecturerScheduleScreenState extends State<LecturerScheduleScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   DateTime _selectedDate = DateTime.now();
-  int _selectedWeek = 1;
+  late int _selectedWeek;
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
+    _selectedWeek = _getCurrentWeek(); // Khởi tạo với tuần hiện tại
     _tabController = TabController(length: 2, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<LecturerProvider>().fetchSchedule();
@@ -289,15 +290,21 @@ class _LecturerScheduleScreenState extends State<LecturerScheduleScreen>
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           IconButton(
-            onPressed: () {
-              setState(() {
-                _selectedWeek = (_selectedWeek - 1).clamp(1, 20);
-                _selectedDate = _selectedDate.subtract(const Duration(days: 7));
-              });
-            },
+            onPressed: _selectedWeek > 1
+                ? () {
+                    setState(() {
+                      _selectedDate = _selectedDate.subtract(
+                        const Duration(days: 7),
+                      );
+                      _selectedWeek = _getWeekNumber(_selectedDate);
+                    });
+                  }
+                : null,
             icon: Icon(
               Icons.chevron_left,
-              color: isDark ? Colors.white : Colors.black87,
+              color: _selectedWeek > 1
+                  ? (isDark ? Colors.white : Colors.black87)
+                  : Colors.grey.shade400,
             ),
           ),
           Container(
@@ -315,15 +322,21 @@ class _LecturerScheduleScreenState extends State<LecturerScheduleScreen>
             ),
           ),
           IconButton(
-            onPressed: () {
-              setState(() {
-                _selectedWeek = (_selectedWeek + 1).clamp(1, 20);
-                _selectedDate = _selectedDate.add(const Duration(days: 7));
-              });
-            },
+            onPressed: _selectedWeek < 20
+                ? () {
+                    setState(() {
+                      _selectedDate = _selectedDate.add(
+                        const Duration(days: 7),
+                      );
+                      _selectedWeek = _getWeekNumber(_selectedDate);
+                    });
+                  }
+                : null,
             icon: Icon(
               Icons.chevron_right,
-              color: isDark ? Colors.white : Colors.black87,
+              color: _selectedWeek < 20
+                  ? (isDark ? Colors.white : Colors.black87)
+                  : Colors.grey.shade400,
             ),
           ),
         ],
@@ -856,9 +869,12 @@ class _LecturerScheduleScreenState extends State<LecturerScheduleScreen>
   }
 
   int _getCurrentWeek() {
+    return _getWeekNumber(DateTime.now());
+  }
+
+  int _getWeekNumber(DateTime date) {
     // Tính tuần học từ đầu năm học (giả sử bắt đầu từ tuần 1 tháng 9)
-    final now = DateTime.now();
-    final currentYear = now.month >= 9 ? now.year : now.year - 1;
+    final currentYear = date.month >= 9 ? date.year : date.year - 1;
     final startOfAcademicYear = DateTime(currentYear, 9, 1);
 
     // Tìm thứ 2 đầu tiên của năm học
@@ -866,12 +882,15 @@ class _LecturerScheduleScreenState extends State<LecturerScheduleScreen>
       Duration(days: (8 - startOfAcademicYear.weekday) % 7),
     );
 
-    if (now.isBefore(firstMonday)) {
+    if (date.isBefore(firstMonday)) {
       return 1;
     }
 
-    final difference = now.difference(firstMonday).inDays;
-    return (difference / 7).floor() + 1;
+    final difference = date.difference(firstMonday).inDays;
+    final weekNumber = (difference / 7).floor() + 1;
+
+    // Giới hạn trong học kỳ (tuần 1-20)
+    return weekNumber.clamp(1, 20);
   }
 
   void _showDayScheduleDialog(
