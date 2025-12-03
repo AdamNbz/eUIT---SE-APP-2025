@@ -377,7 +377,10 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '${nextClass.tietBatDau ?? ''} - ${nextClass.tietKetThuc ?? ''}',
+                          _periodsToTimeRange(
+                            int.tryParse(nextClass.tietBatDau ?? '1') ?? 1,
+                            int.tryParse(nextClass.tietKetThuc ?? '3') ?? 3,
+                          ),
                           style: TextStyle(
                             color: isDark
                                 ? AppTheme.bluePrimary
@@ -408,6 +411,32 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
                         ),
                       ],
                     ),
+                  ),
+                  const SizedBox(width: 16),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        'Bắt đầu sau',
+                        style: TextStyle(
+                          color: isDark
+                              ? Colors.grey.shade400
+                              : Colors.grey.shade600,
+                          fontSize: 13,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _calculateCountdown(nextClass),
+                        style: TextStyle(
+                          color: isDark
+                              ? AppTheme.bluePrimary
+                              : AppTheme.bluePrimary,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -446,6 +475,99 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
         ),
       ),
     );
+  }
+
+  String _calculateCountdown(dynamic nextClass) {
+    try {
+      final now = DateTime.now();
+      final classDate = nextClass.ngayBatDau;
+
+      if (classDate == null) return '---';
+
+      final startPeriod = int.tryParse(nextClass.tietBatDau ?? '1') ?? 1;
+      final classTime = _getClassStartTime(classDate, startPeriod);
+
+      final difference = classTime.difference(now);
+
+      if (difference.isNegative) return 'Đã bắt đầu';
+
+      final hours = difference.inHours;
+      final minutes = difference.inMinutes % 60;
+
+      if (hours > 24) {
+        final days = hours ~/ 24;
+        return '${days}d ${hours % 24}h';
+      } else if (hours > 0) {
+        return minutes > 0 ? '${hours}h ${minutes}m' : '${hours}h';
+      } else {
+        return '${minutes}m';
+      }
+    } catch (e) {
+      return '---';
+    }
+  }
+
+  DateTime _getClassStartTime(DateTime date, int period) {
+    const Map<int, int> periodStartHour = {
+      1: 7,
+      2: 8,
+      3: 9,
+      4: 10,
+      5: 10,
+      6: 13,
+      7: 13,
+      8: 14,
+      9: 15,
+      0: 16,
+    };
+    const Map<int, int> periodStartMinute = {
+      1: 30,
+      2: 15,
+      3: 0,
+      4: 0,
+      5: 45,
+      6: 0,
+      7: 45,
+      8: 30,
+      9: 30,
+      0: 15,
+    };
+
+    final hour = periodStartHour[period] ?? 7;
+    final minute = periodStartMinute[period] ?? 30;
+
+    return DateTime(date.year, date.month, date.day, hour, minute);
+  }
+
+  String _periodsToTimeRange(int startPeriod, int endPeriod) {
+    const Map<int, String> startMap = {
+      1: '7:30',
+      2: '8:15',
+      3: '9:00',
+      4: '10:00',
+      5: '10:45',
+      6: '13:00',
+      7: '13:45',
+      8: '14:30',
+      9: '15:30',
+      0: '16:15',
+    };
+    const Map<int, String> endMap = {
+      1: '8:15',
+      2: '9:00',
+      3: '9:45',
+      4: '10:45',
+      5: '11:30',
+      6: '13:45',
+      7: '14:30',
+      8: '15:15',
+      9: '16:15',
+      0: '17:00',
+    };
+
+    final start = startMap[startPeriod] ?? '$startPeriod';
+    final end = endMap[endPeriod] ?? '$endPeriod';
+    return '$start - $end';
   }
 
   Widget _buildDetailChip(String label, bool isDark) {

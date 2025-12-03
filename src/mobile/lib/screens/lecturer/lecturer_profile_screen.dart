@@ -227,40 +227,25 @@ class _LecturerProfileScreenState extends State<LecturerProfileScreen> {
   }
 
   Widget _buildQuickActions(bool isDark) {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildActionButton(
-            icon: Icons.edit,
-            label: 'Cập nhật',
-            onTap: () => Navigator.pushNamed(context, '/lecturer_edit_profile'),
-            isDark: isDark,
-            gradient: [Colors.blue.shade400, Colors.blue.shade600],
-          ),
+    return Center(
+      child: SizedBox(
+        width: 200,
+        child: _buildActionButton(
+          icon: Icons.edit,
+          label: 'Cập nhật thông tin',
+          onTap: () {
+            // TODO: Implement update profile
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Chức năng đang phát triển'),
+                duration: Duration(seconds: 2),
+              ),
+            );
+          },
+          isDark: isDark,
+          gradient: [Colors.blue.shade400, Colors.blue.shade600],
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildActionButton(
-            icon: Icons.lock_reset,
-            label: 'Đổi MK',
-            onTap: () =>
-                Navigator.pushNamed(context, '/lecturer_change_password'),
-            isDark: isDark,
-            gradient: [Colors.purple.shade400, Colors.purple.shade600],
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildActionButton(
-            icon: Icons.description,
-            label: 'Giấy XN',
-            onTap: () =>
-                Navigator.pushNamed(context, '/lecturer_confirmation_letter'),
-            isDark: isDark,
-            gradient: [Colors.green.shade400, Colors.green.shade600],
-          ),
-        ),
-      ],
+      ),
     );
   }
 
