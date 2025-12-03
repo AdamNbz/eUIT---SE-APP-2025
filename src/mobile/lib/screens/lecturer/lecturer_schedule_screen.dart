@@ -129,18 +129,32 @@ class _LecturerScheduleScreenState extends State<LecturerScheduleScreen>
                   ],
                 ),
               ),
-              IconButton(
-                onPressed: () {
-                  setState(() {
-                    _selectedDate = DateTime.now();
-                    _selectedWeek = 1;
-                  });
-                },
-                icon: Icon(
-                  Icons.today,
-                  color: isDark ? Colors.white : Colors.black87,
+              if (!_isCurrentWeek())
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _selectedDate = DateTime.now();
+                      _selectedWeek = _getCurrentWeek();
+                    });
+                  },
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    backgroundColor: AppTheme.bluePrimary.withOpacity(0.1),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Text(
+                    'Hôm nay',
+                    style: AppTheme.bodySmall.copyWith(
+                      color: AppTheme.bluePrimary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
-              ),
             ],
           ),
           const SizedBox(height: 12),
@@ -587,25 +601,210 @@ class _LecturerScheduleScreenState extends State<LecturerScheduleScreen>
     final firstDayOfMonth = DateTime(now.year, now.month, 1);
     final lastDayOfMonth = DateTime(now.year, now.month + 1, 0);
     final daysInMonth = lastDayOfMonth.day;
+    final firstWeekday = firstDayOfMonth.weekday;
 
-    return ListView.builder(
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
-      itemCount: daysInMonth,
-      itemBuilder: (context, index) {
-        final day = DateTime(now.year, now.month, index + 1);
-        final daySchedule = provider.schedule
-            .where((item) => item.thu == day.weekday)
-            .toList();
+      child: Column(
+        children: [
+          // Month selector
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                IconButton(
+                  onPressed: () {
+                    setState(() {
+                      _selectedDate = DateTime(
+                        _selectedDate.year,
+                        _selectedDate.month - 1,
+                      );
+                    });
+                  },
+                  icon: Icon(
+                    Icons.chevron_left,
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    gradient: AppTheme.primaryGradient,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    DateFormat('MMMM yyyy', 'vi').format(_selectedDate),
+                    style: AppTheme.bodyMedium.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  onPressed: () {
+                    setState(() {
+                      _selectedDate = DateTime(
+                        _selectedDate.year,
+                        _selectedDate.month + 1,
+                      );
+                    });
+                  },
+                  icon: Icon(
+                    Icons.chevron_right,
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Calendar grid
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: (isDark ? AppTheme.darkCard : Colors.white)
+                      .withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: (isDark ? AppTheme.darkBorder : AppTheme.lightBorder)
+                        .withOpacity(0.3),
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    // Weekday headers
+                    Container(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      decoration: BoxDecoration(
+                        gradient: AppTheme.primaryGradient.scale(0.3),
+                        borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(14),
+                        ),
+                      ),
+                      child: Row(
+                        children: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN']
+                            .map((day) {
+                              return Expanded(
+                                child: Center(
+                                  child: Text(
+                                    day,
+                                    style: AppTheme.bodySmall.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            })
+                            .toList(),
+                      ),
+                    ),
+                    // Calendar days
+                    ...List.generate(
+                      ((daysInMonth + firstWeekday - 1) / 7).ceil(),
+                      (weekIndex) {
+                        return Row(
+                          children: List.generate(7, (dayIndex) {
+                            final dayNumber =
+                                weekIndex * 7 + dayIndex - firstWeekday + 2;
+                            if (dayNumber < 1 || dayNumber > daysInMonth) {
+                              return Expanded(child: Container());
+                            }
+                            final day = DateTime(
+                              _selectedDate.year,
+                              _selectedDate.month,
+                              dayNumber,
+                            );
+                            final daySchedule = provider.schedule
+                                .where((item) => item.thu == day.weekday)
+                                .toList();
+                            final isToday =
+                                day.day == DateTime.now().day &&
+                                day.month == DateTime.now().month &&
+                                day.year == DateTime.now().year;
 
-        // Filter by search query
-        final filteredSchedule = daySchedule.where((item) {
-          if (_searchQuery.isEmpty) return true;
-          return item.tenMon.toLowerCase().contains(_searchQuery) ||
-              item.maMon.toLowerCase().contains(_searchQuery);
-        }).toList();
-
-        return _buildDayCard(day, filteredSchedule, isDark);
-      },
+                            return Expanded(
+                              child: GestureDetector(
+                                onTap: daySchedule.isNotEmpty
+                                    ? () => _showDayScheduleDialog(
+                                        day,
+                                        daySchedule,
+                                        isDark,
+                                      )
+                                    : null,
+                                child: Container(
+                                  height: 70,
+                                  margin: const EdgeInsets.all(2),
+                                  decoration: BoxDecoration(
+                                    color: isToday
+                                        ? AppTheme.bluePrimary.withOpacity(0.2)
+                                        : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: isToday
+                                        ? Border.all(
+                                            color: AppTheme.bluePrimary,
+                                            width: 2,
+                                          )
+                                        : null,
+                                  ),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        '$dayNumber',
+                                        style: AppTheme.bodyMedium.copyWith(
+                                          color: isDark
+                                              ? Colors.white
+                                              : Colors.black87,
+                                          fontWeight: isToday
+                                              ? FontWeight.bold
+                                              : FontWeight.normal,
+                                        ),
+                                      ),
+                                      if (daySchedule.isNotEmpty)
+                                        Container(
+                                          margin: const EdgeInsets.only(top: 4),
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 6,
+                                            vertical: 2,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            gradient: AppTheme.primaryGradient,
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            '${daySchedule.length}',
+                                            style: AppTheme.bodySmall.copyWith(
+                                              color: Colors.white,
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          }),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -638,5 +837,108 @@ class _LecturerScheduleScreenState extends State<LecturerScheduleScreen>
       weekSchedule[i] = schedule.where((item) => item.thu == i + 1).toList();
     }
     return weekSchedule;
+  }
+
+  bool _isCurrentWeek() {
+    final now = DateTime.now();
+    final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+    final endOfWeek = startOfWeek.add(const Duration(days: 6));
+    return _selectedDate.isAfter(
+          startOfWeek.subtract(const Duration(days: 1)),
+        ) &&
+        _selectedDate.isBefore(endOfWeek.add(const Duration(days: 1)));
+  }
+
+  int _getCurrentWeek() {
+    // Calculate current week number (simple implementation)
+    final now = DateTime.now();
+    final startOfYear = DateTime(now.year, 1, 1);
+    final difference = now.difference(startOfYear).inDays;
+    return (difference / 7).ceil();
+  }
+
+  void _showDayScheduleDialog(
+    DateTime day,
+    List<TeachingScheduleItem> schedule,
+    bool isDark,
+  ) {
+    final filteredSchedule = schedule.where((item) {
+      if (_searchQuery.isEmpty) return true;
+      return item.tenMon.toLowerCase().contains(_searchQuery) ||
+          item.maMon.toLowerCase().contains(_searchQuery);
+    }).toList();
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 500),
+              decoration: BoxDecoration(
+                color: (isDark ? AppTheme.darkCard : Colors.white).withOpacity(
+                  0.9,
+                ),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      gradient: AppTheme.primaryGradient,
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(16),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                DateFormat('EEEE', 'vi').format(day),
+                                style: AppTheme.bodyMedium.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              Text(
+                                DateFormat('dd/MM/yyyy').format(day),
+                                style: AppTheme.bodySmall.copyWith(
+                                  color: Colors.white.withOpacity(0.9),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () => Navigator.pop(context),
+                          icon: const Icon(Icons.close, color: Colors.white),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    constraints: const BoxConstraints(maxHeight: 400),
+                    child: ListView(
+                      shrinkWrap: true,
+                      children: filteredSchedule
+                          .map((item) => _buildScheduleItem(item, isDark))
+                          .toList(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
