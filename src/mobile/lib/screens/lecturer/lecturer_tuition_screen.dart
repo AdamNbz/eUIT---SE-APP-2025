@@ -296,11 +296,15 @@ class _LecturerTuitionScreenState extends State<LecturerTuitionScreen> {
   }
 
   Widget _buildTuitionCard(Map<String, dynamic> tuition, bool isDark) {
-    final hocKy = tuition['hocKy'] as String? ?? 'N/A';
-    final tongHocPhi = tuition['tongHocPhi'] as num? ?? 0;
-    final daDong = tuition['daDong'] as num? ?? 0;
+    final hocKy = tuition['hocKy']?.toString() ?? 'N/A';
+    final tongHocPhi = tuition['tongHocPhi'] is num
+        ? tuition['tongHocPhi'] as num
+        : num.tryParse(tuition['tongHocPhi']?.toString() ?? '0') ?? 0;
+    final daDong = tuition['daDong'] is num
+        ? tuition['daDong'] as num
+        : num.tryParse(tuition['daDong']?.toString() ?? '0') ?? 0;
     final conLai = tongHocPhi - daDong;
-    final trangThai = tuition['trangThai'] as String? ?? '';
+    final trangThai = tuition['trangThai']?.toString() ?? '';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -370,7 +374,7 @@ class _LecturerTuitionScreenState extends State<LecturerTuitionScreen> {
                     valueColor: conLai > 0 ? Colors.red : Colors.green),
                 if (tuition['hanDong'] != null) ...[
                   const SizedBox(height: 8),
-                  _buildInfoRow('Hạn đóng', tuition['hanDong'] as String, isDark,
+                  _buildInfoRow('Hạn đóng', tuition['hanDong'].toString(), isDark,
                       valueColor: Colors.orange),
                 ],
               ],

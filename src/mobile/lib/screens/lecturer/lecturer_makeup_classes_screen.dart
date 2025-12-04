@@ -181,15 +181,15 @@ class _LecturerMakeupClassesScreenState
   }
 
   Widget _buildMakeupClassCard(Map<String, dynamic> makeupClass, bool isDark) {
-    final maMon = makeupClass['maMon'] as String? ?? '';
-    final tenMon = makeupClass['tenMon'] as String? ?? 'N/A';
-    final nhom = makeupClass['nhom'] as String? ?? '';
-    final ngayHocBu = makeupClass['ngayHocBu'] as String?;
-    final tietBatDau = makeupClass['tietBatDau'] as String? ?? '';
-    final tietKetThuc = makeupClass['tietKetThuc'] as String? ?? '';
-    final phong = makeupClass['phong'] as String? ?? 'TBA';
-    final lyDo = makeupClass['lyDo'] as String? ?? '';
-    final trangThai = makeupClass['trangThai'] as String? ?? 'Chưa học';
+    final maMon = makeupClass['maMon']?.toString() ?? '';
+    final tenMon = makeupClass['tenMon']?.toString() ?? 'N/A';
+    final nhom = makeupClass['nhom']?.toString() ?? '';
+    final ngayHocBu = makeupClass['ngayHocBu']?.toString();
+    final tietBatDau = makeupClass['tietBatDau']?.toString() ?? '';
+    final tietKetThuc = makeupClass['tietKetThuc']?.toString() ?? '';
+    final phong = makeupClass['phong']?.toString() ?? 'TBA';
+    final lyDo = makeupClass['lyDo']?.toString() ?? '';
+    final trangThai = makeupClass['trangThai']?.toString() ?? 'Chưa học';
 
     DateTime? dateTime;
     if (ngayHocBu != null) {
@@ -257,7 +257,7 @@ class _LecturerMakeupClassesScreenState
                           ),
                           Text(
                             dateTime != null
-                                ? DateFormat('MMM', 'vi').format(dateTime)
+                                ? DateFormat('MMM').format(dateTime)
                                 : '',
                             style: AppTheme.bodySmall.copyWith(
                               color: Colors.white,

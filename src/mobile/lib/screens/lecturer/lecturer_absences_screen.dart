@@ -242,14 +242,20 @@ class _LecturerAbsencesScreenState extends State<LecturerAbsencesScreen> {
   }
 
   Widget _buildAbsenceCard(Map<String, dynamic> absence, bool isDark) {
-    final mssv = absence['mssv'] as String? ?? '';
-    final hoTen = absence['hoTen'] as String? ?? 'N/A';
-    final maMon = absence['maMon'] as String? ?? '';
-    final tenMon = absence['tenMon'] as String? ?? 'N/A';
-    final soTietVang = absence['soTietVang'] as int? ?? 0;
-    final soTietCoPhep = absence['soTietCoPhep'] as int? ?? 0;
+    final mssv = absence['mssv']?.toString() ?? '';
+    final hoTen = absence['hoTen']?.toString() ?? 'N/A';
+    final maMon = absence['maMon']?.toString() ?? '';
+    final tenMon = absence['tenMon']?.toString() ?? 'N/A';
+    final soTietVang = absence['soTietVang'] is int 
+        ? absence['soTietVang'] as int 
+        : int.tryParse(absence['soTietVang']?.toString() ?? '0') ?? 0;
+    final soTietCoPhep = absence['soTietCoPhep'] is int
+        ? absence['soTietCoPhep'] as int
+        : int.tryParse(absence['soTietCoPhep']?.toString() ?? '0') ?? 0;
     final soTietKhongPhep = soTietVang - soTietCoPhep;
-    final tongSoTiet = absence['tongSoTiet'] as int? ?? 45;
+    final tongSoTiet = absence['tongSoTiet'] is int
+        ? absence['tongSoTiet'] as int
+        : int.tryParse(absence['tongSoTiet']?.toString() ?? '45') ?? 45;
     final tiLeVang = (soTietVang / tongSoTiet * 100);
 
     final isWarning = tiLeVang > 20; // Cảnh báo nếu vắng > 20%

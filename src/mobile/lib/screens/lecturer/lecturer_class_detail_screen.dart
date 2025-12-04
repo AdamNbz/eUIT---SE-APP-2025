@@ -96,14 +96,6 @@ class _LecturerClassDetailScreenState extends State<LecturerClassDetailScreen>
     }
   }
 
-  String _generateVietnameseName(int index) {
-    final lastNames = ['Nguyễn', 'Trần', 'Lê', 'Phạm', 'Hoàng', 'Huỳnh', 'Võ', 'Phan', 'Đặng', 'Bùi'];
-    final middleNames = ['Văn', 'Thị', 'Hữu', 'Minh', 'Quốc', 'Đức', 'Anh', 'Thanh', 'Tuấn', 'Phương'];
-    final firstNames = ['An', 'Bình', 'Chi', 'Dũng', 'Hà', 'Hùng', 'Linh', 'Mai', 'Nam', 'Phúc', 'Quân', 'Sơn', 'Tâm', 'Thảo', 'Tú'];
-    
-    return '${lastNames[index % lastNames.length]} ${middleNames[index % middleNames.length]} ${firstNames[index % firstNames.length]}';
-  }
-
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
