@@ -257,6 +257,9 @@ class LecturerProvider extends ChangeNotifier {
         _teachingSchedule = data
             .map((item) => TeachingScheduleItem.fromJson(item))
             .toList();
+        
+        // Find next class from schedule
+        _findNextClass();
         notifyListeners();
       } else {
         developer.log('Failed to fetch teaching schedule: ${res?.statusCode}', name: 'LecturerProvider');
@@ -267,6 +270,40 @@ class LecturerProvider extends ChangeNotifier {
         name: 'LecturerProvider',
       );
     }
+  }
+
+  void _findNextClass() {
+    if (_teachingSchedule.isEmpty) {
+      _nextClass = null;
+      return;
+    }
+
+    final now = DateTime.now();
+    TeachingScheduleItem? upcoming;
+    Duration? shortestDuration;
+
+    for (final item in _teachingSchedule) {
+      // Skip if no date information
+      if (item.ngayBatDau == null) continue;
+
+      final classDateTime = item.ngayBatDau!;
+      
+      // Only consider future classes
+      if (classDateTime.isAfter(now)) {
+        final duration = classDateTime.difference(now);
+        
+        if (shortestDuration == null || duration < shortestDuration) {
+          shortestDuration = duration;
+          upcoming = item;
+        }
+      }
+    }
+
+    _nextClass = upcoming;
+    developer.log(
+      'Next class found: ${_nextClass?.tenMon ?? 'None'}',
+      name: 'LecturerProvider',
+    );
   }
 
   Future<void> _fetchNotifications() async {
