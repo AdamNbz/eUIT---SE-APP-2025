@@ -43,12 +43,13 @@ public class ServiceController : ControllerBase
 
         try
         {
-            var sql = "SELECT * FROM func_request_confirmation_letter(@p_mssv, @p_purpose)";
+            var sql = "SELECT * FROM func_request_confirmation_letter(@p_mssv, @p_purpose, @p_language)";
             
             var result = await _context.Database
                 .SqlQueryRaw<ConfirmationLetterResult>(sql,
-                    new NpgsqlParameter("p_mssv", mssv ?? 0),
-                    new NpgsqlParameter("p_purpose", requestDto.Purpose ?? string.Empty))
+                    new NpgsqlParameter("p_mssv", mssv.Value ?? 0 ),
+                    new NpgsqlParameter("p_purpose", requestDto.Purpose ?? string.Empty),
+                    new NpgsqlParameter("p_language", requestDto.Language))
                 .ToListAsync();
 
             var record = result.FirstOrDefault();
@@ -159,7 +160,7 @@ public class ServiceController : ControllerBase
         try
         {
             // Bước 2: Gọi SQL function để lấy lịch sử
-            var sql = "SELECT * FROM func_get_confirmation_letter_status(@p_mssv)";
+            var sql = "SELECT * FROM func_get_confirmation_letter_history(@p_mssv)";
             
             var results = await _context.Database
                 .SqlQueryRaw<ConfirmationLetterHistoryResult>(sql, 
@@ -171,6 +172,8 @@ public class ServiceController : ControllerBase
             {
                 SerialNumber = r.serial_number,
                 Purpose = r.purpose,
+                Language = r.language,
+                Status = r.status,
                 ExpiryDate = r.expiry_date?.ToString("dd/MM/yyyy") ?? "",
                 RequestedAt = r.requested_at.ToString("dd/MM/yyyy HH:mm")
             }).ToList();
@@ -228,7 +231,7 @@ public class ServiceController : ControllerBase
 
     private class ParkingPassResult
     {
-        public int id { get; set; }
+        public int out_id { get; set; }
         public string license_plate { get; set; } = string.Empty;
         public string vehicle_type { get; set; } = string.Empty;
         public DateTime expiry_date { get; set; }
@@ -259,12 +262,8 @@ public class ServiceController : ControllerBase
         }
         else // motorbike
         {
-            if (string.IsNullOrWhiteSpace(requestDto.LicensePlate))
-            {
-                ModelState.AddModelError(nameof(requestDto.LicensePlate), "Biển số xe là bắt buộc cho xe máy.");
-                return BadRequest(ModelState);
-            }
-            licensePlate = requestDto.LicensePlate;
+            ModelState.AddModelError(nameof(requestDto.LicensePlate), "Biển số xe là bắt buộc cho xe máy.");
+            return BadRequest(ModelState);
         }
 
         try
@@ -286,18 +285,18 @@ public class ServiceController : ControllerBase
 
             var responseDto = new ParkingPassResponseDto
             {
-                Id = result.id,
+                Id = result.out_id,
                 LicensePlate = result.license_plate,
                 VehicleType = result.vehicle_type,
                 RegisteredAt = result.registered_at.ToString("dd/MM/yyyy HH:mm"),
                 ExpiryDate = result.expiry_date.ToString("dd/MM/yyyy")
             };
 
-            return CreatedAtAction(nameof(RegisterParkingPass), new { id = result.id }, responseDto);
+            return CreatedAtAction(nameof(RegisterParkingPass), new { id = result.out_id }, responseDto);
         }
         catch (PostgresException pgEx) when (pgEx.SqlState == "P0001")
         {
-            // Bắt lỗi 'P0001' từ hàm SQL và trả về 409 Conflict
+            // Catch 'P0001' error from the SQL function and return 409 Conflict
             return Conflict(new { error = pgEx.MessageText });
         }
         catch (Exception ex)
