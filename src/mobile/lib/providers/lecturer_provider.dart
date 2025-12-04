@@ -127,6 +127,21 @@ class LecturerProvider extends ChangeNotifier {
         type: 'lecturer_confirmation_letter',
         iconName: 'verified',
       ),
+      QuickAction(
+        label: 'Vắng mặt',
+        type: 'lecturer_absences',
+        iconName: 'event_busy',
+      ),
+      QuickAction(
+        label: 'Lớp học bù',
+        type: 'lecturer_makeup_classes',
+        iconName: 'event_available',
+      ),
+      QuickAction(
+        label: 'Học phí',
+        type: 'lecturer_tuition',
+        iconName: 'payment',
+      ),
     ];
   }
 

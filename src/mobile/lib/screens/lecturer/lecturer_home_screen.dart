@@ -68,6 +68,15 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
       case 'lecturer_confirmation_letter':
         Navigator.pushNamed(context, '/lecturer_confirmation_letter');
         break;
+      case 'lecturer_tuition':
+        Navigator.pushNamed(context, '/lecturer_tuition');
+        break;
+      case 'lecturer_absences':
+        Navigator.pushNamed(context, '/lecturer_absences');
+        break;
+      case 'lecturer_makeup_classes':
+        Navigator.pushNamed(context, '/lecturer_makeup_classes');
+        break;
       default:
         break;
     }

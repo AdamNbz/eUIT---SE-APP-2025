@@ -15,6 +15,9 @@ import 'screens/lecturer/lecturer_exam_schedule_screen.dart';
 import 'screens/lecturer/lecturer_edit_profile_screen.dart';
 import 'screens/lecturer/lecturer_change_password_screen.dart';
 import 'screens/lecturer/lecturer_confirmation_letter_screen.dart';
+import 'screens/lecturer/lecturer_tuition_screen.dart';
+import 'screens/lecturer/lecturer_absences_screen.dart';
+import 'screens/lecturer/lecturer_makeup_classes_screen.dart';
 import 'screens/chatbot.dart';
 import 'screens/notifications_screen.dart';
 import 'services/theme_controller.dart';
@@ -121,6 +124,10 @@ class MyApp extends StatelessWidget {
             const LecturerChangePasswordScreen(),
         '/lecturer_confirmation_letter': (context) =>
             const LecturerConfirmationLetterScreen(),
+        '/lecturer_tuition': (context) => const LecturerTuitionScreen(),
+        '/lecturer_absences': (context) => const LecturerAbsencesScreen(),
+        '/lecturer_makeup_classes': (context) =>
+            const LecturerMakeupClassesScreen(),
         '/chatbot': (context) => const ChatbotScreen(),
         '/notifications': (context) => const NotificationsScreen(),
         '/settings': (context) => const SettingsScreen(),
