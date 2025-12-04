@@ -338,29 +338,28 @@ class LecturerProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final token = await auth.getToken();
-      if (token == null) {
-        _isLoading = false;
-        notifyListeners();
-        return;
-      }
-
+      developer.log('Fetching teaching schedule...', name: 'LecturerProvider');
       final uri = auth.buildUri('/api/lecturer/schedule');
-      final res = await http
-          .get(
-            uri,
-            headers: {
-              'Authorization': 'Bearer $token',
-              'Content-Type': 'application/json',
-            },
-          )
-          .timeout(const Duration(seconds: 10));
+      
+      final res = await _makeAuthenticatedRequest(
+        requestFn: (token) => http.get(
+          uri,
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+          },
+        ).timeout(const Duration(seconds: 10)),
+      );
 
-      if (res.statusCode == 200) {
+      if (res != null && res.statusCode == 200) {
+        developer.log('Teaching schedule fetched successfully', name: 'LecturerProvider');
         final data = jsonDecode(res.body) as List;
         _teachingSchedule = data
             .map((item) => TeachingScheduleItem.fromJson(item))
             .toList();
+        developer.log('Found ${_teachingSchedule.length} schedule items', name: 'LecturerProvider');
+      } else {
+        developer.log('Failed to fetch schedule: ${res?.statusCode}', name: 'LecturerProvider');
       }
     } catch (e) {
       developer.log('Error fetching schedule: $e', name: 'LecturerProvider');
@@ -433,9 +432,10 @@ class LecturerProvider extends ChangeNotifier {
       developer.log('Handling appeal $appealId with action: $action', name: 'LecturerProvider');
       final uri = auth.buildUri('/api/lecturer/appeals/$appealId');
       final body = {
-        'result': action,
+        'status': action, // Backend expects 'status' not 'result'
         if (ghiChu != null) 'comment': ghiChu,
-        if (diemMoi != null) 'diemMoi': diemMoi,
+        // Note: Backend doesn't handle diemMoi in this endpoint
+        // Điểm mới sẽ được cập nhật qua grades endpoint sau khi approve
       };
 
       final res = await _makeAuthenticatedRequest(
@@ -992,5 +992,43 @@ class LecturerProvider extends ChangeNotifier {
       developer.log('Error fetching makeup classes: $e', name: 'LecturerProvider');
     }
     return [];
+  }
+
+  // POST /api/lecturer/confirmation-letter - Tạo giấy xác nhận cho sinh viên
+  Future<Map<String, dynamic>?> createConfirmationLetter({
+    required int mssv,
+    required String purpose,
+  }) async {
+    try {
+      developer.log('Creating confirmation letter for student $mssv...', name: 'LecturerProvider');
+      final uri = auth.buildUri('/api/lecturer/confirmation-letter');
+      final body = {
+        'mssv': mssv,
+        'purpose': purpose,
+      };
+
+      final res = await _makeAuthenticatedRequest(
+        requestFn: (token) => http.post(
+          uri,
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode(body),
+        ).timeout(const Duration(seconds: 10)),
+      );
+
+      if (res != null && res.statusCode == 200) {
+        developer.log('Confirmation letter created successfully', name: 'LecturerProvider');
+        final data = jsonDecode(res.body) as Map<String, dynamic>;
+        return data;
+      } else {
+        developer.log('Failed to create confirmation letter: ${res?.statusCode}', name: 'LecturerProvider');
+      }
+      return null;
+    } catch (e) {
+      developer.log('Error creating confirmation letter: $e', name: 'LecturerProvider');
+      return null;
+    }
   }
 }
