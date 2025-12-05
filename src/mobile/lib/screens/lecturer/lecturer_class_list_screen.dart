@@ -24,18 +24,26 @@ class _LecturerClassListScreenState extends State<LecturerClassListScreen>
   bool get wantKeepAlive => true;
 
   late ScrollController _scrollController;
-  String _selectedSemester = 'all';
-  String _selectedYear = 'all';
+  String _selectedSemester = 'all'; // Start with "All" to load all semesters
+  String _selectedYear = ''; // Will be set to first available year from data
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
+  bool _isFirstLoad = true;
 
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController();
-    // Fetch teaching classes when screen loads
+    // Fetch teaching classes with default current academic year when screen loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<LecturerProvider>().fetchTeachingClasses();
+      final provider = context.read<LecturerProvider>();
+      // Get current academic year (Aug-Jul cycle)
+      final now = DateTime.now();
+      final currentYear = now.month >= 8 ? now.year : now.year - 1;
+      final nextYear = currentYear + 1;
+      _selectedYear = '$currentYear-$nextYear';
+      
+      _fetchClassesWithFilter(provider);
     });
   }
 
@@ -234,9 +242,7 @@ class _LecturerClassListScreenState extends State<LecturerClassListScreen>
                           .map((String year) {
                             return DropdownMenuItem<String>(
                               value: year,
-                              child: Text(
-                                year == 'all' ? 'Tất cả năm học' : 'Năm học $year',
-                              ),
+                              child: Text('Năm học $year'),
                             );
                           }).toList(),
                       onChanged: (String? newValue) {
@@ -244,6 +250,7 @@ class _LecturerClassListScreenState extends State<LecturerClassListScreen>
                           setState(() {
                             _selectedYear = newValue;
                           });
+                          _fetchClassesWithFilter(provider);
                         }
                       },
                     ),
@@ -295,8 +302,34 @@ class _LecturerClassListScreenState extends State<LecturerClassListScreen>
     // Sort years in descending order (newest first)
     years.sort((a, b) => b!.compareTo(a!));
     
-    // Add 'all' option at the beginning
-    return ['all', ...years.map((y) => y!).toList()];
+    final yearsList = years.map((y) => y!).toList();
+    
+    // If no years available yet, add current year as placeholder
+    if (yearsList.isEmpty && _selectedYear.isNotEmpty) {
+      yearsList.add(_selectedYear);
+    }
+    
+    // Return only actual years (no 'all' option)
+    return yearsList;
+  }
+
+  void _fetchClassesWithFilter(LecturerProvider provider) {
+    // Year is always required now (no 'all' option)
+    if (_selectedYear.isEmpty) return;
+    
+    // If "All semesters" selected, fetch all 3 semesters for the year
+    if (_selectedSemester == 'all') {
+      provider.fetchTeachingClassesForYear(_selectedYear);
+      return;
+    }
+    
+    // Construct full semester (e.g., "2024_2025_1")
+    final yearParts = _selectedYear.split('-'); // "2024-2025" -> ["2024", "2025"]
+    final semesterNum = _selectedSemester.replaceAll('hk', ''); // "hk1" -> "1"
+    final semesterParam = '${yearParts[0]}_${yearParts[1]}_$semesterNum'; // "2024_2025_1"
+    
+    // Fetch classes with specific semester
+    provider.fetchTeachingClasses(semester: semesterParam);
   }
 
   Widget _buildFilterChip(String label, String value, bool isDark) {
@@ -307,6 +340,7 @@ class _LecturerClassListScreenState extends State<LecturerClassListScreen>
         setState(() {
           _selectedSemester = value;
         });
+        _fetchClassesWithFilter(context.read<LecturerProvider>());
       },
       borderRadius: BorderRadius.circular(20),
       child: Container(
@@ -343,19 +377,7 @@ class _LecturerClassListScreenState extends State<LecturerClassListScreen>
   Widget _buildClassList(LecturerProvider provider, bool isDark) {
     List<TeachingClass> classes = provider.teachingClasses;
 
-    // Apply filters
-    if (_selectedYear != 'all') {
-      classes = classes
-          .where((c) => c.namHoc == _selectedYear)
-          .toList();
-    }
-
-    if (_selectedSemester != 'all') {
-      classes = classes
-          .where((c) => c.hocKy?.toLowerCase() == _selectedSemester)
-          .toList();
-    }
-
+    // Only apply search filter (year and semester already filtered by API)
     if (_searchQuery.isNotEmpty) {
       classes = classes.where((c) {
         return c.tenMon.toLowerCase().contains(_searchQuery) ||
@@ -501,6 +523,65 @@ class _LecturerClassListScreenState extends State<LecturerClassListScreen>
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 8),
+
+                      // Năm học và Học kỳ
+                      Row(
+                        children: [
+                          if (classItem.namHoc != null)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: (isDark
+                                        ? AppTheme.bluePrimary
+                                        : AppTheme.bluePrimary)
+                                    .withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                'NH: ${classItem.namHoc}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: isDark
+                                      ? AppTheme.bluePrimary.withOpacity(0.9)
+                                      : AppTheme.bluePrimary,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          if (classItem.namHoc != null &&
+                              classItem.semesterNumber != null)
+                            const SizedBox(width: 8),
+                          if (classItem.semesterNumber != null)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: (isDark
+                                        ? AppTheme.lightOrbPurple1
+                                        : AppTheme.lightOrbPurple1)
+                                    .withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                classItem.semesterNumber!.toUpperCase(),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: isDark
+                                      ? AppTheme.lightOrbPurple1
+                                          .withOpacity(0.9)
+                                      : AppTheme.lightOrbPurple1,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                       const SizedBox(height: 12),
 
