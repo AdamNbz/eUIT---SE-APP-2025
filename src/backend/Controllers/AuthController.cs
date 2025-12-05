@@ -73,7 +73,7 @@ public class AuthController : ControllerBase
         var accessToken = _tokenService.CreateAccessToken(userId, role, TimeSpan.FromDays(1)); // 1 ngày
         
         // Tạo refresh token (dài hạn)
-        var refreshTokenValue = _tokenService.GenerateRefreshToken();
+        var refreshTokenValue = _tokenService.CreateAccessToken(userId, role, TimeSpan.FromDays(30));
         var refreshTokenHash = HashRefreshToken(refreshTokenValue);
         
         // Lưu refresh token vào database
@@ -148,7 +148,7 @@ public class AuthController : ControllerBase
         var newAccessToken = _tokenService.CreateAccessToken(userId, role, TimeSpan.FromDays(1));
         
         // Optionally, rotate refresh token (create new one and revoke old)
-        var newRefreshToken = _tokenService.GenerateRefreshToken();
+        var newRefreshToken = _tokenService.CreateAccessToken(userId, role, TimeSpan.FromDays(30));
         
         // Update database: revoke old token and insert new one
         await using var updateCmd = connection.CreateCommand();
