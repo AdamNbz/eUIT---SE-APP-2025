@@ -370,13 +370,16 @@ class LecturerProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> fetchTeachingClasses() async {
+  Future<void> fetchTeachingClasses({String? semester}) async {
     _isLoading = true;
     notifyListeners();
 
     try {
       developer.log('Fetching teaching classes...', name: 'LecturerProvider');
-      final uri = auth.buildUri('/api/lecturer/courses');
+      // Get all classes without semester filter, or with specific semester if provided
+      final uri = semester != null && semester.isNotEmpty
+          ? auth.buildUri('/api/lecturer/courses?semester=$semester')
+          : auth.buildUri('/api/lecturer/courses');
       
       developer.log('Classes API URL: $uri', name: 'LecturerProvider');
       
@@ -410,6 +413,58 @@ class LecturerProvider extends ChangeNotifier {
         'Error fetching teaching classes: $e',
         name: 'LecturerProvider',
       );
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // Fetch classes for multiple semesters and merge results
+  Future<void> fetchTeachingClassesForYear(String year) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final yearParts = year.split('-'); // "2024-2025" -> ["2024", "2025"]
+      final allClasses = <TeachingClass>[];
+
+      // Fetch all 3 semesters
+      for (int semNum = 1; semNum <= 3; semNum++) {
+        final semester = '${yearParts[0]}_${yearParts[1]}_$semNum';
+        developer.log('Fetching semester: $semester', name: 'LecturerProvider');
+        
+        final uri = auth.buildUri('/api/lecturer/courses?semester=$semester');
+        developer.log('API URL: $uri', name: 'LecturerProvider');
+        
+        final res = await _makeAuthenticatedRequest(
+          requestFn: (token) => http.get(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $token',
+              'Content-Type': 'application/json',
+            },
+          ).timeout(const Duration(seconds: 10)),
+        );
+
+        if (res != null && res.statusCode == 200) {
+          developer.log('Response body: ${res.body}', name: 'LecturerProvider');
+          final data = jsonDecode(res.body) as List;
+          final classes = data.map((item) => TeachingClass.fromJson(item)).toList();
+          allClasses.addAll(classes);
+          developer.log('Found ${classes.length} classes for $semester', name: 'LecturerProvider');
+        } else {
+          developer.log('API failed for $semester: ${res?.statusCode}', name: 'LecturerProvider');
+          if (res != null) {
+            developer.log('Error response: ${res.body}', name: 'LecturerProvider');
+          }
+        }
+      }
+
+      _teachingClasses = allClasses;
+      developer.log('Total classes fetched: ${_teachingClasses.length}', name: 'LecturerProvider');
+      notifyListeners();
+    } catch (e) {
+      developer.log('Error fetching classes for year: $e', name: 'LecturerProvider');
     } finally {
       _isLoading = false;
       notifyListeners();
