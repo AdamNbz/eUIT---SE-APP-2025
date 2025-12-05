@@ -307,20 +307,37 @@ class LecturerProvider extends ChangeNotifier {
 
     final now = DateTime.now();
     TeachingScheduleItem? upcoming;
-    Duration? shortestDuration;
+    DateTime? nearestDateTime;
 
     for (final item in _teachingSchedule) {
-      // Skip if no date information
-      if (item.ngayBatDau == null) continue;
+      // Skip if no date or day information
+      if (item.ngayBatDau == null || item.ngayKetThuc == null || item.thu == null) continue;
 
-      final classDateTime = item.ngayBatDau!;
+      // Parse thu (day of week): "2" = Monday, "3" = Tuesday, etc.
+      final thuInt = int.tryParse(item.thu!.trim());
+      if (thuInt == null || thuInt < 2 || thuInt > 8) continue;
       
-      // Only consider future classes
-      if (classDateTime.isAfter(now)) {
-        final duration = classDateTime.difference(now);
+      // Convert Vietnamese day numbering to Dart weekday (1=Mon, 2=Tue, ..., 7=Sun)
+      final targetWeekday = thuInt == 8 ? 7 : thuInt - 1;
+
+      // Find next occurrence of this weekday
+      DateTime nextOccurrence = now;
+      while (nextOccurrence.weekday != targetWeekday || 
+             nextOccurrence.isBefore(item.ngayBatDau!) ||
+             nextOccurrence.isAfter(item.ngayKetThuc!)) {
+        nextOccurrence = nextOccurrence.add(const Duration(days: 1));
         
-        if (shortestDuration == null || duration < shortestDuration) {
-          shortestDuration = duration;
+        // If we've passed the end date, this class has no upcoming sessions
+        if (nextOccurrence.isAfter(item.ngayKetThuc!)) {
+          break;
+        }
+      }
+
+      // Check if this is a valid future class
+      if (nextOccurrence.isAfter(now) && 
+          !nextOccurrence.isAfter(item.ngayKetThuc!)) {
+        if (nearestDateTime == null || nextOccurrence.isBefore(nearestDateTime)) {
+          nearestDateTime = nextOccurrence;
           upcoming = item;
         }
       }
@@ -328,7 +345,7 @@ class LecturerProvider extends ChangeNotifier {
 
     _nextClass = upcoming;
     developer.log(
-      'Next class found: ${_nextClass?.tenMon ?? 'None'}',
+      'Next class found: ${_nextClass?.tenMon ?? 'None'} on ${nearestDateTime?.toString() ?? 'N/A'}',
       name: 'LecturerProvider',
     );
   }
@@ -479,22 +496,19 @@ class LecturerProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> fetchSchedule() async {
+  Future<void> fetchSchedule({String? semester}) async {
     _isLoading = true;
     notifyListeners();
 
     try {
       developer.log('Fetching teaching schedule...', name: 'LecturerProvider');
-      // Fetch entire academic year (Aug 1 to Jul 31 next year)
-      final now = DateTime.now();
-      final startDate = DateTime(now.month >= 8 ? now.year : now.year - 1, 8, 1);
-      final endDate = DateTime(now.month >= 8 ? now.year + 1 : now.year, 7, 31);
       
-      final queryParams = {
-        'startDate': startDate.toIso8601String(),
-        'endDate': endDate.toIso8601String(),
-      };
-      final uri = auth.buildUri('/api/lecturer/schedule').replace(queryParameters: queryParams);
+      // If no semester specified, use current semester (2025_2026_1)
+      final semesterParam = semester ?? '2025_2026_1';
+      
+      final uri = auth.buildUri('/api/lecturer/schedule?semester=$semesterParam');
+      
+      developer.log('Schedule API URL: $uri', name: 'LecturerProvider');
       
       final res = await _makeAuthenticatedRequest(
         requestFn: (token) => http.get(
