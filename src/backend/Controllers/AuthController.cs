@@ -60,7 +60,7 @@ public class AuthController : ControllerBase
             return Unauthorized(new { message = "Invalid credentials" });
 
         // Tạo access token (ngắn hạn)
-        var accessToken = _tokenService.CreateAccessToken(userId, role, TimeSpan.FromMinutes(15)); // 15 phút
+        var accessToken = _tokenService.CreateAccessToken(userId, role, TimeSpan.FromDays(1)); // 1 ngày
         
         // Tạo refresh token (dài hạn)
         var refreshTokenValue = _tokenService.GenerateRefreshToken();
@@ -132,7 +132,7 @@ public class AuthController : ControllerBase
         var userId = reader.GetString(1);
         
         // Generate new access token
-        var newAccessToken = _tokenService.CreateAccessToken(userId, role, TimeSpan.FromMinutes(15));
+        var newAccessToken = _tokenService.CreateAccessToken(userId, role, TimeSpan.FromDays(1));
         
         // Optionally, rotate refresh token (create new one and revoke old)
         var newRefreshToken = _tokenService.GenerateRefreshToken();

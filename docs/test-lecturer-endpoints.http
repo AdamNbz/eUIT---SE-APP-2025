@@ -22,7 +22,7 @@ Content-Type: application/json
 }
 
 ### Save the token from response above, then set it here:
-@token = eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiI4MDA2OCIsInJvbGUiOiJsZWN0dXJlciIsIm5iZiI6MTc2NDkxMDUyMCwiZXhwIjoxNzY0OTExNDIwLCJpYXQiOjE3NjQ5MTA1MjAsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6NTEyOCIsImF1ZCI6Imh0dHA6Ly9sb2NhbGhvc3Q6NTEyOCJ9.m957H1bog7sPp0kJjN9w0XC3Lro7U6B_spFUwWrCI-czdsAgKvH970AvMmpxIw-X4DL1OqfMLsni_I545b97kA
+@token = eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiI4MDA2OCIsInJvbGUiOiJsZWN0dXJlciIsIm5iZiI6MTc2NDkxMzUwOCwiZXhwIjoxNzY0OTE0NDA4LCJpYXQiOjE3NjQ5MTM1MDgsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6NTEyOCIsImF1ZCI6Imh0dHA6Ly9sb2NhbGhvc3Q6NTEyOCJ9.Q8rE3FwMqQK-_pQRDeKzC5TFXCIju7sDdAuTjOAtXaqBl4hRWayQhf4kqTLDCkcT5EfgeJ35Cv8KEOj0lFrNEw
 
 ### ============================================================================
 ### PROFILE MANAGEMENT
