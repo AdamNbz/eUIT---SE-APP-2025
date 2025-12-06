@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../providers/academic_provider.dart';
 
 class ProgressScreen extends StatefulWidget {
   const ProgressScreen({super.key});
@@ -8,13 +10,24 @@ class ProgressScreen extends StatefulWidget {
 }
 
 class _ProgressScreenState extends State<ProgressScreen> {
-  // Training progress data
-  final int completedCredits = 68;
-  final int remainingCredits = 82;
-  final int totalRequiredCredits = 150;
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AcademicProvider>().fetchProgress();
+    });
+  }
+
+  Map<String, dynamic>? get progressData {
+    return context.watch<AcademicProvider>().progress;
+  }
+
+  int get completedCredits => progressData?['completedCredits'] ?? 0;
+  int get remainingCredits => progressData?['remainingCredits'] ?? 0;
+  int get totalRequiredCredits => progressData?['totalRequiredCredits'] ?? 150;
 
   double get progressPercentage {
-    return (completedCredits / totalRequiredCredits) * 100;
+    return totalRequiredCredits > 0 ? (completedCredits / totalRequiredCredits) * 100 : 0.0;
   }
 
   @override

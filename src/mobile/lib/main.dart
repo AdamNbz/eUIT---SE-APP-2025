@@ -26,6 +26,7 @@ import 'services/language_controller.dart';
 import 'providers/home_provider.dart';
 import 'providers/lecturer_provider.dart';
 import 'providers/schedule_provider.dart';
+import 'providers/academic_provider.dart';
 import 'utils/app_localizations.dart';
 import 'utils/app_colors.dart';
 import 'screens/settings_screen.dart';
@@ -62,6 +63,10 @@ Future<void> main() async {
         // Student schedule provider
         ChangeNotifierProvider(
           create: (_) => ScheduleProvider(auth: AuthService()),
+        ),
+        // Academic provider for grades, tuition, training, content
+        ChangeNotifierProvider(
+          create: (_) => AcademicProvider(auth: AuthService()),
         ),
       ],
       child: const MyApp(),

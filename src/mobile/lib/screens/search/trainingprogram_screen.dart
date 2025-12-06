@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../providers/academic_provider.dart';
 
 class TrainingProgramScreen extends StatefulWidget {
   const TrainingProgramScreen({super.key});
@@ -11,69 +13,25 @@ class _TrainingProgramScreenState extends State<TrainingProgramScreen> {
   String selectedProgram = 'Công nghệ thông tin';
   int? expandedCategoryIndex;
 
-  final List<String> programs = [
-    'Công nghệ thông tin',
-    'Kỹ thuật phần mềm',
-    'Khoa học máy tính',
-    'Hệ thống thông tin',
-    'An toàn thông tin',
-  ];
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AcademicProvider>().fetchTrainingProgram();
+    });
+  }
 
-  final Map<String, Map<String, dynamic>> programData = {
-    'Công nghệ thông tin': {
-      'code': 'CNTT',
-      'totalCredits': 150,
-      'duration': '4 năm',
-      'degree': 'Kỹ sư',
-      'categories': [
-        {
-          'name': 'Kiến thức giáo dục đại cương',
-          'credits': 45,
-          'color': Color(0xFF3B82F6),
-          'subjects': [
-            'Triết học Mác - Lênin',
-            'Kinh tế chính trị Mác - Lênin',
-            'Chủ nghĩa xã hội khoa học',
-            'Lịch sử Đảng Cộng sản Việt Nam',
-            'Tư tưởng Hồ Chí Minh',
-            'Tiếng Anh 1, 2, 3',
-            'Giáo dục thể chất',
-            'Toán cao cấp A1, A2, A3',
-            'Vật lý đại cương',
-          ],
-        },
-        {
-          'name': 'Kiến thức giáo dục chuyên nghiệp',
-          'credits': 90,
-          'color': Color(0xFF10B981),
-          'subjects': [
-            'Cấu trúc dữ liệu và giải thuật',
-            'Lập trình hướng đối tượng',
-            'Cơ sở dữ liệu',
-            'Mạng máy tính',
-            'Hệ điều hành',
-            'Công nghệ Web',
-            'Phát triển ứng dụng di động',
-            'Trí tuệ nhân tạo',
-            'Học máy',
-            'An ninh mạng',
-            'Kiến trúc máy tính',
-            'Phân tích thiết kế hệ thống',
-          ],
-        },
-        {
-          'name': 'Thực tập và Đồ án tốt nghiệp',
-          'credits': 15,
-          'color': Color(0xFFF59E0B),
-          'subjects': [
-            'Thực tập chuyên môn',
-            'Thực tập tốt nghiệp',
-            'Đồ án tốt nghiệp',
-          ],
-        },
-      ],
-    },
-  };
+  Map<String, dynamic>? get programData {
+    return context.watch<AcademicProvider>().trainingProgram;
+  }
+
+  List<String> get programs {
+    return programData?.keys.toList() ?? [];
+  }
+
+  Map<String, dynamic>? get currentProgramData {
+    return programData?[selectedProgram];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -200,7 +158,7 @@ class _TrainingProgramScreenState extends State<TrainingProgramScreen> {
   }
 
   Widget _buildProgramOverview() {
-    final data = programData[selectedProgram];
+    final data = currentProgramData;
     if (data == null) return SizedBox.shrink();
 
     return Container(
@@ -315,7 +273,7 @@ class _TrainingProgramScreenState extends State<TrainingProgramScreen> {
   }
 
   Widget _buildGitStyleDistribution() {
-    final data = programData[selectedProgram];
+    final data = currentProgramData;
     if (data == null) return SizedBox.shrink();
 
     final categories = data['categories'] as List;
@@ -448,8 +406,7 @@ class _TrainingProgramScreenState extends State<TrainingProgramScreen> {
                       ),
                     ],
                   ),
-                ),
-              );
+                );
             }).toList(),
           ),
 
@@ -513,7 +470,7 @@ class _TrainingProgramScreenState extends State<TrainingProgramScreen> {
   }
 
   Widget _buildCategories() {
-    final data = programData[selectedProgram];
+    final data = currentProgramData;
     if (data == null) return SizedBox.shrink();
 
     final categories = data['categories'] as List;

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../providers/academic_provider.dart';
 
 class StudyResultScreen extends StatefulWidget {
   const StudyResultScreen({super.key});
@@ -8,72 +10,41 @@ class StudyResultScreen extends StatefulWidget {
 }
 
 class _StudyResultScreenState extends State<StudyResultScreen> {
-  String selectedSemester = '{Học kỳ 2 - Năm học 2023-2024}';
+  String selectedSemester = 'Học kỳ 2 - Năm học 2023-2024';
 
   final List<String> semesters = [
-    '{Học kỳ 2 - Năm học 2023-2024}',
-    '{Học kỳ 1 - Năm học 2023-2024}',
-    '{Học kỳ 2 - Năm học 2022-2023}',
-    '{Học kỳ 1 - Năm học 2022-2023}',
+    'Học kỳ 2 - Năm học 2023-2024',
+    'Học kỳ 1 - Năm học 2023-2024',
+    'Học kỳ 2 - Năm học 2022-2023',
+    'Học kỳ 1 - Năm học 2022-2023',
   ];
 
-  final Map<String, List<Map<String, dynamic>>> semesterData = {
-    '{Học kỳ 2 - Năm học 2023-2024}': [
-      {
-        'subject': '{Cấu trúc dữ liệu & Giải thuật}',
-        'credits': 4,
-        'midterm': 8.5,
-        'final': 9.0,
-        'total': 8.8,
-        'grade': 'A',
-      },
-      {
-        'subject': '{Toán cao cấp A2}',
-        'credits': 4,
-        'midterm': 8.0,
-        'final': 8.5,
-        'total': 8.3,
-        'grade': 'B+',
-      },
-      {
-        'subject': '{Tiếng Anh chuyên ngành}',
-        'credits': 3,
-        'midterm': 9.5,
-        'final': 9.0,
-        'total': 9.3,
-        'grade': 'A',
-      },
-    ],
-    '{Học kỳ 1 - Năm học 2023-2024}': [
-      {
-        'subject': '{Lập trình hướng đối tượng}',
-        'credits': 4,
-        'midterm': 8.0,
-        'final': 8.5,
-        'total': 8.3,
-        'grade': 'B+',
-      },
-      {
-        'subject': '{Cơ sở dữ liệu}',
-        'credits': 3,
-        'midterm': 9.0,
-        'final': 9.5,
-        'total': 9.3,
-        'grade': 'A',
-      },
-    ],
-  };
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final provider = context.read<AcademicProvider>();
+      provider.fetchGrades(semester: selectedSemester);
+    });
+  }
+
+  List<Map<String, dynamic>> get currentGrades {
+    final provider = context.watch<AcademicProvider>();
+    return provider.grades.where((grade) => grade['semester'] == selectedSemester).toList();
+  }
 
   double get currentGPA {
-    final data = semesterData[selectedSemester] ?? [];
+    final data = currentGrades;
     if (data.isEmpty) return 0.0;
 
     double totalPoints = 0;
     int totalCredits = 0;
 
     for (var subject in data) {
-      totalPoints += subject['total'] * subject['credits'];
-      totalCredits += subject['credits'] as int;
+      final total = subject['total'] ?? 0.0;
+      final credits = subject['credits'] ?? 0;
+      totalPoints += total * credits;
+      totalCredits += credits;
     }
 
     return totalCredits > 0 ? totalPoints / totalCredits : 0.0;
@@ -185,7 +156,7 @@ class _StudyResultScreenState extends State<StudyResultScreen> {
                       ),
                       SizedBox(height: 8),
                       Text(
-                        '8.37',
+                        currentGPA.toStringAsFixed(2),
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 36,
@@ -296,6 +267,8 @@ class _StudyResultScreenState extends State<StudyResultScreen> {
                     setState(() {
                       selectedSemester = newValue;
                     });
+                    // Fetch new grades when semester changes
+                    context.read<AcademicProvider>().fetchGrades(semester: newValue);
                   }
                 },
               ),
@@ -315,7 +288,7 @@ class _StudyResultScreenState extends State<StudyResultScreen> {
   }
 
   Widget _buildResultsTable() {
-    final data = semesterData[selectedSemester] ?? [];
+    final data = currentGrades;
 
     if (data.isEmpty) {
       return Container(

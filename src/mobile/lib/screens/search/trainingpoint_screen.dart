@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../providers/academic_provider.dart';
 
 class TrainingPointScreen extends StatefulWidget {
   const TrainingPointScreen({super.key});
@@ -8,24 +10,23 @@ class TrainingPointScreen extends StatefulWidget {
 }
 
 class _TrainingPointScreenState extends State<TrainingPointScreen> {
-  final List<Map<String, dynamic>> semesterScores = [
-    {
-      'semester': '{Học kỳ 1 - 2023-2024}',
-      'score': 85,
-    },
-    {
-      'semester': '{Học kỳ 2 - 2023-2024}',
-      'score': 92,
-    },
-    {
-      'semester': '{Học kỳ 1 - 2022-2023}',
-      'score': 88,
-    },
-    {
-      'semester': '{Học kỳ 2 - 2022-2023}',
-      'score': 90,
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AcademicProvider>().fetchTrainingPoints();
+    });
+  }
+
+  List<Map<String, dynamic>> get semesterScores {
+    return context.watch<AcademicProvider>().trainingPoints;
+  }
+
+  double get totalScore {
+    if (semesterScores.isEmpty) return 0.0;
+    final total = semesterScores.fold(0, (sum, item) => sum + (item['score'] as int));
+    return total / semesterScores.length;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -120,7 +121,7 @@ class _TrainingPointScreenState extends State<TrainingPointScreen> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      '88.5',
+                      totalScore.toStringAsFixed(1),
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 48,

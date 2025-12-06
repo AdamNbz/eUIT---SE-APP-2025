@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../providers/academic_provider.dart';
 
 class PlanScreen extends StatefulWidget {
   const PlanScreen({super.key});
@@ -11,58 +13,17 @@ class _PlanScreenState extends State<PlanScreen> {
   // returns current DateTime (separate function for easier testing/overriding)
   DateTime now() => DateTime.now();
 
-  final List<Map<String, dynamic>> academicEvents = [
-    {
-      'date': '05/08/2024 - 11/08/2024',
-      'title': 'Tuần sinh hoạt công dân sinh viên đầu khóa',
-      'color': Color(0xFF3B82F6),
-    },
-    {
-      'date': '12/08/2024',
-      'title': 'Bắt đầu học kỳ 1 năm học 2024-2025',
-      'color': Color(0xFF3B82F6),
-    },
-    {
-      'date': '02/09/2024',
-      'title': 'Nghỉ lễ Quốc Khánh',
-      'color': Color(0xFFEF4444),
-    },
-    {
-      'date': '07/10/2024 - 12/10/2024',
-      'title': 'Thi giữa kỳ',
-      'color': Color(0xFFF59E0B),
-    },
-    {
-      'date': '16/12/2024 - 28/12/2024',
-      'title': 'Thi kết thúc học phần học kỳ 1',
-      'color': Color(0xFFF59E0B),
-    },
-    {
-      'date': '01/01/2025',
-      'title': 'Nghỉ Tết Dương lịch',
-      'color': Color(0xFFEF4444),
-    },
-    {
-      'date': '27/01/2025 - 08/02/2025',
-      'title': 'Nghỉ Tết Nguyên Đán',
-      'color': Color(0xFFEF4444),
-    },
-    {
-      'date': '17/02/2025',
-      'title': 'Bắt đầu học kỳ 2 năm học 2024-2025',
-      'color': Color(0xFF3B82F6),
-    },
-    {
-      'date': '30/04/2025',
-      'title': 'Nghỉ lễ Giải phóng miền Nam',
-      'color': Color(0xFFEF4444),
-    },
-    {
-      'date': '01/05/2025',
-      'title': 'Nghỉ lễ Quốc tế Lao động',
-      'color': Color(0xFFEF4444),
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AcademicProvider>().fetchAnnualPlan();
+    });
+  }
+
+  String? get annualPlanText {
+    return context.watch<AcademicProvider>().annualPlan;
+  }
 
   // parse a single date string in dd/MM/yyyy
   DateTime _parseDate(String s) {
@@ -104,7 +65,7 @@ class _PlanScreenState extends State<PlanScreen> {
   void initState() {
     super.initState();
     // create keys for each timeline item
-    _itemKeys = List.generate(academicEvents.length, (_) => GlobalKey());
+    _itemKeys = List.generate(annualPlanText?.length ?? 0, (_) => GlobalKey());
 
     // after first frame, find the index to focus and scroll to it
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -117,8 +78,8 @@ class _PlanScreenState extends State<PlanScreen> {
       final today = DateTime(now().year, now().month, now().day);
 
       // 1) try to find an event that contains today
-      for (var i = 0; i < academicEvents.length; i++) {
-        final r = _parseRange(academicEvents[i]['date'] as String);
+      for (var i = 0; i < annualPlanText!.length; i++) {
+        final r = _parseRange(annualPlanText![i]['date'] as String);
         if (!today.isBefore(r[0]) && !today.isAfter(r[1])) {
           setState(() {
             _focusedIndex = i;
@@ -130,8 +91,8 @@ class _PlanScreenState extends State<PlanScreen> {
       }
 
       // 2) no exact match: find first event that has an end date >= today (upcoming or covering today)
-      for (var i = 0; i < academicEvents.length; i++) {
-        final r = _parseRange(academicEvents[i]['date'] as String);
+      for (var i = 0; i < annualPlanText!.length; i++) {
+        final r = _parseRange(annualPlanText![i]['date'] as String);
         if (!r[1].isBefore(today)) {
           setState(() {
             _focusedIndex = i;
@@ -144,7 +105,7 @@ class _PlanScreenState extends State<PlanScreen> {
 
       // 3) all events are before today -> focus last
       setState(() {
-        _focusedIndex = academicEvents.length - 1;
+        _focusedIndex = annualPlanText!.length - 1;
         _hasNow = false;
       });
       _ensureVisible(_focusedIndex);
@@ -171,6 +132,38 @@ class _PlanScreenState extends State<PlanScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final text = annualPlanText;
+    if (text == null || text.isEmpty) {
+      return Scaffold(
+        backgroundColor: Color(0xFF0F172A),
+        appBar: AppBar(
+          backgroundColor: Color(0xFF1E293B),
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => Navigator.pop(context),
+          ),
+          title: Text(
+            'Kế hoạch năm học 2024-2025',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        body: Center(
+          child: Text(
+            'Chưa có dữ liệu kế hoạch',
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.5),
+              fontSize: 14,
+            ),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: Color(0xFF0F172A),
       appBar: AppBar(
@@ -190,7 +183,6 @@ class _PlanScreenState extends State<PlanScreen> {
         ),
       ),
       body: SingleChildScrollView(
-        controller: _scrollController,
         child: Padding(
           padding: EdgeInsets.all(20),
           child: Container(
@@ -203,68 +195,13 @@ class _PlanScreenState extends State<PlanScreen> {
                 width: 1,
               ),
             ),
-            child: Column(
-              children: [
-                // Top banner showing today and whether it's inside an event
-                Container(
-                  margin: EdgeInsets.only(bottom: 12),
-                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: Color(0xFF0F172A),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Color.fromRGBO(255, 255, 255, 0.06)),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.access_time, color: Colors.white70, size: 18),
-                      SizedBox(width: 8),
-                      Text(
-                        'Today: ${_formatDate(now())}',
-                        style: TextStyle(color: Colors.white70, fontSize: 14),
-                      ),
-                      Spacer(),
-                      if (_focusedIndex >= 0)
-                        Container(
-                          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: _hasNow ? Colors.greenAccent : Colors.blueAccent,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            _hasNow ? 'IN CURRENT TIMELINE' : 'NEAREST',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-
-                // timeline items
-                ...academicEvents.asMap().entries.map((entry) {
-                  final index = entry.key;
-                  final event = entry.value;
-                  final isLast = index == academicEvents.length - 1;
-                  final isNow = _isNowInRange(event['date'] as String);
-                  final isFocused = index == _focusedIndex;
-
-                  return Container(
-                    key: _itemKeys[index],
-                    child: _buildTimelineItem(
-                      date: event['date'] as String,
-                      title: event['title'] as String,
-                      color: event['color'] as Color,
-                      isLast: isLast,
-                      isNow: isNow,
-                      isFocused: isFocused,
-                    ),
-                  );
-                }).toList(),
-              ],
+            child: Text(
+              text,
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.8),
+                fontSize: 14,
+                height: 1.6,
+              ),
             ),
           ),
         ),
@@ -446,4 +383,3 @@ class _PlanScreenState extends State<PlanScreen> {
     );
   }
 }
-

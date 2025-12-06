@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../providers/academic_provider.dart';
 
 class TuitionScreen extends StatefulWidget {
   const TuitionScreen({super.key});
@@ -8,39 +10,28 @@ class TuitionScreen extends StatefulWidget {
 }
 
 class _TuitionScreenState extends State<TuitionScreen> {
-  final List<Map<String, dynamic>> tuitionHistory = [
-    {
-      'semester': '{Học kỳ 2 2023-2024}',
-      'amount': '{15.000.000 đ}',
-      'deadline': '{2024-08-01}',
-      'status': 'unpaid', // unpaid or paid
-    },
-    {
-      'semester': '{Học kỳ 1 2023-2024}',
-      'amount': '{15.000.000 }',
-      'deadline': '{2024-02-01}',
-      'status': 'paid',
-    },
-    {
-      'semester': '{Học kỳ 2 2022-2023}',
-      'amount': '{14.500.000 đ}',
-      'deadline': '{2023-08-01}',
-      'status': 'paid',
-    },
-    {
-      'semester': '{Học kỳ 1 2022-2023}',
-      'amount': '{14.500.000 đ}',
-      'deadline': '{2023-02-01}',
-      'status': 'paid',
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AcademicProvider>().fetchTuition();
+    });
+  }
+
+  Map<String, dynamic>? get tuitionData {
+    return context.watch<AcademicProvider>().tuition;
+  }
+
+  List<Map<String, dynamic>> get tuitionHistory {
+    return tuitionData?['history'] ?? [];
+  }
 
   int get totalUnpaid {
     int total = 0;
     for (var item in tuitionHistory) {
       if (item['status'] == 'unpaid') {
-        String amount = item['amount'].replaceAll(RegExp(r'[^\d]'), '');
-        total += int.parse(amount);
+        String amount = item['amount'].toString().replaceAll(RegExp(r'[^\d]'), '');
+        total += int.tryParse(amount) ?? 0;
       }
     }
     return total;
