@@ -611,7 +611,7 @@ class _LecturerScheduleScreenState extends State<LecturerScheduleScreen>
       return _buildShimmerLoading(isDark);
     }
 
-    final now = DateTime.now();
+    final now = _selectedDate; // Use selected date, not current date
     final firstDayOfMonth = DateTime(now.year, now.month, 1);
     final lastDayOfMonth = DateTime(now.year, now.month + 1, 0);
     final daysInMonth = lastDayOfMonth.day;
@@ -710,7 +710,7 @@ class _LecturerScheduleScreenState extends State<LecturerScheduleScreen>
                         ),
                       ),
                       child: Row(
-                        children: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN']
+                        children: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7']
                             .map((day) {
                               return Expanded(
                                 child: Center(
@@ -733,38 +733,65 @@ class _LecturerScheduleScreenState extends State<LecturerScheduleScreen>
                       (weekIndex) {
                         return Row(
                           children: List.generate(7, (dayIndex) {
-                            final dayNumber =
-                                weekIndex * 7 + dayIndex - firstWeekday + 2;
-                            if (dayNumber < 1 || dayNumber > daysInMonth) {
-                              return Expanded(child: Container());
+                            // dayIndex: 0=CN(Sun), 1=T2(Mon), 2=T3(Tue), ..., 6=T7(Sat)
+                            // firstWeekday: 1=Mon, 2=Tue, ..., 7=Sun (Dart weekday)
+                            
+                            // Calculate which day number should appear in this cell
+                            // We need to find the offset from Sunday (day 0 of our grid)
+                            final weekdayOffset = firstWeekday % 7; // Convert: Mon=1→1, Tue=2→2, ..., Sun=7→0
+                            final dayNumber = weekIndex * 7 + dayIndex - weekdayOffset + 1;
+                            
+                            // Check if this is a valid day in current month
+                            final isCurrentMonth = dayNumber >= 1 && dayNumber <= daysInMonth;
+                            
+                            // If not current month, calculate previous/next month day
+                            int displayDay = dayNumber;
+                            bool isPreviousMonth = false;
+                            bool isNextMonth = false;
+                            
+                            if (dayNumber < 1) {
+                              // Previous month
+                              final prevMonth = DateTime(_selectedDate.year, _selectedDate.month, 0);
+                              displayDay = prevMonth.day + dayNumber;
+                              isPreviousMonth = true;
+                            } else if (dayNumber > daysInMonth) {
+                              // Next month
+                              displayDay = dayNumber - daysInMonth;
+                              isNextMonth = true;
                             }
-                            final day = DateTime(
+                            
+                            final day = isCurrentMonth ? DateTime(
                               _selectedDate.year,
                               _selectedDate.month,
                               dayNumber,
-                            );
-                            // Check if this day has schedule
-                            final dayOfWeek = day.weekday; // 1=Mon, 2=Tue, ..., 7=Sun
-                            final thuStr = (dayOfWeek == 7 ? '8' : '${dayOfWeek + 1}'); // 1(Mon)→2, 2(Tue)→3, 7(Sun)→8
-                            final daySchedule = provider.schedule.where((item) {
-                              if (item.thu == null) return false;
-                              final thu = item.thu!.trim();
-                              // Check if class is on this weekday
-                              if (thu != thuStr) return false;
-                              
-                              // Use helper function to check date range and cachTuan
-                              return _shouldShowClassOnDate(item, day);
-                            }).toList();
-                            final isToday =
+                            ) : null;
+                            
+                            // Only check schedule for current month days
+                            final daySchedule = isCurrentMonth && day != null ? (() {
+                              final dayOfWeek = day.weekday; // 1=Mon, 2=Tue, ..., 7=Sun
+                              final thuStr = (dayOfWeek == 7 ? '8' : '${dayOfWeek + 1}'); // 1(Mon)→2, 2(Tue)→3, 7(Sun)→8
+                              return provider.schedule.where((item) {
+                                if (item.thu == null) return false;
+                                final thu = item.thu!.trim();
+                                
+                                // Check if class is on this weekday
+                                if (thu != thuStr) return false;
+                                
+                                // Use helper function to check date range and cachTuan
+                                return _shouldShowClassOnDate(item, day);
+                              }).toList();
+                            })() : <TeachingScheduleItem>[];
+                            
+                            final isToday = isCurrentMonth && day != null &&
                                 day.day == DateTime.now().day &&
                                 day.month == DateTime.now().month &&
                                 day.year == DateTime.now().year;
 
                             return Expanded(
                               child: GestureDetector(
-                                onTap: daySchedule.isNotEmpty
+                                onTap: isCurrentMonth && daySchedule.isNotEmpty
                                     ? () => _showDayScheduleDialog(
-                                        day,
+                                        day!,
                                         daySchedule,
                                         isDark,
                                       )
@@ -788,17 +815,17 @@ class _LecturerScheduleScreenState extends State<LecturerScheduleScreen>
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Text(
-                                        '$dayNumber',
+                                        '$displayDay',
                                         style: AppTheme.bodyMedium.copyWith(
-                                          color: isDark
-                                              ? Colors.white
-                                              : Colors.black87,
+                                          color: (isPreviousMonth || isNextMonth)
+                                              ? (isDark ? Colors.grey.shade700 : Colors.grey.shade400)
+                                              : (isDark ? Colors.white : Colors.black87),
                                           fontWeight: isToday
                                               ? FontWeight.bold
                                               : FontWeight.normal,
                                         ),
                                       ),
-                                      if (daySchedule.isNotEmpty)
+                                      if (isCurrentMonth && daySchedule.isNotEmpty)
                                         Container(
                                           margin: const EdgeInsets.only(top: 4),
                                           width: 6,
@@ -905,23 +932,21 @@ class _LecturerScheduleScreenState extends State<LecturerScheduleScreen>
     
     // Check cachTuan for biweekly classes
     if (item.cachTuan != null && item.cachTuan! > 1 && item.ngayBatDau != null) {
-      // Calculate weeks difference based on the same weekday
-      // For example: if start date is Monday, we count Mondays between dates
-      final startDate = item.ngayBatDau!;
-      
-      // Get the first occurrence of this class on or after start date that matches the weekday
+      // Get the target weekday from thu field
       final thuInt = int.tryParse(item.thu?.trim() ?? '');
-      if (thuInt == null) return false;
+      if (thuInt == null) return true; // If can't parse, don't filter by cachTuan
       
-      final targetWeekday = thuInt == 8 ? 7 : thuInt - 1; // Convert thu to Dart weekday (1-7)
+      // Convert Vietnamese thu (2-8) to Dart weekday (1-7)
+      // thu: 2=Mon, 3=Tue, 4=Wed, 5=Thu, 6=Fri, 7=Sat, 8=Sun
+      // Dart weekday: 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat, 7=Sun
+      final targetWeekday = thuInt == 8 ? 7 : thuInt - 1;
       
-      // Find first class date (adjust start date to match weekday if needed)
-      DateTime firstClassDate = startDate;
-      while (firstClassDate.weekday != targetWeekday) {
-        firstClassDate = firstClassDate.add(const Duration(days: 1));
-      }
+      // Find the first class date (first occurrence on target weekday on/after ngayBatDau)
+      final startDate = item.ngayBatDau!;
+      int daysToAdd = (targetWeekday - startDate.weekday + 7) % 7;
+      final firstClassDate = startDate.add(Duration(days: daysToAdd));
       
-      // Now calculate weeks from first class date
+      // Calculate weeks difference from first class date
       final daysDiff = date.difference(firstClassDate).inDays;
       if (daysDiff < 0) return false; // Before first class
       
