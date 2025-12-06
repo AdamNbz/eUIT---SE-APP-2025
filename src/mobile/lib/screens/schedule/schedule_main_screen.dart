@@ -153,20 +153,22 @@ class _ScheduleMainScreenState extends State<ScheduleMainScreen> {
   }
 
   bool _isClassOnDate(ScheduleClass s, DateTime date) {
-    try {
-      if (s.ngayBatDau != null && s.ngayKetThuc != null) {
-        if (date.isBefore(s.ngayBatDau!) || date.isAfter(s.ngayKetThuc!)) return false;
-      }
-      final thuNum = int.tryParse(s.thu ?? '0');
-      if (thuNum == null) return false;
-      // Backend uses '2'->Monday ... '8'->Sunday. DateTime.weekday: Monday=1..Sunday=7
-      final expectedWeekday = thuNum - 1; // 2->1 (Monday)
-      if (expectedWeekday != date.weekday) return false;
-      // cachTuan check omitted for brevity
-      return true;
-    } catch (_) {
-      return false;
-    }
+    // Ignore if tietBatDau is null or thu is '*'
+    if (s.tietBatDau == null || s.thu == '*') return false;
+    if (s.ngayBatDau == null || s.ngayKetThuc == null) return false;
+    if (date.isBefore(s.ngayBatDau!) || date.isAfter(s.ngayKetThuc!)) return false;
+    // Backend uses '2'->Monday ... '8'->Sunday. DateTime.weekday: Monday=1..Sunday=7
+    final thuNum = int.tryParse(s.thu ?? '0');
+    if (thuNum == null) return false;
+    final expectedWeekday = thuNum - 1; // 2->1 (Monday)
+    if (expectedWeekday != date.weekday) return false;
+    // Calculate weekIndex from ngayBatDau
+    final daysDiff = date.difference(s.ngayBatDau!).inDays;
+    final weekIndex = (daysDiff / 7).floor() + 1;
+    final cachTuan = s.cachTuan ?? 0;
+    if (cachTuan == 2 && (weekIndex - 1) % 2 != 0) return false; // every 2 weeks, start from ngayBatDau
+    // cachTuan=1 or 0: every week
+    return true;
   }
 
   bool _isSameDay(DateTime a, DateTime b) {
