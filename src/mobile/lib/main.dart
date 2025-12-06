@@ -25,6 +25,7 @@ import 'services/theme_controller.dart';
 import 'services/language_controller.dart';
 import 'providers/home_provider.dart';
 import 'providers/lecturer_provider.dart';
+import 'providers/schedule_provider.dart';
 import 'utils/app_localizations.dart';
 import 'utils/app_colors.dart';
 import 'screens/settings_screen.dart';
@@ -58,6 +59,10 @@ Future<void> main() async {
               LecturerProvider(auth: context.read<AuthService>()),
         ),
         ChangeNotifierProvider(create: (_) => ChatbotProvider()),
+        // Student schedule provider
+        ChangeNotifierProvider(
+          create: (_) => ScheduleProvider(auth: AuthService()),
+        ),
       ],
       child: const MyApp(),
     ),
