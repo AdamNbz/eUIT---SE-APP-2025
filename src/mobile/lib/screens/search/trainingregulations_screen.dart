@@ -25,24 +25,6 @@ class _TrainingRegulationsScreenState extends State<TrainingRegulationsScreen> {
     return context.watch<AcademicProvider>().regulations;
   }
 
-  List<Map<String, dynamic>> get _filteredRegulations {
-    if (_searchQuery.isEmpty) {
-      return regulations;
-    }
-    return regulations.where((item) {
-      final title = item['title'].toString().toLowerCase();
-      final description = item['description'].toString().toLowerCase();
-      final query = _searchQuery.toLowerCase();
-      return title.contains(query) || description.contains(query);
-    }).toList();
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

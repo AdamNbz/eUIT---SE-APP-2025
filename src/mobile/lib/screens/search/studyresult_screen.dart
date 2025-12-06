@@ -38,7 +38,7 @@ class _StudyResultScreenState extends State<StudyResultScreen> {
     if (data.isEmpty) return 0.0;
 
     double totalPoints = 0;
-    int totalCredits = 0;
+    num totalCredits = 0;
 
     for (var subject in data) {
       final total = subject['total'] ?? 0.0;
