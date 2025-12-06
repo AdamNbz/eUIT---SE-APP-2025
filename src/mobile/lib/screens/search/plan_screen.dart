@@ -16,49 +16,19 @@ class _PlanScreenState extends State<PlanScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<AcademicProvider>().fetchAnnualPlan();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await context.read<AcademicProvider>().fetchAcademicPlan();
     });
-  }
-
-  String? get annualPlanText {
-    return context.watch<AcademicProvider>().annualPlan;
   }
 
   @override
   Widget build(BuildContext context) {
-    final text = annualPlanText;
-    if (text == null || text.isEmpty) {
-      return Scaffold(
-        backgroundColor: Color(0xFF0F172A),
-        appBar: AppBar(
-          backgroundColor: Color(0xFF1E293B),
-          elevation: 0,
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () => Navigator.pop(context),
-          ),
-          title: Text(
-            'Kế hoạch năm học 2024-2025',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-        body: Center(
-          child: Text(
-            'Chưa có dữ liệu kế hoạch',
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.5),
-              fontSize: 14,
-            ),
-          ),
-        ),
-      );
+    final provider = context.watch<AcademicProvider>();
+    String? imageUrl = provider.planImageUrl;
+    final isLoading = provider.isAcademicPlanLoading ?? false;
+    if (imageUrl != null && imageUrl.isNotEmpty && !imageUrl.startsWith('http')) {
+      imageUrl = 'https://student.uit.edu.vn$imageUrl';
     }
-
     return Scaffold(
       backgroundColor: Color(0xFF0F172A),
       appBar: AppBar(
@@ -69,7 +39,7 @@ class _PlanScreenState extends State<PlanScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Kế hoạch năm học 2024-2025',
+          'Kế hoạch đào tạo',
           style: TextStyle(
             color: Colors.white,
             fontSize: 20,
@@ -77,30 +47,31 @@ class _PlanScreenState extends State<PlanScreen> {
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.all(20),
-          child: Container(
-            padding: EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Color(0xFF1E293B),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: Color.fromRGBO(255, 255, 255, 0.1),
-                width: 1,
-              ),
-            ),
-            child: Text(
-              text,
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.8),
-                fontSize: 14,
-                height: 1.6,
-              ),
-            ),
-          ),
-        ),
-      ),
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : (imageUrl == null || imageUrl.isEmpty)
+              ? Center(
+                  child: Text(
+                    'Chưa có dữ liệu kế hoạch đào tạo',
+                    style: TextStyle(color: Colors.white.withOpacity(0.7)),
+                  ),
+                )
+              : Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: RotatedBox(
+                      quarterTurns: 1,
+                      child: Image.network(
+                        imageUrl,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) => Text(
+                          'Không thể tải hình ảnh kế hoạch',
+                          style: TextStyle(color: Colors.white.withOpacity(0.7)),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
     );
   }
 }
