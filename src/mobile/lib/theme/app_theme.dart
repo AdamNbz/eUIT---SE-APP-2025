@@ -105,5 +105,8 @@ class AppTheme {
       offset: const Offset(0, 4),
     ),
   ];
-}
 
+  // Bottom navigation base height (content area) used by MainScreen and others.
+  // Other screens should add MediaQuery.of(context).padding.bottom to get the full nav bar height.
+  static const double bottomNavBaseHeight = 75.0;
+}

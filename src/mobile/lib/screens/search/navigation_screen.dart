@@ -4,6 +4,7 @@ import 'package:mobile/screens/search/plan_screen.dart';
 import 'package:mobile/screens/search/trainingprogram_screen.dart';
 import 'package:mobile/screens/search/trainingregulations_screen.dart';
 import '../../utils/app_localizations.dart';
+import '../../theme/app_theme.dart';
 import 'studyresult_screen.dart';
 import 'trainingpoint_screen.dart';
 import 'progress_screen.dart';
@@ -144,7 +145,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
     // Ensure we leave space above the bottom navigation bar used in MainScreen
     // MainScreen uses baseHeight = 75.0 + MediaQuery.padding.bottom
     final double bottomInset = MediaQuery.of(context).padding.bottom;
-    final double navBarBaseHeight = 75.0; // same baseHeight as MainScreen
+    final double navBarBaseHeight = AppTheme.bottomNavBaseHeight;
     final double navBarHeight = navBarBaseHeight + bottomInset;
 
     return Scaffold(
@@ -280,7 +281,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
     // Ensure GridView has extra bottom padding equal to the navigation bar height
     // (base 75.0 + device bottom inset) so items aren't obscured by the bottom nav.
     final double bottomInset = MediaQuery.of(context).padding.bottom;
-    final double navBarBaseHeight = 75.0;
+    final double navBarBaseHeight = AppTheme.bottomNavBaseHeight;
     final double navBarHeight = navBarBaseHeight + bottomInset;
     return GridView.builder(
       padding: EdgeInsets.fromLTRB(20, 0, 20, 20 + navBarHeight),
