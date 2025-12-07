@@ -1,5 +1,7 @@
 import 'dart:math';
 import 'dart:ui';
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_shaders/flutter_shaders.dart';
 import 'package:provider/provider.dart';
@@ -19,6 +21,22 @@ class LoadingScreen extends StatefulWidget {
 
 class _LoadingScreenState extends State<LoadingScreen>
     with SingleTickerProviderStateMixin {
+  static const loadingMessages = [
+    "Đang khởi tạo hệ thống...",
+    "Đang tải dữ liệu, vui lòng chờ...",
+    "Đang đồng bộ thông tin...",
+    "Đang kết nối máy chủ...",
+    "Đang xác thực phiên làm việc...",
+    "Đang xử lý dữ liệu...",
+    "Đang chuẩn bị môi trường làm việc...",
+    "Đang tối ưu trải nghiệm của bạn...",
+    "Đang tải thông tin học tập...",
+    "Đang đồng bộ lịch học...",
+  ];
+
+  int _messageIndex = 0;
+  late Timer _textTimer;
+
   bool _started = false;
   bool _warpFlash = false;
   late AnimationController _controller;
@@ -39,12 +57,22 @@ class _LoadingScreenState extends State<LoadingScreen>
         _runPrefetch();
       }
     });
+    // Auto-rotate text every 2.5s
+    _textTimer = Timer.periodic(const Duration(milliseconds: 2500), (_) {
+      if (!mounted) return;
+      setState(() {
+        _messageIndex = (_messageIndex + 1) % loadingMessages.length;
+      });
+    });
+
   }
 
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
+    _textTimer.cancel();
+
   }
 
   Future<void> _runPrefetch() async {
@@ -145,12 +173,20 @@ class _LoadingScreenState extends State<LoadingScreen>
           },
         ),
         const SizedBox(height: 24),
-        const Text(
-          "Đang uốn cong không gian...",
-          style: TextStyle(
-            color: Colors.white70,
-            fontSize: 17,
-            fontWeight: FontWeight.w500,
+
+        // FIXED: AnimatedSwitcher – remove wrong semicolon
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 600),
+          transitionBuilder: (child, anim) =>
+              FadeTransition(opacity: anim, child: child),
+          child: Text(
+            loadingMessages[_messageIndex],
+            key: ValueKey(_messageIndex),
+            style: const TextStyle(
+              color: Colors.white70,
+              fontSize: 17,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ),
       ],

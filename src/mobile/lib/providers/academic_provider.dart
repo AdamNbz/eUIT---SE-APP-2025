@@ -380,4 +380,25 @@ class AcademicProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  /// Prefetch commonly used academic data. Intended to be called at app start or after login.
+  Future<void> prefetch({bool forceRefresh = false}) async {
+    try {
+      developer.log('AcademicProvider: starting prefetch', name: 'AcademicProvider');
+      await Future.wait([
+        fetchGradeDetails(forceRefresh: forceRefresh),
+        fetchGrades(forceRefresh: forceRefresh),
+        fetchTrainingPoints(forceRefresh: forceRefresh),
+        fetchProgress(forceRefresh: forceRefresh),
+        fetchTuition(forceRefresh: forceRefresh),
+        fetchTrainingProgram(forceRefresh: forceRefresh),
+        fetchRegulations(forceRefresh: forceRefresh),
+        fetchAnnualPlan(forceRefresh: forceRefresh),
+      ]);
+      developer.log('AcademicProvider: prefetch completed', name: 'AcademicProvider');
+    } catch (e) {
+      developer.log('AcademicProvider: prefetch error: $e', name: 'AcademicProvider');
+      rethrow;
+    }
+  }
 }
