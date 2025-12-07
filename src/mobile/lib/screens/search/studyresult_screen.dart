@@ -288,7 +288,7 @@ class _StudyResultScreenState extends State<StudyResultScreen> {
                 items: semesters.map((String semester) {
                   return DropdownMenuItem(
                     value: semester,
-                    child: Text(semester, style: TextStyle(color: isDark ? Colors.white : Colors.black87)),
+                    child: Text(_formatSemesterLabel(semester, loc), style: TextStyle(color: isDark ? Colors.white : Colors.black87)),
                   );
                 }).toList(),
                 onChanged: (value) {
@@ -342,7 +342,7 @@ class _StudyResultScreenState extends State<StudyResultScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          selectedSemester ?? '',
+          _formatSemesterLabel(selectedSemester, loc),
           style: TextStyle(
             color: isDark ? Colors.white : Colors.black87,
             fontSize: 18,
@@ -525,4 +525,16 @@ class _StudyResultScreenState extends State<StudyResultScreen> {
      final parts = code.split(' - ');
      return parts.isNotEmpty ? parts.first : '';
    }
+
+  // Move the semester formatting helper to a class-level private method so all widgets can reuse it
+  String _formatSemesterLabel(String? raw, AppLocalizations loc) {
+    if (raw == null || raw.isEmpty) return '';
+    final parts = raw.split(RegExp('[_-]'));
+    if (parts.length < 3) return raw;
+    final year1 = parts[0];
+    final year2 = parts[1];
+    final semester = parts[2];
+    final template = loc.t('semester_format');
+    return template.replaceAll('{semester}', semester).replaceAll('{year1}', year1).replaceAll('{year2}', year2);
+  }
  }

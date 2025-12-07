@@ -89,6 +89,8 @@ class AppLocalizations {
       'search_hint': 'Tìm kiếm...',
       'no_results': 'Không tìm thấy kết quả',
       'try_different_query': 'Thử tìm kiếm với từ khóa khác',
+      // Semester display format
+      'semester_format': 'Học kỳ {semester} - Năm học {year1}-{year2}',
       // Study result screen
       'study_results_title': 'Kết quả học tập',
       'gpa_cumulative': 'GPA Tích Lũy',
@@ -96,7 +98,6 @@ class AppLocalizations {
       'gpa_4_label': 'Hệ 4.0',
       'view_by_semester': 'Xem điểm theo kỳ',
       'current_semester_gpa': 'GPA kỳ này',
-      'credits': 'Tín chỉ',
       'final_score': 'Tổng kết',
       'no_data': 'Chưa có dữ liệu',
       // Menu items (titles + subtitles)
@@ -280,6 +281,8 @@ class AppLocalizations {
       'search_hint': 'Search...',
       'no_results': 'No results found',
       'try_different_query': 'Try searching with another keyword',
+      // Semester display format
+      'semester_format': 'Semester {semester} - Academic Year {year1}-{year2}',
       // Study result screen
       'study_results_title': 'Study Results',
       'gpa_cumulative': 'Cumulative GPA',
@@ -287,7 +290,6 @@ class AppLocalizations {
       'gpa_4_label': 'Scale 4.0',
       'view_by_semester': 'View by semester',
       'current_semester_gpa': 'This semester GPA',
-      'credits': 'Credits',
       'final_score': 'Final score',
       'no_data': 'No data available',
       // Menu items (titles + subtitles)
