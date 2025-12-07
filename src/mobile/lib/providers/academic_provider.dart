@@ -1,9 +1,9 @@
-import 'dart:convert';
 import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import '../services/api_client.dart';
 import '../models/grades_detail.dart';
+import '../models/student_models.dart';
 
 /// AcademicProvider handles fetching academic data like grades, tuition, training, content.
 class AcademicProvider extends ChangeNotifier {
@@ -28,6 +28,10 @@ class AcademicProvider extends ChangeNotifier {
   // Training points
   List<Map<String, dynamic>> _trainingPoints = [];
   List<Map<String, dynamic>> get trainingPoints => _trainingPoints;
+
+  // Training scores (typed response for screens expecting TrainingScoreListResponse)
+  TrainingScoreListResponse? _trainingScores;
+  TrainingScoreListResponse? get trainingScores => _trainingScores;
 
   // Training program
   Map<String, dynamic>? _trainingProgram;
@@ -95,6 +99,36 @@ class AcademicProvider extends ChangeNotifier {
       }
     } catch (e) {
       developer.log('Error fetching tuition: $e', name: 'AcademicProvider');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /// Fetch training scores (typed)
+  /// Kept separate from fetchTrainingPoints for backward compatibility.
+  Future<void> fetchTrainingScores({String? filterBySemester}) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      developer.log('Fetching training scores...', name: 'AcademicProvider');
+      final queryParams = <String, String>{};
+      if (filterBySemester != null && filterBySemester.isNotEmpty) {
+        queryParams['filter_by_semester'] = filterBySemester;
+      }
+
+      final data = await _client.get('/training-scores', queryParameters: queryParams);
+
+      if (data != null && data is Map<String, dynamic>) {
+        _trainingScores = TrainingScoreListResponse.fromJson(data);
+        // also keep the raw trainingPoints list for other usages
+        final pointsList = data['trainingScores'] as List? ?? [];
+        _trainingPoints = pointsList.map((e) => e as Map<String, dynamic>).toList();
+        developer.log('Training scores fetched: ${_trainingScores?.trainingScores.length}', name: 'AcademicProvider');
+      }
+    } catch (e) {
+      developer.log('Error fetching training scores: $e', name: 'AcademicProvider');
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -248,7 +282,8 @@ class AcademicProvider extends ChangeNotifier {
 
       if (data != null && data is Map<String, dynamic>) {
         _gradeDetails = GradesDetailResponse.fromJson(data);
-        developer.log('Grade details fetched: \\${_gradeDetails?.semesters.length}', name: 'AcademicProvider');
+        // Log the number of semesters; fall back to 0 if null to avoid printing 'null'.
+        developer.log('Grade details fetched: ${_gradeDetails?.semesters.length ?? 0}', name: 'AcademicProvider');
       }
     } catch (e) {
       developer.log('Error fetching grade details: $e', name: 'AcademicProvider');

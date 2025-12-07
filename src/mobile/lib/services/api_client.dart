@@ -225,6 +225,77 @@ class ApiClient {
       throw ApiException('Request failed: $e', 0);
     }
   }
+
+  /// PUT multipart request (for updating resources with files)
+  Future<dynamic> putMultipart(
+    String path, {
+    required Map<String, String> fields,
+    Map<String, String>? files,
+    bool requireAuth = true,
+  }) async {
+    try {
+      final uri = buildUri(path);
+
+      final request = http.MultipartRequest('PUT', uri);
+      final headers = await _getHeaders(includeAuth: requireAuth, isMultipart: true);
+      request.headers.addAll(headers);
+      request.fields.addAll(fields);
+
+      if (files != null) {
+        for (final entry in files.entries) {
+          final file = await http.MultipartFile.fromPath(entry.key, entry.value);
+          request.files.add(file);
+        }
+      }
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      return _handleResponse(response);
+    } on SocketException {
+      throw ApiException('Network error. Please check your connection.', 0);
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('Request failed: $e', 0);
+    }
+  }
+
+  /// Download a file as bytes. Returns raw bytes for consumers to save to disk.
+  Future<List<int>> downloadFile(
+    String path, {
+    Map<String, dynamic>? queryParameters,
+    bool requireAuth = true,
+  }) async {
+    try {
+      final uri = buildUri(path, queryParameters: queryParameters);
+
+      final response = await _sendWithRetry((headers) {
+        return http.get(uri, headers: headers);
+      }, requireAuth: requireAuth);
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return response.bodyBytes;
+      }
+
+      // Non-success: try to extract message
+      String message = 'Request failed';
+      try {
+        final decoded = jsonDecode(response.body);
+        if (decoded is Map<String, dynamic>) {
+          message = (decoded['error'] ?? decoded['message'] ?? message).toString();
+        }
+      } catch (_) {
+        message = response.body.isNotEmpty ? response.body : message;
+      }
+
+      throw ApiException(message, response.statusCode);
+    } on SocketException {
+      throw ApiException('Network error. Please check your connection.', 0);
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('Request failed: $e', 0);
+    }
+  }
 }
 
 /// Custom exception for API errors
