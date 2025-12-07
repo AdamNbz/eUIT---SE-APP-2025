@@ -465,7 +465,7 @@ class _LecturerScheduleScreenState extends State<LecturerScheduleScreen>
                     padding: const EdgeInsets.all(16),
                     child: Center(
                       child: Text(
-                        'Không có lịch giảng',
+                        'Không có lớp nào',
                         style: AppTheme.bodySmall.copyWith(
                           color: isDark
                               ? Colors.grey.shade500

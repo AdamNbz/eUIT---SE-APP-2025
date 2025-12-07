@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../providers/lecturer_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/app_localizations.dart';
@@ -62,6 +63,9 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
       case 'lecturer_documents':
         Navigator.pushNamed(context, '/lecturer_documents');
         break;
+      case 'lecturer_regulations':
+        _openRegulationsWebsite();
+        break;
       case 'lecturer_exam_schedule':
         Navigator.pushNamed(context, '/lecturer_exam_schedule');
         break;
@@ -79,6 +83,21 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
         break;
       default:
         break;
+    }
+  }
+
+  Future<void> _openRegulationsWebsite() async {
+    final url = Uri.parse('https://daa.uit.edu.vn/qui-che-qui-dinh-qui-trinh');
+    try {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Không thể mở trình duyệt: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
