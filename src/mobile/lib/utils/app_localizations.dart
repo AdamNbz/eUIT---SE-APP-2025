@@ -89,6 +89,16 @@ class AppLocalizations {
       'search_hint': 'Tìm kiếm...',
       'no_results': 'Không tìm thấy kết quả',
       'try_different_query': 'Thử tìm kiếm với từ khóa khác',
+      // Study result screen
+      'study_results_title': 'Kết quả học tập',
+      'gpa_cumulative': 'GPA Tích Lũy',
+      'gpa_10_label': 'Hệ 10.0',
+      'gpa_4_label': 'Hệ 4.0',
+      'view_by_semester': 'Xem điểm theo kỳ',
+      'current_semester_gpa': 'GPA kỳ này',
+      'credits': 'Tín chỉ',
+      'final_score': 'Tổng kết',
+      'no_data': 'Chưa có dữ liệu',
       // Menu items (titles + subtitles)
       'menu_academic_results_title': 'Kết quả học tập',
       'menu_academic_results_subtitle': 'Xem điểm theo kỳ và GPA',
@@ -270,6 +280,16 @@ class AppLocalizations {
       'search_hint': 'Search...',
       'no_results': 'No results found',
       'try_different_query': 'Try searching with another keyword',
+      // Study result screen
+      'study_results_title': 'Study Results',
+      'gpa_cumulative': 'Cumulative GPA',
+      'gpa_10_label': 'Scale 10.0',
+      'gpa_4_label': 'Scale 4.0',
+      'view_by_semester': 'View by semester',
+      'current_semester_gpa': 'This semester GPA',
+      'credits': 'Credits',
+      'final_score': 'Final score',
+      'no_data': 'No data available',
       // Menu items (titles + subtitles)
       'menu_academic_results_title': 'Academic Results',
       'menu_academic_results_subtitle': 'View semester grades and GPA',
