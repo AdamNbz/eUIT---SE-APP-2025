@@ -43,7 +43,7 @@ class AppLocalizations {
       'system_mode': 'Hệ thống',
       'language': 'Ngôn ngữ',
       'vietnamese': 'Tiếng Việt',
-      'english': 'English',
+      'english': 'Tiếng Anh',
       'push_notifications': 'Nhận thông báo đẩy',
       'notification_customization': 'Tùy chỉnh thông báo',
       'change_password': 'Đổi mật khẩu',
