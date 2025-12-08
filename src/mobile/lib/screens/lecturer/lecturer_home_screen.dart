@@ -2,11 +2,14 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/services.dart';
 import '../../providers/lecturer_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/app_localizations.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../widgets/lecturer_id_card.dart';
+import 'regulations_webview_screen.dart';
 
 /// LecturerHomeScreen - Trang chủ cho giảng viên
 class LecturerHomeScreen extends StatefulWidget {
@@ -22,6 +25,8 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
   bool get wantKeepAlive => true;
 
   late ScrollController _scrollController;
+  bool _hoverLecturerCard = false;
+  bool _hoverClassCard = false;
 
   @override
   void initState() {
@@ -35,9 +40,6 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
     super.dispose();
   }
 
-  bool _hoverLecturerCard = false;
-  bool _hoverClassCard = false;
-
   void _handleQuickAction(String actionType) {
     switch (actionType) {
       case 'lecturer_card':
@@ -46,11 +48,9 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
         _showLecturerCardDialog(loc, isDark);
         break;
       case 'lecturer_classes':
-        // Navigate to class list screen
         Navigator.pushNamed(context, '/lecturer_class_list');
         break;
       case 'lecturer_schedule':
-        // Navigate to schedule screen
         Navigator.pushNamed(context, '/lecturer_schedule');
         break;
       case 'lecturer_grading':
@@ -61,6 +61,9 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
         break;
       case 'lecturer_documents':
         Navigator.pushNamed(context, '/lecturer_documents');
+        break;
+      case 'lecturer_regulations':
+        _tryOpenRegulationsOrShowDialog();
         break;
       case 'lecturer_exam_schedule':
         Navigator.pushNamed(context, '/lecturer_exam_schedule');
@@ -81,6 +84,59 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
         break;
     }
   }
+
+  Future<void> _tryOpenRegulationsOrShowDialog() async {
+    const urlStr = 'https://daa.uit.edu.vn/qui-che-qui-dinh-qui-trinh';
+    final url = Uri.parse(urlStr);
+    bool launched = false;
+    try {
+      if (await canLaunchUrl(url)) {
+        launched = await launchUrl(url, mode: LaunchMode.externalApplication);
+      }
+    } catch (_) {
+      launched = false;
+    }
+    if (!launched && mounted) {
+      _showRegulationsDialog(urlStr);
+    }
+  }
+
+  void _showRegulationsDialog(String url) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Quy định'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Không thể mở trực tiếp trang quy định. Vui lòng sao chép link và dán vào trình duyệt:'),
+            const SizedBox(height: 12),
+            SelectableText(url, style: const TextStyle(color: Colors.blue)),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              await Clipboard.setData(ClipboardData(text: url));
+              Navigator.of(context).pop();
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Đã sao chép link vào clipboard!')),
+                );
+              }
+            },
+            child: const Text('Sao chép link'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Đóng'),
+          ),
+        ],
+      ),
+    );
+  }
+  // ...existing code...
 
   @override
   Widget build(BuildContext context) {

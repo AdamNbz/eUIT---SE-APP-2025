@@ -87,7 +87,7 @@ class _LecturerConfirmationLetterScreenState
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Giấy xác nhận đã được tạo thành công.'),
+                const Text('Đăng ký thành công.'),
                 const SizedBox(height: 12),
                 if (result['serialNumber'] != null)
                   Text('Số sê-ri: ${result['serialNumber']}'),
@@ -110,7 +110,7 @@ class _LecturerConfirmationLetterScreenState
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Không thể tạo giấy xác nhận. Vui lòng thử lại.'),
+            content: Text('Không thể đăng ký. Vui lòng thử lại.'),
             backgroundColor: Colors.red,
           ),
         );
@@ -166,7 +166,7 @@ class _LecturerConfirmationLetterScreenState
             ),
             const SizedBox(width: 8),
             const Text(
-              'Giấy xác nhận',
+              'Thủ tục hành chính',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
           ],

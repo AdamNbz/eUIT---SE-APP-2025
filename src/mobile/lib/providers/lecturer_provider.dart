@@ -125,8 +125,8 @@ class LecturerProvider extends ChangeNotifier {
         iconName: 'rate_review',
       ),
       QuickAction(
-        label: 'Tài liệu',
-        type: 'lecturer_documents',
+        label: 'Quy định',
+        type: 'lecturer_regulations',
         iconName: 'description_outlined',
       ),
       QuickAction(
@@ -135,12 +135,12 @@ class LecturerProvider extends ChangeNotifier {
         iconName: 'event_note',
       ),
       QuickAction(
-        label: 'Giấy XN',
+        label: 'Dịch vụ',
         type: 'lecturer_confirmation_letter',
         iconName: 'verified',
       ),
       QuickAction(
-        label: 'Vắng mặt',
+        label: 'Báo nghỉ',
         type: 'lecturer_absences',
         iconName: 'event_busy',
       ),
