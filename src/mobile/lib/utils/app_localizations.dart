@@ -608,6 +608,12 @@ class AppLocalizations {
 
       // Training point descriptions
       'training_point_additional_description': 'Training points are evaluated based on participation in school and class activities and other achievements. These scores affect scholarship eligibility and awards.',
+      // Training point (English translations missing previously)
+      'training_point_title': 'Training Points',
+      'training_point_total_label': 'Total Training Points',
+      'training_point_by_semester': 'Training points by semester',
+      'training_point_additional_info': 'Additional information',
+      'training_point_no_score': 'no score',
     },
   };
 
