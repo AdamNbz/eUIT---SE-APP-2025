@@ -35,11 +35,6 @@ class RegradeScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(
-                    loc.t('regrade_time_over'),
-                    style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 12),
                   // Make table horizontally scrollable to avoid overflow on small screens
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
@@ -69,6 +64,12 @@ class RegradeScreen extends StatelessWidget {
                             .toList(),
                       ),
                     ),
+                  ),
+                  const SizedBox(height: 12),
+                  // Warning message placed between the table and the button
+                  Text(
+                    loc.t('regrade_time_over'),
+                    style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 20),
                   // Disabled button (user should see it's not clickable)
