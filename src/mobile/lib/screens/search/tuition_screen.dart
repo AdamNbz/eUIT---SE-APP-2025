@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/academic_provider.dart';
+import '../../widgets/animated_background.dart';
 
 class TuitionScreen extends StatefulWidget {
   const TuitionScreen({super.key});
@@ -36,64 +37,81 @@ class _TuitionScreenState extends State<TuitionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final double bottomInset = MediaQuery.of(context).padding.bottom;
+    final double navBarHeight = 0 + bottomInset;
+
     return Scaffold(
-      backgroundColor: Color(0xFF0F172A),
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Color(0xFF1E293B),
+        backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: isDark ? Colors.white : Colors.black87),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           'Thông tin học phí',
           style: TextStyle(
-            color: Colors.white,
+            color: isDark ? Colors.white : Colors.black87,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Balance Card
-              _buildBalanceCard(),
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          Positioned.fill(child: AnimatedBackground(isDark: isDark)),
+          Positioned.fill(
+            child: SafeArea(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.fromLTRB(20, 20, 20, 20 + navBarHeight),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Balance Card
+                    _buildBalanceCard(),
 
-              SizedBox(height: 24),
+                    SizedBox(height: 24),
 
-              // History Title
-              Text(
-                'Hóa đơn & Lịch sử giao dịch',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+                    // History Title
+                    Text(
+                      'Hóa đơn & Lịch sử giao dịch',
+                      style: TextStyle(
+                        color: isDark ? Colors.white : Colors.black87,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+
+                    SizedBox(height: 16),
+
+                    // Tuition History Table
+                    _buildTuitionHistoryTable(),
+                  ],
                 ),
               ),
-
-              SizedBox(height: 16),
-
-              // Tuition History Table
-              _buildTuitionHistoryTable(),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
 
   Widget _buildBalanceCard() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardColor = isDark ? const Color.fromRGBO(30, 41, 59, 0.62) : const Color.fromRGBO(255, 255, 255, 0.9);
+    final strokeColor = isDark ? const Color.fromRGBO(255, 255, 255, 0.10) : const Color.fromRGBO(0, 0, 0, 0.05);
+
     return Container(
       padding: EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Color(0xFF1E293B),
+        color: cardColor,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.white.withOpacity(0.1),
+          color: strokeColor,
           width: 1,
         ),
       ),
@@ -105,7 +123,7 @@ class _TuitionScreenState extends State<TuitionScreen> {
               Container(
                 padding: EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: Color(0xFFEF4444).withOpacity(0.2),
+                  color: Color.fromRGBO(239, 68, 68, 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
@@ -122,7 +140,7 @@ class _TuitionScreenState extends State<TuitionScreen> {
                     Text(
                       'Tổng học phí',
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.6),
+                        color: Color.fromRGBO(255, 255, 255, 0.6),
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
                       ),
@@ -131,7 +149,7 @@ class _TuitionScreenState extends State<TuitionScreen> {
                     Text(
                       _formatCurrency(totalFee),
                       style: TextStyle(
-                        color: Colors.white,
+                        color: Color.fromRGBO(255, 255, 255, 1),
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
@@ -141,7 +159,7 @@ class _TuitionScreenState extends State<TuitionScreen> {
                       children: [
                         Icon(Icons.check_circle, color: Color(0xFF10B981), size: 16),
                         SizedBox(width: 4),
-                        Text('Đã đóng: ', style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 13)),
+                        Text('Đã đóng: ', style: TextStyle(color: Color.fromRGBO(255,255,255,0.7), fontSize: 13)),
                         Text(_formatCurrency(totalPaid), style: TextStyle(color: Color(0xFF10B981), fontWeight: FontWeight.bold, fontSize: 13)),
                       ],
                     ),
@@ -150,7 +168,7 @@ class _TuitionScreenState extends State<TuitionScreen> {
                       children: [
                         Icon(Icons.warning_amber_rounded, color: Color(0xFFEF4444), size: 16),
                         SizedBox(width: 4),
-                        Text('Còn lại: ', style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 13)),
+                        Text('Còn lại: ', style: TextStyle(color: Color.fromRGBO(255,255,255,0.7), fontSize: 13)),
                         Text(_formatCurrency(totalUnpaid), style: TextStyle(color: Color(0xFFEF4444), fontWeight: FontWeight.bold, fontSize: 13)),
                       ],
                     ),
@@ -167,27 +185,30 @@ class _TuitionScreenState extends State<TuitionScreen> {
   Widget _buildTuitionHistoryTable() {
     final history = tuitionHistory;
     if (history.isEmpty) {
+      final isDark = Theme.of(context).brightness == Brightness.dark;
+      final cardColor = isDark ? const Color.fromRGBO(30, 41, 59, 0.62) : const Color.fromRGBO(255, 255, 255, 0.9);
+      final strokeColor = isDark ? const Color.fromRGBO(255,255,255,0.10) : const Color.fromRGBO(0,0,0,0.05);
       return Container(
         padding: EdgeInsets.all(32),
         decoration: BoxDecoration(
-          color: Color(0xFF1E293B),
+          color: cardColor,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: Colors.white.withOpacity(0.1),
+            color: strokeColor,
             width: 1,
           ),
         ),
         child: Center(
-          child: Text('Chưa có dữ liệu học phí', style: TextStyle(color: Colors.white.withOpacity(0.5))),
+          child: Text('Chưa có dữ liệu học phí', style: TextStyle(color: isDark ? Color.fromRGBO(255,255,255,0.5) : Colors.black54)),
         ),
       );
     }
     return Container(
       decoration: BoxDecoration(
-        color: Color(0xFF1E293B),
+        color: Theme.of(context).brightness == Brightness.dark ? const Color.fromRGBO(30,41,59,0.62) : const Color.fromRGBO(255,255,255,0.9),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.white.withOpacity(0.1),
+          color: Theme.of(context).brightness == Brightness.dark ? const Color.fromRGBO(255,255,255,0.10) : const Color.fromRGBO(0,0,0,0.05),
           width: 1,
         ),
       ),
@@ -199,18 +220,18 @@ class _TuitionScreenState extends State<TuitionScreen> {
             decoration: BoxDecoration(
               border: Border(
                 bottom: BorderSide(
-                  color: Colors.white.withOpacity(0.1),
+                  color: Theme.of(context).brightness == Brightness.dark ? const Color.fromRGBO(255,255,255,0.1) : const Color.fromRGBO(0,0,0,0.05),
                   width: 1,
                 ),
               ),
             ),
             child: Row(
               children: [
-                Expanded(flex: 2, child: Text('HỌC KỲ', style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.5))),
-                Expanded(flex: 2, child: Text('TÍN CHỈ', style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.5), textAlign: TextAlign.center)),
-                Expanded(flex: 3, child: Text('HỌC PHÍ', style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.5), textAlign: TextAlign.center)),
-                Expanded(flex: 3, child: Text('ĐÃ ĐÓNG', style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.5), textAlign: TextAlign.center)),
-                Expanded(flex: 3, child: Text('CÒN LẠI', style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.5), textAlign: TextAlign.center)),
+                Expanded(flex: 2, child: Text('HỌC KỲ', style: TextStyle(color: Color.fromRGBO(255,255,255,0.6), fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.5))),
+                Expanded(flex: 2, child: Text('TÍN CHỈ', style: TextStyle(color: Color.fromRGBO(255,255,255,0.6), fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.5), textAlign: TextAlign.center)),
+                Expanded(flex: 3, child: Text('HỌC PHÍ', style: TextStyle(color: Color.fromRGBO(255,255,255,0.6), fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.5), textAlign: TextAlign.center)),
+                Expanded(flex: 3, child: Text('ĐÃ ĐÓNG', style: TextStyle(color: Color.fromRGBO(255,255,255,0.6), fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.5), textAlign: TextAlign.center)),
+                Expanded(flex: 3, child: Text('CÒN LẠI', style: TextStyle(color: Color.fromRGBO(255,255,255,0.6), fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.5), textAlign: TextAlign.center)),
               ],
             ),
           ),
@@ -221,7 +242,7 @@ class _TuitionScreenState extends State<TuitionScreen> {
               decoration: BoxDecoration(
                 border: Border(
                   bottom: BorderSide(
-                    color: Colors.white.withOpacity(0.05),
+                    color: Color.fromRGBO(255,255,255,0.05),
                     width: 1,
                   ),
                 ),
@@ -263,6 +284,7 @@ class _TuitionScreenState extends State<TuitionScreen> {
     return '$result đ';
   }
 
+  // ignore: unused_element
   void _handlePaymentAction(String semester, String status) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(

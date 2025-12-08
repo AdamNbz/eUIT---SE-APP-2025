@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/academic_provider.dart';
+import '../../widgets/animated_background.dart';
 
 class TrainingPointScreen extends StatefulWidget {
   const TrainingPointScreen({super.key});
@@ -44,58 +45,72 @@ class _TrainingPointScreenState extends State<TrainingPointScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Color(0xFF0F172A),
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Color(0xFF1E293B),
+        backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: isDark ? Colors.white : Colors.black87),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           'Điểm Rèn Luyện',
           style: TextStyle(
-            color: Colors.white,
+            color: isDark ? Colors.white : Colors.black87,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Total Training Score Card
-              _buildTotalScoreCard(),
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          Positioned.fill(child: AnimatedBackground(isDark: isDark)),
+          Positioned.fill(
+            child: SafeArea(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Total Training Score Card
+                    _buildTotalScoreCard(),
 
-              SizedBox(height: 20),
+                    SizedBox(height: 20),
 
-              // Semester Scores Card
-              _buildSemesterScoresCard(),
+                    // Semester Scores Card
+                    _buildSemesterScoresCard(),
 
-              SizedBox(height: 20),
+                    SizedBox(height: 20),
 
-              // Additional Info
-              _buildAdditionalInfo(),
-            ],
+                    // Additional Info
+                    _buildAdditionalInfo(),
+                  ],
+                ),
+              ),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
 
   Widget _buildTotalScoreCard() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardColor = isDark ? const Color.fromRGBO(30, 41, 59, 0.62) : const Color.fromRGBO(255, 255, 255, 0.9);
+    final strokeColor = isDark ? const Color.fromRGBO(255, 255, 255, 0.10) : const Color.fromRGBO(0, 0, 0, 0.05);
+
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Color(0xFF1E293B),
+        color: cardColor,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.white.withOpacity(0.1),
+          color: strokeColor,
           width: 1,
         ),
       ),
@@ -105,7 +120,7 @@ class _TrainingPointScreenState extends State<TrainingPointScreen> {
           Container(
             padding: EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Color(0xFF8B5CF6).withOpacity(0.2),
+              color: Color.fromRGBO(139, 92, 246, 0.20),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Icon(
@@ -148,7 +163,7 @@ class _TrainingPointScreenState extends State<TrainingPointScreen> {
                       child: Text(
                         '/ 100',
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.5),
+                          color: Color.fromRGBO(255, 255, 255, 0.5),
                           fontSize: 16,
                         ),
                       ),
@@ -164,13 +179,17 @@ class _TrainingPointScreenState extends State<TrainingPointScreen> {
   }
 
   Widget _buildSemesterScoresCard() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardColor = isDark ? const Color.fromRGBO(30, 41, 59, 0.62) : const Color.fromRGBO(255, 255, 255, 0.9);
+    final strokeColor = isDark ? const Color.fromRGBO(255, 255, 255, 0.10) : const Color.fromRGBO(0, 0, 0, 0.05);
+
     return Container(
       padding: EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Color(0xFF1E293B),
+        color: cardColor,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.white.withOpacity(0.1),
+          color: strokeColor,
           width: 1,
         ),
       ),
@@ -201,7 +220,7 @@ class _TrainingPointScreenState extends State<TrainingPointScreen> {
                   Padding(
                     padding: EdgeInsets.symmetric(vertical: 16),
                     child: Divider(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Color.fromRGBO(255, 255, 255, 0.1),
                       height: 1,
                     ),
                   ),
@@ -238,7 +257,7 @@ class _TrainingPointScreenState extends State<TrainingPointScreen> {
               Text(
                 ranking,
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.6),
+                  color: Color.fromRGBO(255, 255, 255, 0.6),
                   fontSize: 12,
                 ),
               ),
@@ -248,17 +267,17 @@ class _TrainingPointScreenState extends State<TrainingPointScreen> {
         Container(
           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: scoreColor.withOpacity(0.2),
+            color: Color.fromARGB((0.2 * 255).round(), ((scoreColor.r * 255.0).round()).clamp(0,255).toInt(), ((scoreColor.g * 255.0).round()).clamp(0,255).toInt(), ((scoreColor.b * 255.0).round()).clamp(0,255).toInt()),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: scoreColor.withOpacity(0.3),
+              color: Color.fromARGB((0.3 * 255).round(), ((scoreColor.r * 255.0).round()).clamp(0,255).toInt(), ((scoreColor.g * 255.0).round()).clamp(0,255).toInt(), ((scoreColor.b * 255.0).round()).clamp(0,255).toInt()),
               width: 1,
             ),
           ),
           child: Text(
             scoreRaw == null ? 'chưa có điểm' : score.toStringAsFixed(1),
             style: TextStyle(
-              color: scoreRaw == null ? Colors.white : scoreColor,
+              color: scoreRaw == null ? Color.fromRGBO(255, 255, 255, 1) : scoreColor,
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
@@ -269,13 +288,17 @@ class _TrainingPointScreenState extends State<TrainingPointScreen> {
   }
 
   Widget _buildAdditionalInfo() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardColor = isDark ? const Color.fromRGBO(30, 41, 59, 0.62) : const Color.fromRGBO(255, 255, 255, 0.9);
+    final strokeColor = isDark ? const Color.fromRGBO(255, 255, 255, 0.10) : const Color.fromRGBO(0, 0, 0, 0.05);
+
     return Container(
       padding: EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Color(0xFF1E293B),
+        color: cardColor,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.white.withOpacity(0.1),
+          color: strokeColor,
           width: 1,
         ),
       ),
@@ -306,7 +329,7 @@ class _TrainingPointScreenState extends State<TrainingPointScreen> {
           Text(
             'Điểm rèn luyện được đánh giá dựa trên sự tham gia vào các hoạt động của trường, lớp, và các thành tích khác. Điểm số này ảnh hưởng đến việc xét học bổng và các danh hiệu thi đua.',
             style: TextStyle(
-              color: Colors.white.withOpacity(0.6),
+              color: Color.fromRGBO(255, 255, 255, 0.6),
               fontSize: 14,
               height: 1.6,
             ),

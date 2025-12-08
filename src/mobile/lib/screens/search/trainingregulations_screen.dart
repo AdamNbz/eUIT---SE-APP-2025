@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/academic_provider.dart';
+import '../../widgets/animated_background.dart';
 
 class TrainingRegulationsScreen extends StatefulWidget {
   const TrainingRegulationsScreen({super.key});
@@ -27,52 +28,68 @@ class _TrainingRegulationsScreenState extends State<TrainingRegulationsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Color(0xFF0F172A),
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Color(0xFF1E293B),
+        backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: isDark ? Colors.white : Colors.black87),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           'Quy chế & Đào tạo',
           style: TextStyle(
-            color: Colors.white,
+            color: isDark ? Colors.white : Colors.black87,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Search Section
-              _buildSearchSection(),
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          Positioned.fill(child: AnimatedBackground(isDark: isDark)),
+          Positioned.fill(
+            child: SafeArea(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Search Section
+                      _buildSearchSection(),
 
-              SizedBox(height: 24),
+                      SizedBox(height: 24),
 
-              // Regulations List
-              _buildRegulationsList(),
-            ],
+                      // Regulations List
+                      _buildRegulationsList(),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
 
   Widget _buildSearchSection() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardColor = isDark ? const Color.fromRGBO(30, 41, 59, 0.62) : const Color.fromRGBO(255, 255, 255, 0.9);
+    final strokeColor = isDark ? const Color.fromRGBO(255, 255, 255, 0.10) : const Color.fromRGBO(0, 0, 0, 0.05);
+
     return Container(
       padding: EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Color(0xFF1E293B),
+        color: cardColor,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.white.withOpacity(0.1),
+          color: strokeColor,
           width: 1,
         ),
       ),
@@ -93,7 +110,7 @@ class _TrainingRegulationsScreenState extends State<TrainingRegulationsScreen> {
               color: Color(0xFF0F172A),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: Colors.white.withOpacity(0.1),
+                color: Color.fromRGBO(255, 255, 255, 0.10),
                 width: 1,
               ),
             ),
@@ -111,19 +128,19 @@ class _TrainingRegulationsScreenState extends State<TrainingRegulationsScreen> {
               decoration: InputDecoration(
                 hintText: 'Nhập từ khóa để tìm kiếm (ví dụ: học vụ, học phí...)',
                 hintStyle: TextStyle(
-                  color: Colors.white.withOpacity(0.4),
+                  color: Color.fromRGBO(255, 255, 255, 0.4),
                   fontSize: 14,
                 ),
                 prefixIcon: Icon(
                   Icons.search,
-                  color: Colors.white.withOpacity(0.5),
+                  color: Color.fromRGBO(255, 255, 255, 0.5),
                   size: 20,
                 ),
                 suffixIcon: _searchQuery.isNotEmpty
                     ? IconButton(
                   icon: Icon(
                     Icons.clear,
-                    color: Colors.white.withOpacity(0.5),
+                    color: Color.fromRGBO(255, 255, 255, 0.5),
                     size: 20,
                   ),
                   onPressed: () {
@@ -150,13 +167,16 @@ class _TrainingRegulationsScreenState extends State<TrainingRegulationsScreen> {
   Widget _buildRegulationsList() {
     final text = regulationsText;
     if (text == null || text.isEmpty) {
+      final isDark = Theme.of(context).brightness == Brightness.dark;
+      final cardColor = isDark ? const Color.fromRGBO(30, 41, 59, 0.62) : const Color.fromRGBO(255, 255, 255, 0.9);
+      final strokeColor = isDark ? const Color.fromRGBO(255, 255, 255, 0.10) : const Color.fromRGBO(0, 0, 0, 0.05);
       return Container(
         padding: EdgeInsets.all(40),
         decoration: BoxDecoration(
-          color: Color(0xFF1E293B),
+          color: cardColor,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: Colors.white.withOpacity(0.1),
+            color: strokeColor,
             width: 1,
           ),
         ),
@@ -164,7 +184,7 @@ class _TrainingRegulationsScreenState extends State<TrainingRegulationsScreen> {
           child: Text(
             'Chưa có dữ liệu quy chế',
             style: TextStyle(
-              color: Colors.white.withOpacity(0.5),
+              color: isDark ? Color.fromRGBO(255,255,255,0.5) : Colors.black54,
               fontSize: 14,
             ),
           ),
@@ -172,20 +192,24 @@ class _TrainingRegulationsScreenState extends State<TrainingRegulationsScreen> {
       );
     }
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardColor = isDark ? const Color.fromRGBO(30, 41, 59, 0.62) : const Color.fromRGBO(255, 255, 255, 0.9);
+    final strokeColor = isDark ? const Color.fromRGBO(255, 255, 255, 0.10) : const Color.fromRGBO(0, 0, 0, 0.05);
+
     return Container(
       padding: EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Color(0xFF1E293B),
+        color: cardColor,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.white.withOpacity(0.1),
+          color: strokeColor,
           width: 1,
         ),
       ),
       child: Text(
         text,
         style: TextStyle(
-          color: Colors.white.withOpacity(0.8),
+          color: isDark ? Color.fromRGBO(255,255,255,0.8) : Colors.black87,
           fontSize: 14,
           height: 1.6,
         ),
