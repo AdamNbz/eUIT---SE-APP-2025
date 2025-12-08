@@ -323,6 +323,7 @@ class AppLocalizations {
       'training_point_by_semester': 'Điểm rèn luyện theo kỳ',
       'training_point_additional_info': 'Thông tin thêm',
       'training_point_no_score': 'chưa có điểm',
+      'loading_profile': 'Đang tải hồ sơ...',
     },
     'en': {
       'login': 'Login',
@@ -614,6 +615,7 @@ class AppLocalizations {
       'training_point_by_semester': 'Training points by semester',
       'training_point_additional_info': 'Additional information',
       'training_point_no_score': 'no score',
+      'loading_profile': 'Loading profile...',
     },
   };
 

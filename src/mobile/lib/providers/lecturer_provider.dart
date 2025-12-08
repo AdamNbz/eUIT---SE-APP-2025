@@ -65,7 +65,7 @@ class LecturerProvider extends ChangeNotifier {
 
     try {
       // Check if we have a token first
-      final token = await auth.getToken();
+      final token = await auth.getValidToken();
       print('Token available: ${token != null}');
       developer.log('Token available: ${token != null}', name: 'LecturerProvider');
       
@@ -125,8 +125,8 @@ class LecturerProvider extends ChangeNotifier {
         iconName: 'rate_review',
       ),
       QuickAction(
-        label: 'Tài liệu',
-        type: 'lecturer_documents',
+        label: 'Quy định',
+        type: 'lecturer_regulations',
         iconName: 'description_outlined',
       ),
       QuickAction(
@@ -135,12 +135,12 @@ class LecturerProvider extends ChangeNotifier {
         iconName: 'event_note',
       ),
       QuickAction(
-        label: 'Giấy XN',
+        label: 'Dịch vụ',
         type: 'lecturer_confirmation_letter',
         iconName: 'verified',
       ),
       QuickAction(
-        label: 'Vắng mặt',
+        label: 'Báo nghỉ',
         type: 'lecturer_absences',
         iconName: 'event_busy',
       ),
@@ -980,5 +980,22 @@ class LecturerProvider extends ChangeNotifier {
       developer.log('Error creating confirmation letter: $e', name: 'LecturerProvider');
     }
     return null;
+  }
+
+  /// Prefetch commonly used lecturer data. Used by LoadingScreen.
+  Future<void> prefetch({bool forceRefresh = false}) async {
+    try {
+      developer.log('LecturerProvider: starting prefetch', name: 'LecturerProvider');
+      await Future.wait([
+        fetchLecturerProfile(),
+        fetchTeachingClasses(),
+        fetchTeachingSchedule(),
+        _fetchNotifications(),
+      ]);
+      developer.log('LecturerProvider: prefetch completed', name: 'LecturerProvider');
+    } catch (e) {
+      developer.log('LecturerProvider: prefetch error: $e', name: 'LecturerProvider');
+      rethrow;
+    }
   }
 }
