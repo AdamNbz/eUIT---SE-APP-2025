@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../utils/app_localizations.dart';
 import '../../providers/academic_provider.dart';
 import '../../widgets/animated_background.dart';
 
@@ -49,7 +50,7 @@ class _TrainingProgramScreenState extends State<TrainingProgramScreen> {
             onPressed: () => Navigator.pop(context),
           ),
           title: Text(
-            'Chương trình đào tạo',
+            AppLocalizations.of(context).t('training_program_title'),
             style: TextStyle(
               color: isDark ? Colors.white : Colors.black87,
               fontSize: 20,
@@ -65,9 +66,9 @@ class _TrainingProgramScreenState extends State<TrainingProgramScreen> {
               child: SafeArea(
                 child: Center(
                   child: Text(
-                    'Chưa có dữ liệu chương trình đào tạo',
+                    AppLocalizations.of(context).t('training_program_no_data'),
                     style: TextStyle(
-                      color: isDark ? Colors.white.withOpacity(0.5) : Colors.black54,
+                      color: isDark ? Color.fromRGBO(255,255,255,0.5) : Colors.black54,
                       fontSize: 14,
                     ),
                   ),
@@ -89,7 +90,7 @@ class _TrainingProgramScreenState extends State<TrainingProgramScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Chương trình đào tạo',
+          AppLocalizations.of(context).t('training_program_title'),
           style: TextStyle(
             color: isDark ? Colors.white : Colors.black87,
             fontSize: 20,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../utils/app_localizations.dart';
 import '../../providers/academic_provider.dart';
 import '../../widgets/animated_background.dart';
 
@@ -52,7 +53,7 @@ class _TuitionScreenState extends State<TuitionScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Thông tin học phí',
+          AppLocalizations.of(context).t('tuition_title'),
           style: TextStyle(
             color: isDark ? Colors.white : Colors.black87,
             fontSize: 20,
@@ -78,7 +79,7 @@ class _TuitionScreenState extends State<TuitionScreen> {
 
                     // History Title
                     Text(
-                      'Hóa đơn & Lịch sử giao dịch',
+                      AppLocalizations.of(context).t('tuition_history_title'),
                       style: TextStyle(
                         color: isDark ? Colors.white : Colors.black87,
                         fontSize: 18,
@@ -138,7 +139,7 @@ class _TuitionScreenState extends State<TuitionScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Tổng học phí',
+                      AppLocalizations.of(context).t('tuition_total_fee_label'),
                       style: TextStyle(
                         color: Color.fromRGBO(255, 255, 255, 0.6),
                         fontSize: 13,
@@ -199,7 +200,7 @@ class _TuitionScreenState extends State<TuitionScreen> {
           ),
         ),
         child: Center(
-          child: Text('Chưa có dữ liệu học phí', style: TextStyle(color: isDark ? Color.fromRGBO(255,255,255,0.5) : Colors.black54)),
+          child: Text(AppLocalizations.of(context).t('tuition_no_data'), style: TextStyle(color: isDark ? Color.fromRGBO(255,255,255,0.5) : Colors.black54)),
         ),
       );
     }
@@ -227,11 +228,11 @@ class _TuitionScreenState extends State<TuitionScreen> {
             ),
             child: Row(
               children: [
-                Expanded(flex: 2, child: Text('HỌC KỲ', style: TextStyle(color: Color.fromRGBO(255,255,255,0.6), fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.5))),
-                Expanded(flex: 2, child: Text('TÍN CHỈ', style: TextStyle(color: Color.fromRGBO(255,255,255,0.6), fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.5), textAlign: TextAlign.center)),
-                Expanded(flex: 3, child: Text('HỌC PHÍ', style: TextStyle(color: Color.fromRGBO(255,255,255,0.6), fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.5), textAlign: TextAlign.center)),
-                Expanded(flex: 3, child: Text('ĐÃ ĐÓNG', style: TextStyle(color: Color.fromRGBO(255,255,255,0.6), fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.5), textAlign: TextAlign.center)),
-                Expanded(flex: 3, child: Text('CÒN LẠI', style: TextStyle(color: Color.fromRGBO(255,255,255,0.6), fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.5), textAlign: TextAlign.center)),
+                Expanded(flex: 2, child: Text(AppLocalizations.of(context).t('tuition_table_col_semester'), style: TextStyle(color: Color.fromRGBO(255,255,255,0.6), fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.5))),
+                Expanded(flex: 2, child: Text(AppLocalizations.of(context).t('tuition_table_col_credits'), style: TextStyle(color: Color.fromRGBO(255,255,255,0.6), fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.5), textAlign: TextAlign.center)),
+                Expanded(flex: 3, child: Text(AppLocalizations.of(context).t('tuition_table_col_fee'), style: TextStyle(color: Color.fromRGBO(255,255,255,0.6), fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.5), textAlign: TextAlign.center)),
+                Expanded(flex: 3, child: Text(AppLocalizations.of(context).t('tuition_table_col_paid'), style: TextStyle(color: Color.fromRGBO(255,255,255,0.6), fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.5), textAlign: TextAlign.center)),
+                Expanded(flex: 3, child: Text(AppLocalizations.of(context).t('tuition_table_col_unpaid'), style: TextStyle(color: Color.fromRGBO(255,255,255,0.6), fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.5), textAlign: TextAlign.center)),
               ],
             ),
           ),

@@ -256,6 +256,73 @@ class AppLocalizations {
       'regrade_table_col_score': 'Điểm',
       'regrade_table_col_note': 'Ghi chú',
       'regrade_button': 'Phúc khảo',
+      // Services tiles (specific titles/subtitles)
+      'services_student_confirmation_title': 'Đăng ký giấy xác nhận sinh viên',
+      'services_student_confirmation_subtitle': 'Phòng Công tác Sinh viên',
+      'services_parking_monthly_title': 'Đăng ký Vé tháng gửi xe máy',
+      'services_parking_monthly_subtitle': 'Phòng Dữ liệu & Công nghệ thông tin',
+      'services_certificate_confirmation_title': 'Đăng ký Xác nhận chứng chỉ',
+      'services_certificate_confirmation_subtitle': 'Phòng Đào tạo Đại học / VPCCTĐB',
+      'services_regrade_title': 'Đăng ký Phúc khảo',
+      'services_regrade_subtitle': 'Phòng Đào tạo Đại học / VPCCTĐB',
+      'services_transcript_title': 'Đăng ký Bảng điểm',
+      'services_transcript_subtitle': 'Phòng Đào tạo Đại học / VPCCTĐB',
+      'services_introduction_letter_title': 'Đăng ký Giấy giới thiệu',
+      'services_introduction_letter_subtitle': 'Phòng Đào tạo Đại học / VPCCTĐB',
+
+      // Parking monthly
+      'parking_monthly_title': 'Đăng ký Vé tháng gửi xe máy',
+      'parking_monthly_select_months_label': 'Chọn số tháng đăng ký giữ xe',
+      'parking_monthly_select_months_hint': 'Chọn số tháng',
+      'parking_monthly_plate_label': 'Biển số xe đăng ký',
+      'parking_monthly_plate_hint': 'Biển số xe Đăng ký',
+      'parking_monthly_example': 'Ví dụ: 47E1-123.45\nNếu là xe đạp thì nhập Mã số sinh viên',
+      'parking_monthly_select_months_required': 'Vui lòng chọn số tháng',
+      'parking_monthly_plate_required': 'Vui lòng nhập biển số xe',
+
+      // Plan screen
+      'plan_title': 'Kế hoạch đào tạo',
+      'plan_no_data': 'Chưa có dữ liệu kế hoạch đào tạo',
+      'plan_image_error': 'Không thể tải hình ảnh kế hoạch',
+
+      // Tuition screen
+      'tuition_title': 'Thông tin học phí',
+      'tuition_history_title': 'Hóa đơn & Lịch sử giao dịch',
+      'tuition_no_data': 'Chưa có dữ liệu học phí',
+      'tuition_table_col_semester': 'HỌC KỲ',
+      'tuition_table_col_credits': 'TÍN CHỈ',
+      'tuition_table_col_fee': 'HỌC PHÍ',
+      'tuition_table_col_paid': 'ĐÃ ĐÓNG',
+      'tuition_table_col_unpaid': 'CÒN LẠI',
+      'tuition_total_fee_label': 'Tổng học phí',
+      'tuition_paid_label': 'Đã đóng',
+      'tuition_unpaid_label': 'Còn lại',
+      'tuition_action_view': 'Xem chi tiết thanh toán {semester}',
+      'tuition_action_pay': 'Thanh toán học phí {semester}',
+
+      // Training point descriptions
+      'training_point_additional_description': 'Điểm rèn luyện được đánh giá dựa trên sự tham gia vào các hoạt động của trường, lớp, và các thành tích khác. Điểm số này ảnh hưởng đến việc xét học bổng và các danh hiệu thi đua.',
+
+      // Progress screen
+      'progress_title': 'Kết quả đào tạo (Tiến độ)',
+      'progress_overview_title': 'Tổng quan tín chỉ',
+      'progress_overview_subtitle': 'Theo dõi tiến độ hoàn thành chương trình đào tạo của bạn.',
+      'progress_no_group_data': 'Chưa có dữ liệu nhóm tín chỉ',
+      'progress_by_group_title': 'Tiến độ theo nhóm tín chỉ',
+      'progress_completed_credits_label': 'Tín chỉ đã hoàn thành',
+      'progress_remaining_credits_label': 'Tín chỉ còn lại',
+      'progress_total_required_credits_label': 'Tổng tín chỉ yêu cầu',
+
+      // Training program
+      'training_program_title': 'Chương trình đào tạo',
+      'training_program_no_data': 'Chưa có dữ liệu chương trình đào tạo',
+
+      // Training point
+      'training_point_title': 'Điểm Rèn Luyện',
+      'training_point_total_label': 'Điểm Rèn Luyện Tổng',
+      'training_point_by_semester': 'Điểm rèn luyện theo kỳ',
+      'training_point_additional_info': 'Thông tin thêm',
+      'training_point_no_score': 'chưa có điểm',
     },
     'en': {
       'login': 'Login',
@@ -495,6 +562,52 @@ class AppLocalizations {
       'regrade_table_col_score': 'Score',
       'regrade_table_col_note': 'Note',
       'regrade_button': 'Request regrade',
+      // Services tiles (specific titles/subtitles)
+      'services_student_confirmation_title': 'Student confirmation request',
+      'services_student_confirmation_subtitle': 'Student Affairs Office',
+      'services_parking_monthly_title': 'Motorbike monthly parking registration',
+      'services_parking_monthly_subtitle': 'Data & IT Office',
+      'services_certificate_confirmation_title': 'Certificate confirmation registration',
+      'services_certificate_confirmation_subtitle': 'Undergraduate Office / Special Training Office',
+      'services_regrade_title': 'Regrade request',
+      'services_regrade_subtitle': 'Undergraduate Office / Special Training Office',
+      'services_transcript_title': 'Transcript registration',
+      'services_transcript_subtitle': 'Undergraduate Office / Special Training Office',
+      'services_introduction_letter_title': 'Introduction letter request',
+      'services_introduction_letter_subtitle': 'Undergraduate Office / Special Training Office',
+
+      // Parking monthly
+      'parking_monthly_title': 'Motorbike monthly parking registration',
+      'parking_monthly_select_months_label': 'Select number of months',
+      'parking_monthly_select_months_hint': 'Select months',
+      'parking_monthly_plate_label': 'License plate',
+      'parking_monthly_plate_hint': 'Enter license plate',
+      'parking_monthly_example': 'E.g.: 47E1-123.45\nIf bicycle, enter Student ID',
+      'parking_monthly_select_months_required': 'Please select number of months',
+      'parking_monthly_plate_required': 'Please enter license plate',
+
+      // Plan screen
+      'plan_title': 'Annual Plan',
+      'plan_no_data': 'No annual plan data available',
+      'plan_image_error': 'Unable to load plan image',
+
+      // Tuition screen
+      'tuition_title': 'Tuition Info',
+      'tuition_history_title': 'Invoices & Transaction History',
+      'tuition_no_data': 'No tuition data available',
+      'tuition_table_col_semester': 'SEMESTER',
+      'tuition_table_col_credits': 'CREDITS',
+      'tuition_table_col_fee': 'TUITION FEE',
+      'tuition_table_col_paid': 'PAID',
+      'tuition_table_col_unpaid': 'UNPAID',
+      'tuition_total_fee_label': 'Total tuition',
+      'tuition_paid_label': 'Paid',
+      'tuition_unpaid_label': 'Unpaid',
+      'tuition_action_view': 'View payment details {semester}',
+      'tuition_action_pay': 'Pay tuition for {semester}',
+
+      // Training point descriptions
+      'training_point_additional_description': 'Training points are evaluated based on participation in school and class activities and other achievements. These scores affect scholarship eligibility and awards.',
     },
   };
 

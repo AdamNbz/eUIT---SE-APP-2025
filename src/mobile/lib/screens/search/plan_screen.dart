@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../utils/app_localizations.dart';
 import '../../providers/academic_provider.dart';
 import '../../widgets/animated_background.dart';
 
@@ -45,7 +46,7 @@ class _PlanScreenState extends State<PlanScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Kế hoạch đào tạo',
+          AppLocalizations.of(context).t('plan_title'),
           style: TextStyle(
             color: isDark ? Colors.white : Colors.black87,
             fontSize: 20,
@@ -71,7 +72,7 @@ class _PlanScreenState extends State<PlanScreen> {
                               border: Border.all(color: strokeColor, width: 1),
                             ),
                             child: Text(
-                              'Chưa có dữ liệu kế hoạch đào tạo',
+                              AppLocalizations.of(context).t('plan_no_data'),
                               style: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.7)),
                             ),
                           )
@@ -88,7 +89,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                 imageUrl,
                                 fit: BoxFit.contain,
                                 errorBuilder: (context, error, stackTrace) => Text(
-                                  'Không thể tải hình ảnh kế hoạch',
+                                  AppLocalizations.of(context).t('plan_image_error'),
                                   style: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.7)),
                                 ),
                               ),

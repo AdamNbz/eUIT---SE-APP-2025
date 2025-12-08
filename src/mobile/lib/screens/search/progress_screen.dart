@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../utils/app_localizations.dart';
 import '../../providers/academic_provider.dart';
 import '../../widgets/animated_background.dart';
 
@@ -64,7 +65,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Kết quả đào tạo (Tiến độ)',
+          AppLocalizations.of(context).t('progress_title'),
           style: TextStyle(
             color: isDark ? Colors.white : Colors.black87,
             fontSize: 20,
@@ -125,7 +126,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
         children: [
           // Title
           Text(
-            'Tổng quan tín chỉ',
+            AppLocalizations.of(context).t('progress_overview_title'),
             style: TextStyle(
               color: Colors.white,
               fontSize: 18,
@@ -137,7 +138,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
 
           // Subtitle
           Text(
-            'Theo dõi tiến độ hoàn thành chương trình đào tạo của bạn.',
+            AppLocalizations.of(context).t('progress_overview_subtitle'),
             style: TextStyle(
               color: Color.fromRGBO(255, 255, 255, 0.6),
               fontSize: 14,
@@ -190,7 +191,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
           // Percentage
           Center(
             child: Text(
-              totalRequiredCredits == 0 ? 'chưa có dữ liệu' : '${progressPercentage.toStringAsFixed(1)}%',
+              totalRequiredCredits == 0 ? AppLocalizations.of(context).t('no_data') : '${progressPercentage.toStringAsFixed(1)}%',
               style: TextStyle(
                 color: isDark ? Color.fromRGBO(255,255,255,1) : Colors.black87,
                 fontSize: 32,
@@ -303,7 +304,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
 
           // Value
           Text(
-            value == '0' ? 'chưa có dữ liệu' : value,
+            value == '0' ? AppLocalizations.of(context).t('no_data') : value,
             style: TextStyle(
               color: color,
               fontSize: 28,
@@ -333,7 +334,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
         ),
         child: Center(
           child: Text(
-            'Chưa có dữ liệu nhóm tín chỉ',
+            AppLocalizations.of(context).t('progress_no_group_data'),
             style: TextStyle(
               color: isDark ? Color.fromRGBO(255,255,255,0.5) : Colors.black54,
               fontSize: 14,
@@ -346,7 +347,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Tiến độ theo nhóm tín chỉ',
+          AppLocalizations.of(context).t('progress_by_group_title'),
           style: TextStyle(
             color: Colors.white,
             fontSize: 16,
