@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 import '../widgets/animated_background.dart';
 import '../utils/app_localizations.dart';
 import '../theme/app_theme.dart';
+import '../services/auth_service.dart';
 
 class CertificateConfirmationScreen extends StatefulWidget {
   const CertificateConfirmationScreen({super.key});
@@ -13,8 +16,42 @@ class CertificateConfirmationScreen extends StatefulWidget {
   State<CertificateConfirmationScreen> createState() => _CertificateConfirmationScreenState();
 }
 
+// Model for certificate history items returned by the API
+class CertificateHistoryItem {
+  final int id;
+  final String certificateType;
+  final String score;
+  final String issueDate;
+  final String expiryDate;
+  final String status;
+  final String filePath;
+  final String createdAt;
+
+  CertificateHistoryItem({required this.id, required this.certificateType, required this.score, required this.issueDate, required this.expiryDate, required this.status, required this.filePath, required this.createdAt});
+
+  factory CertificateHistoryItem.fromJson(Map<String, dynamic> json) {
+    return CertificateHistoryItem(
+      id: (json['id'] is int) ? json['id'] as int : int.tryParse(json['id']?.toString() ?? '') ?? 0,
+      certificateType: json['certificateType']?.toString() ?? '',
+      score: json['score']?.toString() ?? '',
+      issueDate: json['issueDate']?.toString() ?? '',
+      expiryDate: json['expiryDate']?.toString() ?? '',
+      status: json['status']?.toString() ?? '',
+      filePath: json['filePath']?.toString() ?? '',
+      createdAt: json['createdAt']?.toString() ?? '',
+    );
+  }
+}
+
 class _CertificateConfirmationScreenState extends State<CertificateConfirmationScreen> {
   final _formKey = GlobalKey<FormState>();
+
+  // Scaffold key so we can open the endDrawer from the AppBar
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  // History state
+  List<CertificateHistoryItem> _history = [];
+  bool _isHistoryLoading = false;
 
   // Helper to render a label with a red '*' prefix to indicate required fields
   Widget _requiredLabel(String text, bool isDark) {
@@ -69,36 +106,14 @@ class _CertificateConfirmationScreenState extends State<CertificateConfirmationS
   // For now use a placeholder URL; the API should provide the current regulation link.
   static final Uri _uitGlobalScholarshipUri = Uri.parse('https://ctsv.uit.edu.vn/bai-viet/thong-bao-trien-khai-hoc-bong-uit-global-tu-hoc-ky-1-nam-hoc-2025-2026');
 
-  Future<void> _openScholarshipReg() async {
-    try {
-      if (!await launchUrl(_uitGlobalScholarshipUri, mode: LaunchMode.externalApplication)) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).t('link_open_failed'))));
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).t('link_open_failed'))));
-    }
+  @override
+  void initState() {
+    super.initState();
+    // Load history after first frame to ensure context is available
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadHistory();
+    });
   }
-
-  // Example certificate list (can be extended later)
-  final List<String> _certificateOptions = [
-    'Chứng chỉ TOEIC (Nghe-Đọc)',
-    'Chứng chỉ TOEIC (Nói-Viết)',
-    'Chứng chỉ TOEFL iBT',
-    'Chứng chỉ IELTS',
-    'Chứng chỉ PTE Academic',
-    'Chứng chỉ Cambridge',
-    'Chứng chỉ VNU-EPT',
-    'Tiếng Nhật',
-    'Tiếng Pháp',
-    'VPET',
-    'Chứng chỉ GDQP&AN',
-    'Bằng TN THPT',
-    'Giấy Khai sinh',
-    'VSTEP - Đánh giá năng lực',
-    'Bằng đại học ngoại ngữ',
-    'Bằng cao đẳng',
-    'Chứng chỉ BCU-EPT',
-  ];
 
   @override
   void dispose() {
@@ -182,19 +197,158 @@ class _CertificateConfirmationScreenState extends State<CertificateConfirmationS
     );
   }
 
+  // Load certificate history from API
+  Future<void> _loadHistory() async {
+    setState(() => _isHistoryLoading = true);
+    final auth = AuthService();
+    try {
+      final token = await auth.getToken();
+      final uri = auth.buildUri('/api/service/language-certificate/history');
+      final headers = {'Accept': 'application/json'};
+      if (token != null && token.isNotEmpty) headers['Authorization'] = 'Bearer $token';
+
+      final res = await http.get(uri, headers: headers).timeout(const Duration(seconds: 20));
+
+      if (res.statusCode >= 200 && res.statusCode < 300) {
+        final List<dynamic> list = jsonDecode(res.body) as List<dynamic>;
+        final parsed = list.map((e) => CertificateHistoryItem.fromJson(e as Map<String, dynamic>)).toList();
+        if (mounted) setState(() => _history = parsed);
+      } else if (res.statusCode == 401) {
+        await auth.deleteToken();
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Yêu cầu đăng nhập lại')));
+      } else {
+        String message = 'Không thể tải lịch sử';
+        try {
+          final Map<String, dynamic> err = jsonDecode(res.body) as Map<String, dynamic>;
+          if (err['message'] != null) message = err['message'].toString();
+        } catch (_) {}
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+      }
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Lỗi mạng, thử lại')));
+    } finally {
+      if (mounted) setState(() => _isHistoryLoading = false);
+    }
+  }
+
+  Future<void> _openScholarshipReg() async {
+    try {
+      if (!await launchUrl(_uitGlobalScholarshipUri, mode: LaunchMode.externalApplication)) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).t('link_open_failed'))));
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).t('link_open_failed'))));
+    }
+  }
+
+  // Example certificate list (can be extended later)
+  final List<String> _certificateOptions = [
+    'Chứng chỉ TOEIC (Nghe-Đọc)',
+    'Chứng chỉ TOEIC (Nói-Viết)',
+    'Chứng chỉ TOEFL iBT',
+    'Chứng chỉ IELTS',
+    'Chứng chỉ PTE Academic',
+    'Chứng chỉ Cambridge',
+    'Chứng chỉ VNU-EPT',
+    'Tiếng Nhật',
+    'Tiếng Pháp',
+    'VPET',
+    'Chứng chỉ GDQP&AN',
+    'Bằng TN THPT',
+    'Giấy Khai sinh',
+    'VSTEP - Đánh giá năng lực',
+    'Bằng đại học ngoại ngữ',
+    'Bằng cao đẳng',
+    'Chứng chỉ BCU-EPT',
+  ];
+
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
+      key: _scaffoldKey,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: Text(loc.t('certificate_registration_title')),
         iconTheme: IconThemeData(color: isDark ? Colors.white : Colors.black87),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.history),
+            onPressed: () {
+              _scaffoldKey.currentState?.openEndDrawer();
+            },
+          ),
+        ],
       ),
+      endDrawer: Drawer(
+        backgroundColor: isDark ? Colors.black.withOpacity(0.8) : Colors.white.withOpacity(0.92),
+        elevation: 0,
+        child: SafeArea(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(loc.t('certificate_confirmation_history_title'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                    IconButton(icon: Icon(Icons.close, color: isDark ? Colors.white : Colors.black87), onPressed: () => Navigator.of(context).maybePop()),
+                  ],
+                ),
+              ),
+
+              Expanded(
+                child: _isHistoryLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : (_history.isEmpty
+                        ? Center(child: Text(loc.t('no_history')))
+                        : ListView.separated(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            itemCount: _history.length,
+                            separatorBuilder: (_, __) => const Divider(height: 1),
+                            itemBuilder: (ctx, idx) {
+                              final item = _history[idx];
+                              return ListTile(
+                                title: Text('${item.certificateType} — ${item.score}'),
+                                subtitle: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const SizedBox(height: 4),
+                                    Text('Ngày cấp: ${item.issueDate}'),
+                                    const SizedBox(height: 4),
+                                    Text('Yêu cầu: ${item.createdAt}'),
+                                    const SizedBox(height: 4),
+                                    Text('Trạng thái: ${item.status}'),
+                                  ],
+                                ),
+                                trailing: Text(item.expiryDate),
+                                onTap: () async {
+                                  Navigator.of(context).pop();
+                                  if (item.filePath.isNotEmpty) {
+                                    final auth = AuthService();
+                                    final uri = auth.buildUri('/${item.filePath}');
+                                    try {
+                                      if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+                                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(loc.t('link_open_failed'))));
+                                      }
+                                    } catch (_) {
+                                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(loc.t('link_open_failed'))));
+                                    }
+                                  }
+                                },
+                              );
+                            },
+                          )),
+              ),
+            ],
+          ),
+        ),
+      ),
+
       body: Stack(
         fit: StackFit.expand,
         children: [

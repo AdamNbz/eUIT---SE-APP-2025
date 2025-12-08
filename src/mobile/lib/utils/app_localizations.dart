@@ -161,6 +161,8 @@ class AppLocalizations {
       // History / empty state for confirmation screen
       'student_confirmation_history_title': 'Lịch sử đăng ký',
       'no_history': 'Không có lịch sử',
+      // Certificate confirmation history title
+      'certificate_confirmation_history_title': 'Lịch sử xác nhận chứng chỉ',
       // Notes for student confirmation screen
       'student_confirmation_other_section_title': 'Lý do khác',
       'student_confirmation_other_section_instruction': 'Nhập theo mẫu bổ sung hồ sơ',
@@ -364,6 +366,8 @@ class AppLocalizations {
       // History / empty state for confirmation screen
       'student_confirmation_history_title': 'Request history',
       'no_history': 'No history',
+      // Certificate confirmation history title
+      'certificate_confirmation_history_title': 'Certificate confirmation history',
       // Notes for student confirmation screen
       'student_confirmation_other_section_title': 'Other reason',
       'student_confirmation_other_section_instruction': 'Enter following supplementary document format',
