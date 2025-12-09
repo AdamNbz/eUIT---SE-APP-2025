@@ -3,12 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../utils/url_launcher_api.dart';
 import '../../providers/lecturer_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/app_localizations.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../widgets/lecturer_id_card.dart';
 import 'regulations_list_screen.dart';
+import '../../utils/app_localizations.dart';
+import '../../theme/app_theme.dart';
+import 'package:android_intent_plus/android_intent.dart';
+import 'package:flutter/services.dart';
 
 /// LecturerHomeScreen - Trang chủ cho giảng viên
 class LecturerHomeScreen extends StatefulWidget {
@@ -62,10 +67,7 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
         Navigator.pushNamed(context, '/lecturer_documents');
         break;
       case 'lecturer_regulations':
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => RegulationsListScreen()),
-        );
+        Navigator.pushNamed(context, '/lecturer_regulations');
         break;
       case 'lecturer_exam_schedule':
         Navigator.pushNamed(context, '/lecturer_exam_schedule');
@@ -88,23 +90,103 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
   }
 
   Future<void> _tryOpenRegulationsOrShowDialog() async {
-    final url = Uri.parse('https://daa.uit.edu.vn/qui-che-qui-dinh-qui-trinh');
+    final urlStr = 'https://daa.uit.edu.vn/qui-che-qui-dinh-qui-trinh';
     try {
-      final launched = await launchUrl(url, mode: LaunchMode.externalApplication);
+      final launched = await openExternalUrl(context, urlStr);
       if (!launched && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Không thể mở trang quy định'),
-            backgroundColor: Color(0xFFEF4444),
+        await showDialog(
+          context: context,
+          builder: (dctx) => AlertDialog(
+            title: Text(AppLocalizations.of(context).t('link_open_failed')),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Không thể mở trang tự động.'),
+                const SizedBox(height: 8),
+                SelectableText(urlStr, style: const TextStyle(color: Colors.blue)),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () async {
+                  Navigator.of(dctx).pop();
+                  try {
+                    final intent = AndroidIntent(action: 'action_view', data: urlStr);
+                    await intent.launch();
+                  } catch (e) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('${AppLocalizations.of(context).t('error_prefix')}${e.toString()}'), backgroundColor: AppTheme.error),
+                      );
+                    }
+                  }
+                },
+                child: const Text('Mở lại'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  await Clipboard.setData(ClipboardData(text: urlStr));
+                  Navigator.of(dctx).pop();
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Đã sao chép link vào clipboard!')),
+                    );
+                  }
+                },
+                child: const Text('Sao chép link'),
+              ),
+              TextButton(onPressed: () => Navigator.of(dctx).pop(), child: const Text('Đóng')),
+            ],
           ),
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Lỗi: ${e.toString()}'),
-            backgroundColor: const Color(0xFFEF4444),
+        await showDialog(
+          context: context,
+          builder: (dctx) => AlertDialog(
+            title: const Text('Lỗi khi mở link'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(e.toString()),
+                const SizedBox(height: 8),
+                SelectableText(urlStr, style: const TextStyle(color: Colors.blue)),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () async {
+                  Navigator.of(dctx).pop();
+                  try {
+                    final intent = AndroidIntent(action: 'action_view', data: urlStr);
+                    await intent.launch();
+                  } catch (err) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('${AppLocalizations.of(context).t('error_prefix')}${err.toString()}'), backgroundColor: AppTheme.error),
+                      );
+                    }
+                  }
+                },
+                child: const Text('Mở lại'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  await Clipboard.setData(ClipboardData(text: urlStr));
+                  Navigator.of(dctx).pop();
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Đã sao chép link vào clipboard!')),
+                    );
+                  }
+                },
+                child: const Text('Sao chép link'),
+              ),
+              TextButton(onPressed: () => Navigator.of(dctx).pop(), child: const Text('Đóng')),
+            ],
           ),
         );
       }

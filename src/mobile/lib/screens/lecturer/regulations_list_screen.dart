@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../utils/url_launcher_api.dart';
+import '../../utils/app_localizations.dart';
 import '../../theme/app_theme.dart';
 
 class RegulationsListScreen extends StatefulWidget {
@@ -185,48 +187,25 @@ class _RegulationsListScreenState extends State<RegulationsListScreen> {
 
   Future<void> _openUrl(BuildContext context, String urlStr) async {
     final uri = Uri.parse(urlStr);
-    bool launched = false;
     try {
-      if (await canLaunchUrl(uri)) {
-        launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
-      }
-    } catch (_) {
-      launched = false;
-    }
-    if (!launched && context.mounted) {
-      await showDialog(
-        context: context,
-        builder: (c) => AlertDialog(
-          title: const Text('Mở trang thất bại'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Không thể mở trang. Vui lòng sao chép link và dán vào trình duyệt:'),
-              const SizedBox(height: 12),
-              SelectableText(urlStr, style: const TextStyle(color: Colors.blue)),
-            ],
+      final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!launched && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Không thể mở trang quy định'),
+            backgroundColor: Color(0xFFEF4444),
           ),
-          actions: [
-            TextButton(
-              onPressed: () async {
-                await Clipboard.setData(ClipboardData(text: urlStr));
-                Navigator.of(c).pop();
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Đã sao chép link vào clipboard!')),
-                  );
-                }
-              },
-              child: const Text('Sao chép link'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(c).pop(),
-              child: const Text('Đóng'),
-            ),
-          ],
-        ),
-      );
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lỗi: ${e.toString()}'),
+            backgroundColor: const Color(0xFFEF4444),
+          ),
+        );
+      }
     }
   }
 
