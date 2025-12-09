@@ -68,7 +68,7 @@ class LecturerProvider extends ChangeNotifier {
       final token = await auth.getValidToken();
       print('Token available: ${token != null}');
       developer.log('Token available: ${token != null}', name: 'LecturerProvider');
-      
+
       if (token == null) {
         print('No token found, skipping API calls');
         developer.log('No token found, skipping API calls', name: 'LecturerProvider');
@@ -84,7 +84,7 @@ class LecturerProvider extends ChangeNotifier {
         fetchTeachingSchedule(),
         _fetchNotifications(),
       ]);
-      
+
       print('=== LECTURER PROVIDER INIT COMPLETED ===');
       developer.log('=== LECTURER PROVIDER INIT COMPLETED ===', name: 'LecturerProvider');
     } catch (e) {
@@ -165,7 +165,7 @@ class LecturerProvider extends ChangeNotifier {
 
     try {
       developer.log('Fetching lecturer profile...', name: 'LecturerProvider');
-      
+
       final data = await _client.get('/api/lecturer/profile');
       if (data != null) {
         developer.log('Lecturer profile fetched successfully', name: 'LecturerProvider');
@@ -189,9 +189,9 @@ class LecturerProvider extends ChangeNotifier {
       final now = DateTime.now();
       final startDate = DateTime(now.month >= 8 ? now.year : now.year - 1, 8, 1);
       final endDate = DateTime(now.month >= 8 ? now.year + 1 : now.year, 7, 31);
-      
+
       developer.log('Schedule date range: $startDate to $endDate', name: 'LecturerProvider');
-      
+
       final data = await _client.get(
         '/api/lecturer/schedule',
         queryParameters: {
@@ -205,9 +205,9 @@ class LecturerProvider extends ChangeNotifier {
         _teachingSchedule = data
             .map((item) => TeachingScheduleItem.fromJson(item))
             .toList();
-        
+
         developer.log('Parsed ${_teachingSchedule.length} schedule items', name: 'LecturerProvider');
-        
+
         // Find next class from schedule
         _findNextClass();
         notifyListeners();
@@ -238,7 +238,7 @@ class LecturerProvider extends ChangeNotifier {
       // Parse thu (day of week): "2" = Monday, "3" = Tuesday, etc.
       final thuInt = int.tryParse(item.thu!.trim());
       if (thuInt == null || thuInt < 2 || thuInt > 8) continue;
-      
+
       // Convert Vietnamese day numbering to Dart weekday (1=Mon, 2=Tue, ..., 7=Sun)
       final targetWeekday = thuInt == 8 ? 7 : thuInt - 1;
 
@@ -247,9 +247,9 @@ class LecturerProvider extends ChangeNotifier {
       if (daysUntilTarget < 0) {
         daysUntilTarget += 7; // Next week
       }
-      
+
       var nextOccurrence = DateTime(now.year, now.month, now.day).add(Duration(days: daysUntilTarget));
-      
+
       // Make sure it's within the course date range
       if (nextOccurrence.isBefore(item.ngayBatDau!)) {
         nextOccurrence = item.ngayBatDau!;
@@ -258,7 +258,7 @@ class LecturerProvider extends ChangeNotifier {
           nextOccurrence = nextOccurrence.add(const Duration(days: 1));
         }
       }
-      
+
       // Skip if past the end date
       if (nextOccurrence.isAfter(item.ngayKetThuc!)) {
         continue;
@@ -273,7 +273,7 @@ class LecturerProvider extends ChangeNotifier {
           // Not on the correct week cycle, find next occurrence
           final weeksToAdd = cachTuan - (weeksDiff % cachTuan);
           nextOccurrence = nextOccurrence.add(Duration(days: weeksToAdd * 7));
-          
+
           // Skip if past the end date
           if (nextOccurrence.isAfter(item.ngayKetThuc!)) {
             continue;
@@ -284,14 +284,14 @@ class LecturerProvider extends ChangeNotifier {
       // Check if class has already ended today
       final endPeriod = int.tryParse(item.tietKetThuc ?? '0') ?? 0;
       final classEndTime = _getClassEndTime(nextOccurrence, endPeriod);
-      
+
       // If today and class already ended, skip to next week
-      if (nextOccurrence.year == now.year && 
-          nextOccurrence.month == now.month && 
-          nextOccurrence.day == now.day && 
+      if (nextOccurrence.year == now.year &&
+          nextOccurrence.month == now.month &&
+          nextOccurrence.day == now.day &&
           now.isAfter(classEndTime)) {
         nextOccurrence = nextOccurrence.add(Duration(days: 7 * cachTuan));
-        
+
         // Skip if past the end date
         if (nextOccurrence.isAfter(item.ngayKetThuc!)) {
           continue;
@@ -332,9 +332,9 @@ class LecturerProvider extends ChangeNotifier {
   Future<void> _fetchNotifications() async {
     try {
       developer.log('Fetching notifications...', name: 'LecturerProvider');
-      
+
       final data = await _client.get('/api/lecturer/notifications');
-      
+
       if (data != null && data is List) {
         developer.log('Notifications fetched successfully', name: 'LecturerProvider');
         _notifications = data.map((item) {
@@ -362,7 +362,7 @@ class LecturerProvider extends ChangeNotifier {
 
     try {
       developer.log('Fetching teaching classes...', name: 'LecturerProvider');
-      
+
       final Map<String, dynamic> queryParams = {};
       if (semester != null && semester.isNotEmpty) {
         queryParams['semester'] = semester;
@@ -372,7 +372,7 @@ class LecturerProvider extends ChangeNotifier {
       notifyListeners();
 
       final data = await _client.get('/api/lecturer/courses', queryParameters: queryParams);
-      
+
       if (data != null && data is List) {
         developer.log('Teaching classes fetched successfully', name: 'LecturerProvider');
         _teachingClasses = data
@@ -407,7 +407,7 @@ class LecturerProvider extends ChangeNotifier {
       for (int semNum = 1; semNum <= 3; semNum++) {
         final semester = '${yearParts[0]}_${yearParts[1]}_$semNum';
         developer.log('Fetching semester: $semester', name: 'LecturerProvider');
-        
+
         final data = await _client.get(
           '/api/lecturer/courses',
           queryParameters: {'semester': semester},
@@ -436,10 +436,10 @@ class LecturerProvider extends ChangeNotifier {
 
     try {
       developer.log('Fetching teaching schedule...', name: 'LecturerProvider');
-      
+
       // If no semester specified, use current semester (2025_2026_1)
       final semesterParam = semester ?? '2025_2026_1';
-      
+
       final data = await _client.get(
         '/api/lecturer/schedule',
         queryParameters: {'semester': semesterParam},
@@ -451,7 +451,7 @@ class LecturerProvider extends ChangeNotifier {
             .map((item) => TeachingScheduleItem.fromJson(item))
             .toList();
         developer.log('Found ${_teachingSchedule.length} schedule items', name: 'LecturerProvider');
-        
+
         // Find next class from schedule
         _findNextClass();
       }
@@ -479,7 +479,7 @@ class LecturerProvider extends ChangeNotifier {
       if (trangThai != null && trangThai.isNotEmpty) queryParams['status'] = trangThai;
 
       developer.log('Fetching appeals...', name: 'LecturerProvider');
-      
+
       final data = await _client.get('/api/lecturer/appeals', queryParameters: queryParams);
 
       if (data != null && data is List) {
@@ -497,11 +497,11 @@ class LecturerProvider extends ChangeNotifier {
 
   // Handle appeal (approve/reject)
   Future<void> handleAppeal(
-    String appealId,
-    String action, {
-    String? ghiChu,
-    double? diemMoi,
-  }) async {
+      String appealId,
+      String action, {
+        String? ghiChu,
+        double? diemMoi,
+      }) async {
     try {
       developer.log('Handling appeal $appealId with action: $action', name: 'LecturerProvider');
       final body = {
@@ -533,7 +533,7 @@ class LecturerProvider extends ChangeNotifier {
       if (loaiTaiLieu != null && loaiTaiLieu.isNotEmpty) queryParams['type'] = loaiTaiLieu;
 
       developer.log('Fetching documents...', name: 'LecturerProvider');
-      
+
       final data = await _client.get('/api/lecturer/materials', queryParameters: queryParams);
 
       if (data != null && data is List) {
@@ -576,9 +576,9 @@ class LecturerProvider extends ChangeNotifier {
   Future<void> deleteDocument(String documentId) async {
     try {
       developer.log('Deleting document: $documentId', name: 'LecturerProvider');
-      
+
       await _client.delete('/api/lecturer/materials/$documentId');
-      
+
       developer.log('Document deleted successfully', name: 'LecturerProvider');
       _documents.removeWhere((d) => d.id == documentId);
       notifyListeners();
@@ -598,7 +598,7 @@ class LecturerProvider extends ChangeNotifier {
       if (vaiTro != null && vaiTro.isNotEmpty) queryParams['vaiTro'] = vaiTro;
 
       developer.log('Fetching exam schedules...', name: 'LecturerProvider');
-      
+
       final data = await _client.get('/api/lecturer/exams', queryParameters: queryParams);
 
       if (data != null && data is List) {
@@ -655,7 +655,7 @@ class LecturerProvider extends ChangeNotifier {
   Future<TeachingClass?> fetchCourseDetail(String classCode) async {
     try {
       developer.log('Fetching course detail for $classCode...', name: 'LecturerProvider');
-      
+
       final data = await _client.get('/api/lecturer/courses/$classCode');
 
       if (data != null && data is Map<String, dynamic>) {
@@ -675,7 +675,7 @@ class LecturerProvider extends ChangeNotifier {
       var queryParams = <String, String>{};
       if (courseId != null) queryParams['courseId'] = courseId;
       if (semester != null) queryParams['semester'] = semester;
-      
+
       final data = await _client.get('/api/lecturer/grades', queryParameters: queryParams);
 
       if (data != null && data is List) {
@@ -692,7 +692,7 @@ class LecturerProvider extends ChangeNotifier {
   Future<Map<String, dynamic>?> fetchStudentGrade(String mssv) async {
     try {
       developer.log('Fetching grade for student $mssv...', name: 'LecturerProvider');
-      
+
       final data = await _client.get('/api/lecturer/grades/$mssv');
 
       if (data != null && data is Map<String, dynamic>) {
@@ -739,7 +739,7 @@ class LecturerProvider extends ChangeNotifier {
   Future<Map<String, dynamic>?> fetchExamDetail(String maLop) async {
     try {
       developer.log('Fetching exam detail for class $maLop...', name: 'LecturerProvider');
-      
+
       final data = await _client.get('/api/lecturer/exams/$maLop');
 
       if (data != null && data is Map<String, dynamic>) {
@@ -756,7 +756,7 @@ class LecturerProvider extends ChangeNotifier {
   Future<List<Map<String, dynamic>>> fetchExamStudents(String maLop) async {
     try {
       developer.log('Fetching exam students for class $maLop...', name: 'LecturerProvider');
-      
+
       final data = await _client.get('/api/lecturer/exams/$maLop/students');
 
       if (data != null && data is List) {
@@ -770,30 +770,41 @@ class LecturerProvider extends ChangeNotifier {
   }
 
   // GET /api/lecturer/tuition - Thông tin học phí
-  Future<List<Map<String, dynamic>>> fetchTuition({String? studentId, String? semester}) async {
+  Future<List<Map<String, dynamic>>> fetchTuition({
+    String? studentId,
+    String? semester,
+  }) async {
     try {
-      developer.log('Fetching tuition info...', name: 'LecturerProvider');
       var queryParams = <String, String>{};
-      if (studentId != null) queryParams['studentId'] = studentId;
-      if (semester != null) queryParams['semester'] = semester;
-      
-      final data = await _client.get('/api/lecturer/tuition', queryParameters: queryParams);
 
-      if (data != null && data is List) {
-        developer.log('Tuition info fetched successfully', name: 'LecturerProvider');
-        return List<Map<String, dynamic>>.from(data);
+      if (studentId != null) queryParams['mssv'] = studentId;  // 🔥 sửa studentId → mssv
+      if (semester != null) queryParams['hocKy'] = semester;
+
+      final data = await _client.get(
+        '/api/lecturer/tuition',
+        queryParameters: queryParams,
+      );
+
+      if (data == null || data is! Map<String, dynamic>) return [];
+
+      // lấy list chiTietHocPhi
+      final details = data["chiTietHocPhi"];
+      if (details is List) {
+        return List<Map<String, dynamic>>.from(details);
       }
+
+      return [];
     } catch (e) {
       developer.log('Error fetching tuition: $e', name: 'LecturerProvider');
+      return [];
     }
-    return [];
   }
 
   // PUT /api/lecturer/notifications/{id}/read - Đánh dấu thông báo đã đọc
   Future<bool> markNotificationAsRead(String notificationId) async {
     try {
       developer.log('Marking notification $notificationId as read...', name: 'LecturerProvider');
-      
+
       final res = await _client.put('/api/lecturer/notifications/$notificationId/read');
 
       if (res != null) {
@@ -826,7 +837,7 @@ class LecturerProvider extends ChangeNotifier {
   Future<List<Map<String, dynamic>>> fetchAbsences() async {
     try {
       developer.log('Fetching absences...', name: 'LecturerProvider');
-      
+
       final data = await _client.get('/api/lecturer/absences');
 
       if (data != null && data is List) {
@@ -843,7 +854,7 @@ class LecturerProvider extends ChangeNotifier {
   Future<List<Map<String, dynamic>>> fetchMakeupClasses() async {
     try {
       developer.log('Fetching makeup classes...', name: 'LecturerProvider');
-      
+
       final data = await _client.get('/api/lecturer/makeup-classes');
 
       if (data != null && data is List) {
@@ -860,7 +871,7 @@ class LecturerProvider extends ChangeNotifier {
   Future<Map<String, dynamic>?> fetchAppealDetail(int appealId) async {
     try {
       developer.log('Fetching appeal detail $appealId...', name: 'LecturerProvider');
-      
+
       final data = await _client.get('/api/lecturer/appeals/$appealId');
 
       if (data != null && data is Map<String, dynamic>) {
