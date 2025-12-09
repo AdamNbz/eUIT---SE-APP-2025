@@ -32,9 +32,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 /// Breakpoints for responsive design
 class Breakpoints {
-  static const double mobile = 600;
-  static const double tablet = 900;
-  static const double desktop = 1200;
+  static const double mobile = 1200;
+  static const double tablet = 1500;
+  static const double desktop = 1800;
 }
 
 /// Device type enum
@@ -42,29 +42,18 @@ enum DeviceType { mobile, tablet, desktop }
 
 /// Get current device type based on screen width
 DeviceType getDeviceType(BuildContext context) {
-  final width = MediaQuery.of(context).size.width;
-  if (width < Breakpoints.mobile) {
-    return DeviceType.mobile;
-  } else if (width < Breakpoints.tablet) {
-    return DeviceType.tablet;
-  } else {
-    return DeviceType.desktop;
-  }
+  // Force mobile layout on all devices
+  return DeviceType.mobile;
 }
 
 /// Check if current device is mobile
-bool isMobile(BuildContext context) =>
-    MediaQuery.of(context).size.width < Breakpoints.mobile;
+bool isMobile(BuildContext context) => true;
 
 /// Check if current device is tablet
-bool isTablet(BuildContext context) {
-  final width = MediaQuery.of(context).size.width;
-  return width >= Breakpoints.mobile && width < Breakpoints.tablet;
-}
+bool isTablet(BuildContext context) => false;
 
 /// Check if current device is desktop
-bool isDesktop(BuildContext context) =>
-    MediaQuery.of(context).size.width >= Breakpoints.tablet;
+bool isDesktop(BuildContext context) => false;
 
 /// Responsive builder widget that builds different layouts based on screen size
 class ResponsiveBuilder extends StatelessWidget {
@@ -81,17 +70,8 @@ class ResponsiveBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        if (constraints.maxWidth >= Breakpoints.tablet) {
-          return desktop ?? tablet ?? mobile;
-        } else if (constraints.maxWidth >= Breakpoints.mobile) {
-          return tablet ?? mobile;
-        } else {
-          return mobile;
-        }
-      },
-    );
+    // Always return the mobile layout regardless of device size
+    return mobile;
   }
 }
 
@@ -228,4 +208,3 @@ class AppIconSizes {
   static double get lg => 32.r;
   static double get xl => 48.r;
 }
-

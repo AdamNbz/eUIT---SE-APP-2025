@@ -111,8 +111,8 @@ class MyApp extends StatelessWidget {
     );
 
     return ScreenUtilInit(
-      // Design size based on 1080x2400 resolution (Full HD+ Android)
-      designSize: const Size(1080, 2400),
+      // Design size based on a medium phone (e.g., iPhone 12/13)
+      designSize: const Size(400, 844),
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (context, child) {
