@@ -2,7 +2,9 @@
 -- This script inserts all PDF files found in the documents folder
 
 -- Clear existing regulations first (optional - comment out if you want to keep them)
--- TRUNCATE TABLE van_ban;
+TRUNCATE TABLE van_ban;
+
+SELECT * FROM van_ban;
 
 INSERT INTO van_ban (ten_van_ban, url_van_ban, ngay_ban_hanh) VALUES ('1139_qd-dhcntt_20-12-2022_to_chuc_thi_cac_mon_hoc_he_dai_hoc_chinh_quy', '1139_qd-dhcntt_20-12-2022_to_chuc_thi_cac_mon_hoc_he_dai_hoc_chinh_quy.pdf', NULL) ON CONFLICT (ten_van_ban) DO UPDATE SET url_van_ban = EXCLUDED.url_van_ban, ngay_ban_hanh = EXCLUDED.ngay_ban_hanh;
 INSERT INTO van_ban (ten_van_ban, url_van_ban, ngay_ban_hanh) VALUES ('1393-qd-dhcntt_29-12-2023_cap_nhat_quy_che_dao_tao_theo_hoc_che_tin_chi_cho_he_dai_hoc_chinh_quy', '1393-qd-dhcntt_29-12-2023_cap_nhat_quy_che_dao_tao_theo_hoc_che_tin_chi_cho_he_dai_hoc_chinh_quy.pdf', NULL) ON CONFLICT (ten_van_ban) DO UPDATE SET url_van_ban = EXCLUDED.url_van_ban, ngay_ban_hanh = EXCLUDED.ngay_ban_hanh;
