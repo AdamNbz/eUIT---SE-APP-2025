@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../utils/url_launcher_api.dart';
+import '../../widgets/animated_background.dart';
 import '../../utils/app_localizations.dart';
 import '../../theme/app_theme.dart';
 
@@ -185,6 +185,11 @@ class _RegulationsListScreenState extends State<RegulationsListScreen> {
     _filtered = List.from(_items);
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   Future<void> _openUrl(BuildContext context, String urlStr) async {
     final uri = Uri.parse(urlStr);
     try {
@@ -228,57 +233,101 @@ class _RegulationsListScreenState extends State<RegulationsListScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Quy định'),
-        backgroundColor: isDark ? const Color(0xFF1E2746) : AppTheme.bluePrimary,
-        foregroundColor: Colors.white,
-      ),
-      body: Column(
+      body: Stack(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: 'Tìm kiếm quy định hoặc url...',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: _query.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () => _filterItems(''),
-                      )
-                    : null,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-              ),
-              onChanged: _filterItems,
-            ),
-          ),
-          Expanded(
-            child: _filtered.isEmpty
-                ? Center(
-                    child: Text(
-                      'Không tìm thấy quy định phù hợp.',
-                      style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
+          // Use the shared animated background so appearance matches other screens
+          Positioned.fill(child: IgnorePointer(child: AnimatedBackground(isDark: isDark))),
+          SafeArea(
+            child: Column(
+              children: [
+                // Header similar to other lecturer screens
+                Container(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                  decoration: BoxDecoration(
+                    color: (isDark ? AppTheme.darkCard : Colors.white).withOpacity(0.7),
+                    border: Border(
+                      bottom: BorderSide(
+                        color: (isDark ? AppTheme.darkBorder : AppTheme.lightBorder).withOpacity(0.5),
+                      ),
                     ),
-                  )
-                : ListView.separated(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    itemBuilder: (context, index) {
-                      final item = _filtered[index];
-                      return ListTile(
-                        title: Text(item['title'] ?? ''),
-                        subtitle: Text(item['url'] ?? ''),
-                        isThreeLine: (item['title'] ?? '').length > 60,
-                        trailing: IconButton(
-                          icon: const Icon(Icons.open_in_new),
-                          onPressed: () => _openUrl(context, item['url'] ?? ''),
-                        ),
-                        onTap: () => _openUrl(context, item['url'] ?? ''),
-                      );
-                    },
-                    separatorBuilder: (_, __) => const Divider(height: 1),
-                    itemCount: _filtered.length,
                   ),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: Icon(Icons.arrow_back, color: isDark ? Colors.white : Colors.black87),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          gradient: AppTheme.primaryGradient,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(Icons.rule_folder, color: Colors.white, size: 24),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Quy định', style: AppTheme.headingMedium.copyWith(color: isDark ? Colors.white : Colors.black87)),
+                            Text('${_items.length} mục', style: AppTheme.bodySmall.copyWith(color: isDark ? Colors.grey.shade400 : Colors.grey.shade600)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Search and list
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: TextField(
+                    decoration: InputDecoration(
+                      hintText: 'Tìm kiếm quy định...',
+                      prefixIcon: const Icon(Icons.search),
+                      filled: true,
+                      fillColor: isDark ? Colors.white10 : Colors.white,
+                      suffixIcon: _query.isNotEmpty
+                          ? IconButton(icon: const Icon(Icons.clear), onPressed: () => _filterItems(''))
+                          : null,
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                    ),
+                    onChanged: _filterItems,
+                  ),
+                ),
+                Expanded(
+                  child: _filtered.isEmpty
+                      ? Center(
+                          child: Text('Không tìm thấy quy định phù hợp.', style: AppTheme.bodyMedium.copyWith(color: isDark ? Colors.white70 : Colors.black54)),
+                        )
+                      : ListView.separated(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          itemBuilder: (context, index) {
+                            final item = _filtered[index];
+                            return Card(
+                              color: (isDark ? AppTheme.darkCard : Colors.white).withOpacity(0.85),
+                              elevation: 2,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              child: ListTile(
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                title: Text(item['title'] ?? '', style: const TextStyle(fontWeight: FontWeight.w600)),
+                                trailing: IconButton(
+                                  icon: const Icon(Icons.open_in_new),
+                                  color: AppTheme.bluePrimary,
+                                  onPressed: () => _openUrl(context, item['url'] ?? ''),
+                                ),
+                                onTap: () => _openUrl(context, item['url'] ?? ''),
+                              ),
+                            );
+                          },
+                          separatorBuilder: (_, __) => const SizedBox(height: 8),
+                          itemCount: _filtered.length,
+                        ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
