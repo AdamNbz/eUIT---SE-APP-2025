@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../utils/app_localizations.dart';
 import '../../providers/academic_provider.dart';
+import '../../widgets/animated_background.dart';
 
 class ProgressScreen extends StatefulWidget {
   const ProgressScreen({super.key});
@@ -51,57 +53,71 @@ class _ProgressScreenState extends State<ProgressScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Color(0xFF0F172A),
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Color(0xFF1E293B),
+        backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: isDark ? Colors.white : Colors.black87),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Kết quả đào tạo (Tiến độ)',
+          AppLocalizations.of(context).t('progress_title'),
           style: TextStyle(
-            color: Colors.white,
+            color: isDark ? Colors.white : Colors.black87,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Progress Card
-              _buildProgressCard(),
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          Positioned.fill(child: AnimatedBackground(isDark: isDark)),
+          Positioned.fill(
+            child: SafeArea(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Progress Card
+                    _buildProgressCard(),
 
-              SizedBox(height: 20),
+                    SizedBox(height: 20),
 
-              // Credits Info Cards
-              _buildCreditsInfoCards(),
+                    // Credits Info Cards
+                    _buildCreditsInfoCards(),
 
-              SizedBox(height: 20),
+                    SizedBox(height: 20),
 
-              // Progress By Group
-              _buildProgressByGroupSection(),
-            ],
+                    // Progress By Group
+                    _buildProgressByGroupSection(),
+                  ],
+                ),
+              ),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
 
   Widget _buildProgressCard() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardColor = isDark ? const Color.fromRGBO(30, 41, 59, 0.62) : const Color.fromRGBO(255, 255, 255, 0.9);
+    final strokeColor = isDark ? const Color.fromRGBO(255, 255, 255, 0.10) : const Color.fromRGBO(0, 0, 0, 0.05);
+
     return Container(
       padding: EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Color(0xFF1E293B),
+        color: cardColor,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.white.withOpacity(0.1),
+          color: strokeColor,
           width: 1,
         ),
       ),
@@ -110,7 +126,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
         children: [
           // Title
           Text(
-            'Tổng quan tín chỉ',
+            AppLocalizations.of(context).t('progress_overview_title'),
             style: TextStyle(
               color: Colors.white,
               fontSize: 18,
@@ -122,9 +138,9 @@ class _ProgressScreenState extends State<ProgressScreen> {
 
           // Subtitle
           Text(
-            'Theo dõi tiến độ hoàn thành chương trình đào tạo của bạn.',
+            AppLocalizations.of(context).t('progress_overview_subtitle'),
             style: TextStyle(
-              color: Colors.white.withOpacity(0.6),
+              color: Color.fromRGBO(255, 255, 255, 0.6),
               fontSize: 14,
               height: 1.5,
             ),
@@ -159,7 +175,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                     borderRadius: BorderRadius.circular(6),
                     boxShadow: [
                       BoxShadow(
-                        color: Color(0xFF3B82F6).withOpacity(0.5),
+                        color: Color.fromRGBO(59, 130, 246, 0.5),
                         blurRadius: 8,
                         offset: Offset(0, 2),
                       ),
@@ -175,9 +191,9 @@ class _ProgressScreenState extends State<ProgressScreen> {
           // Percentage
           Center(
             child: Text(
-              totalRequiredCredits == 0 ? 'chưa có dữ liệu' : '${progressPercentage.toStringAsFixed(1)}%',
+              totalRequiredCredits == 0 ? AppLocalizations.of(context).t('no_data') : '${progressPercentage.toStringAsFixed(1)}%',
               style: TextStyle(
-                color: Colors.white,
+                color: isDark ? Color.fromRGBO(255,255,255,1) : Colors.black87,
                 fontSize: 32,
                 fontWeight: FontWeight.bold,
               ),
@@ -234,13 +250,17 @@ class _ProgressScreenState extends State<ProgressScreen> {
     required Color color,
     required IconData icon,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardColor = isDark ? const Color.fromRGBO(30, 41, 59, 0.62) : const Color.fromRGBO(255, 255, 255, 0.9);
+    final strokeColor = isDark ? const Color.fromRGBO(255, 255, 255, 0.10) : const Color.fromRGBO(0, 0, 0, 0.05);
+
     return Container(
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Color(0xFF1E293B),
+        color: cardColor,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.white.withOpacity(0.1),
+          color: strokeColor,
           width: 1,
         ),
       ),
@@ -250,7 +270,13 @@ class _ProgressScreenState extends State<ProgressScreen> {
           Container(
             padding: EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.2),
+              // Avoid deprecated .red/.green/.blue: extract RGB from color.value
+              color: (() {
+                final r = ((color.r * 255.0).round()).clamp(0, 255).toInt();
+                final g = ((color.g * 255.0).round()).clamp(0, 255).toInt();
+                final b = ((color.b * 255.0).round()).clamp(0, 255).toInt();
+                return Color.fromARGB((0.2 * 255).round(), r, g, b);
+              })(),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(
@@ -266,7 +292,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
           Text(
             title,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.6),
+              color: Color.fromRGBO(255,255,255,0.6),
               fontSize: 12,
               fontWeight: FontWeight.w500,
             ),
@@ -278,7 +304,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
 
           // Value
           Text(
-            value == '0' ? 'chưa có dữ liệu' : value,
+            value == '0' ? AppLocalizations.of(context).t('no_data') : value,
             style: TextStyle(
               color: color,
               fontSize: 28,
@@ -293,21 +319,24 @@ class _ProgressScreenState extends State<ProgressScreen> {
   Widget _buildProgressByGroupSection() {
     final groups = progressByGroup;
     if (groups.isEmpty) {
+      final isDark = Theme.of(context).brightness == Brightness.dark;
+      final cardColor = isDark ? const Color.fromRGBO(30, 41, 59, 0.62) : const Color.fromRGBO(255, 255, 255, 0.9);
+      final strokeColor = isDark ? const Color.fromRGBO(255, 255, 255, 0.10) : const Color.fromRGBO(0, 0, 0, 0.05);
       return Container(
         padding: EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: Color(0xFF1E293B),
+          color: cardColor,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: Colors.white.withOpacity(0.1),
+            color: strokeColor,
             width: 1,
           ),
         ),
         child: Center(
           child: Text(
-            'Chưa có dữ liệu nhóm tín chỉ',
+            AppLocalizations.of(context).t('progress_no_group_data'),
             style: TextStyle(
-              color: Colors.white.withOpacity(0.5),
+              color: isDark ? Color.fromRGBO(255,255,255,0.5) : Colors.black54,
               fontSize: 14,
             ),
           ),
@@ -318,7 +347,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Tiến độ theo nhóm tín chỉ',
+          AppLocalizations.of(context).t('progress_by_group_title'),
           style: TextStyle(
             color: Colors.white,
             fontSize: 16,
@@ -335,14 +364,18 @@ class _ProgressScreenState extends State<ProgressScreen> {
     final groupName = group['groupName'] ?? 'Nhóm';
     final completed = _parseInt(group['completedCredits']);
     final gpa = group['gpa'] is num ? (group['gpa'] as num).toStringAsFixed(2) : '0.00';
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardColor = isDark ? const Color.fromRGBO(30,41,59,0.62) : const Color.fromRGBO(255,255,255,0.9);
+    final strokeColor = isDark ? const Color.fromRGBO(255,255,255,0.10) : const Color.fromRGBO(0,0,0,0.05);
+
     return Container(
       margin: EdgeInsets.only(bottom: 12),
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Color(0xFF1E293B),
+        color: cardColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Colors.white.withOpacity(0.1),
+          color: strokeColor,
           width: 1,
         ),
       ),
@@ -355,7 +388,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 Text(
                   groupName,
                   style: TextStyle(
-                    color: Colors.white,
+                    color: isDark ? Color.fromRGBO(255,255,255,1) : Colors.black87,
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                   ),
@@ -364,7 +397,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 Text(
                   'Tín chỉ đã hoàn thành: $completed',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.7),
+                    color: isDark ? Color.fromRGBO(255,255,255,0.7) : Colors.black54,
                     fontSize: 13,
                   ),
                 ),
@@ -377,7 +410,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
               Text(
                 'GPA',
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.6),
+                  color: isDark ? Color.fromRGBO(255,255,255,0.6) : Colors.black54,
                   fontSize: 12,
                 ),
               ),

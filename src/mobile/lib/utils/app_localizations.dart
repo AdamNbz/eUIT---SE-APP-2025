@@ -43,7 +43,7 @@ class AppLocalizations {
       'system_mode': 'Hệ thống',
       'language': 'Ngôn ngữ',
       'vietnamese': 'Tiếng Việt',
-      'english': 'English',
+      'english': 'Tiếng Anh',
       'push_notifications': 'Nhận thông báo đẩy',
       'notification_customization': 'Tùy chỉnh thông báo',
       'change_password': 'Đổi mật khẩu',
@@ -161,6 +161,8 @@ class AppLocalizations {
       // History / empty state for confirmation screen
       'student_confirmation_history_title': 'Lịch sử đăng ký',
       'no_history': 'Không có lịch sử',
+      // Certificate confirmation history title
+      'certificate_confirmation_history_title': 'Lịch sử xác nhận chứng chỉ',
       // Notes for student confirmation screen
       'student_confirmation_other_section_title': 'Lý do khác',
       'student_confirmation_other_section_instruction': 'Nhập theo mẫu bổ sung hồ sơ',
@@ -220,6 +222,107 @@ class AppLocalizations {
       'toeic_speaking_hint': 'Nhập điểm Nói',
       'toeic_writing_label': 'Điểm Viết',
       'toeic_writing_hint': 'Nhập điểm Viết',
+
+      // New keys for introduction letter form
+      'introduction_letter': 'Đăng ký Giấy giới thiệu',
+      'intro_recipient_label': 'Nội dung Kính gửi (Nội dung đánh số 1 trong mẫu): *',
+      'intro_destination_label': 'Nơi đến (Nội dung đánh số 2 trong mẫu): *',
+      'intro_contact_label': 'Nội dung để liên hệ về việc (Nội dung đánh số 3 trong mẫu): *',
+      'intro_from_label': 'Từ ngày (Nội dung đánh số 4 trong mẫu): *',
+      'intro_to_label': 'Đến ngày (Nội dung đánh số 5 trong mẫu): *',
+      'submit_introduction_request': 'Đăng ký Xin cấp giấy giới thiệu',
+      'submission_received': 'Đã nhận yêu cầu',
+      'submission_received_message': 'Yêu cầu của bạn đã được ghi nhận.',
+      'required': 'Vui lòng nhập trường này',
+      // Transcript / transcript registration keys
+      'register': 'Đăng ký',
+      'transcript_registration_title': 'Đăng ký bảng điểm',
+      'transcript_type_label': 'Loại bảng điểm / GCN',
+      'transcript_type_placeholder': '- Chọn loại -',
+      'transcript_type_required': 'Vui lòng chọn loại bảng điểm',
+      'transcript_type_option_cumulative': 'Bảng điểm tích luỹ (10,000/30,000 VND)',
+      'transcript_type_option_semester': 'Bảng điểm học kỳ (10,000/30,000 VND)',
+      'transcript_type_option_schoolyear': 'Bảng điểm năm học (10,000/30,000 VND)',
+      'transcript_type_option_completion_certificate': 'Giấy xác nhận hoàn thành chương trình học (15,000/35,000 VND)',
+      'transcript_language_label': 'Ngôn ngữ',
+      'transcript_quantity_label': 'Số lượng',
+      'transcript_registered_success': 'Yêu cầu đăng ký bảng điểm đã được gửi (mô phỏng).',
+      'choose': '- Chọn -',
+      // Regrade / Phúc khảo
+      'regrade_title': 'Đăng ký Phúc khảo',
+      'regrade_time_over': 'Đã hết thời gian phúc khảo',
+      'regrade_table_col_subject_code': 'Mã môn',
+      'regrade_table_col_class_code': 'Mã lớp',
+      'regrade_table_col_score': 'Điểm',
+      'regrade_table_col_note': 'Ghi chú',
+      'regrade_button': 'Phúc khảo',
+      // Services tiles (specific titles/subtitles)
+      'services_student_confirmation_title': 'Đăng ký giấy xác nhận sinh viên',
+      'services_student_confirmation_subtitle': 'Phòng Công tác Sinh viên',
+      'services_parking_monthly_title': 'Đăng ký Vé tháng gửi xe máy',
+      'services_parking_monthly_subtitle': 'Phòng Dữ liệu & Công nghệ thông tin',
+      'services_certificate_confirmation_title': 'Đăng ký Xác nhận chứng chỉ',
+      'services_certificate_confirmation_subtitle': 'Phòng Đào tạo Đại học / VPCCTĐB',
+      'services_regrade_title': 'Đăng ký Phúc khảo',
+      'services_regrade_subtitle': 'Phòng Đào tạo Đại học / VPCCTĐB',
+      'services_transcript_title': 'Đăng ký Bảng điểm',
+      'services_transcript_subtitle': 'Phòng Đào tạo Đại học / VPCCTĐB',
+      'services_introduction_letter_title': 'Đăng ký Giấy giới thiệu',
+      'services_introduction_letter_subtitle': 'Phòng Đào tạo Đại học / VPCCTĐB',
+
+      // Parking monthly
+      'parking_monthly_title': 'Đăng ký Vé tháng gửi xe máy',
+      'parking_monthly_select_months_label': 'Chọn số tháng đăng ký giữ xe',
+      'parking_monthly_select_months_hint': 'Chọn số tháng',
+      'parking_monthly_plate_label': 'Biển số xe đăng ký',
+      'parking_monthly_plate_hint': 'Biển số xe Đăng ký',
+      'parking_monthly_example': 'Ví dụ: 47E1-123.45\nNếu là xe đạp thì nhập Mã số sinh viên',
+      'parking_monthly_select_months_required': 'Vui lòng chọn số tháng',
+      'parking_monthly_plate_required': 'Vui lòng nhập biển số xe',
+
+      // Plan screen
+      'plan_title': 'Kế hoạch đào tạo',
+      'plan_no_data': 'Chưa có dữ liệu kế hoạch đào tạo',
+      'plan_image_error': 'Không thể tải hình ảnh kế hoạch',
+
+      // Tuition screen
+      'tuition_title': 'Thông tin học phí',
+      'tuition_history_title': 'Hóa đơn & Lịch sử giao dịch',
+      'tuition_no_data': 'Chưa có dữ liệu học phí',
+      'tuition_table_col_semester': 'HỌC KỲ',
+      'tuition_table_col_credits': 'TÍN CHỈ',
+      'tuition_table_col_fee': 'HỌC PHÍ',
+      'tuition_table_col_paid': 'ĐÃ ĐÓNG',
+      'tuition_table_col_unpaid': 'CÒN LẠI',
+      'tuition_total_fee_label': 'Tổng học phí',
+      'tuition_paid_label': 'Đã đóng',
+      'tuition_unpaid_label': 'Còn lại',
+      'tuition_action_view': 'Xem chi tiết thanh toán {semester}',
+      'tuition_action_pay': 'Thanh toán học phí {semester}',
+
+      // Training point descriptions
+      'training_point_additional_description': 'Điểm rèn luyện được đánh giá dựa trên sự tham gia vào các hoạt động của trường, lớp, và các thành tích khác. Điểm số này ảnh hưởng đến việc xét học bổng và các danh hiệu thi đua.',
+
+      // Progress screen
+      'progress_title': 'Kết quả đào tạo (Tiến độ)',
+      'progress_overview_title': 'Tổng quan tín chỉ',
+      'progress_overview_subtitle': 'Theo dõi tiến độ hoàn thành chương trình đào tạo của bạn.',
+      'progress_no_group_data': 'Chưa có dữ liệu nhóm tín chỉ',
+      'progress_by_group_title': 'Tiến độ theo nhóm tín chỉ',
+      'progress_completed_credits_label': 'Tín chỉ đã hoàn thành',
+      'progress_remaining_credits_label': 'Tín chỉ còn lại',
+      'progress_total_required_credits_label': 'Tổng tín chỉ yêu cầu',
+
+      // Training program
+      'training_program_title': 'Chương trình đào tạo',
+      'training_program_no_data': 'Chưa có dữ liệu chương trình đào tạo',
+
+      // Training point
+      'training_point_title': 'Điểm Rèn Luyện',
+      'training_point_total_label': 'Điểm Rèn Luyện Tổng',
+      'training_point_by_semester': 'Điểm rèn luyện theo kỳ',
+      'training_point_additional_info': 'Thông tin thêm',
+      'training_point_no_score': 'chưa có điểm',
       'loading_profile': 'Đang tải hồ sơ...',
     },
     'en': {
@@ -365,6 +468,8 @@ class AppLocalizations {
       // History / empty state for confirmation screen
       'student_confirmation_history_title': 'Request history',
       'no_history': 'No history',
+      // Certificate confirmation history title
+      'certificate_confirmation_history_title': 'Certificate confirmation history',
       // Notes for student confirmation screen
       'student_confirmation_other_section_title': 'Other reason',
       'student_confirmation_other_section_instruction': 'Enter following supplementary document format',
@@ -424,7 +529,93 @@ class AppLocalizations {
       'toeic_speaking_hint': 'Enter speaking score',
       'toeic_writing_label': 'Writing score',
       'toeic_writing_hint': 'Enter writing score',
-      'loading_profile': 'Đang tải hồ sơ...',
+
+      // New keys for introduction letter form
+      'introduction_letter': 'Introduction Letter',
+      'intro_recipient_label': 'Recipient content (template item #1): *',
+      'intro_destination_label': 'Destination (template item #2): *',
+      'intro_contact_label': 'Content to contact about (template item #3): *',
+      'intro_from_label': 'From date (template item #4): *',
+      'intro_to_label': 'To date (template item #5): *',
+      'submit_introduction_request': 'Request introduction letter',
+      'submission_received': 'Submission received',
+      'submission_received_message': 'Your request has been recorded.',
+      'required': 'Required',
+      // Transcript / transcript registration keys
+      'register': 'Register',
+      'transcript_registration_title': 'Transcript registration',
+      'transcript_type_label': 'Transcript type / Certificate',
+      'transcript_type_placeholder': '- Choose type -',
+      'transcript_type_required': 'Please select transcript type',
+      'transcript_type_option_cumulative': 'Cumulative transcript (10,000/30,000 VND)',
+      'transcript_type_option_semester': 'Semester transcript (10,000/30,000 VND)',
+      'transcript_type_option_schoolyear': 'School-year transcript (10,000/30,000 VND)',
+      'transcript_type_option_completion_certificate': 'Certificate of program completion (15,000/35,000 VND)',
+      'transcript_language_label': 'Language',
+      'transcript_quantity_label': 'Quantity',
+      'transcript_registered_success': 'Transcript request submitted (simulated).',
+      'choose': '- Choose -',
+      // Regrade / Phúc khảo
+      'regrade_title': 'Regrade request',
+      'regrade_time_over': 'Regrade period has ended',
+      'regrade_table_col_subject_code': 'Subject code',
+      'regrade_table_col_class_code': 'Class code',
+      'regrade_table_col_score': 'Score',
+      'regrade_table_col_note': 'Note',
+      'regrade_button': 'Request regrade',
+      // Services tiles (specific titles/subtitles)
+      'services_student_confirmation_title': 'Student confirmation request',
+      'services_student_confirmation_subtitle': 'Student Affairs Office',
+      'services_parking_monthly_title': 'Motorbike monthly parking registration',
+      'services_parking_monthly_subtitle': 'Data & IT Office',
+      'services_certificate_confirmation_title': 'Certificate confirmation registration',
+      'services_certificate_confirmation_subtitle': 'Undergraduate Office / Special Training Office',
+      'services_regrade_title': 'Regrade request',
+      'services_regrade_subtitle': 'Undergraduate Office / Special Training Office',
+      'services_transcript_title': 'Transcript registration',
+      'services_transcript_subtitle': 'Undergraduate Office / Special Training Office',
+      'services_introduction_letter_title': 'Introduction letter request',
+      'services_introduction_letter_subtitle': 'Undergraduate Office / Special Training Office',
+
+      // Parking monthly
+      'parking_monthly_title': 'Motorbike monthly parking registration',
+      'parking_monthly_select_months_label': 'Select number of months',
+      'parking_monthly_select_months_hint': 'Select months',
+      'parking_monthly_plate_label': 'License plate',
+      'parking_monthly_plate_hint': 'Enter license plate',
+      'parking_monthly_example': 'E.g.: 47E1-123.45\nIf bicycle, enter Student ID',
+      'parking_monthly_select_months_required': 'Please select number of months',
+      'parking_monthly_plate_required': 'Please enter license plate',
+
+      // Plan screen
+      'plan_title': 'Annual Plan',
+      'plan_no_data': 'No annual plan data available',
+      'plan_image_error': 'Unable to load plan image',
+
+      // Tuition screen
+      'tuition_title': 'Tuition Info',
+      'tuition_history_title': 'Invoices & Transaction History',
+      'tuition_no_data': 'No tuition data available',
+      'tuition_table_col_semester': 'SEMESTER',
+      'tuition_table_col_credits': 'CREDITS',
+      'tuition_table_col_fee': 'TUITION FEE',
+      'tuition_table_col_paid': 'PAID',
+      'tuition_table_col_unpaid': 'UNPAID',
+      'tuition_total_fee_label': 'Total tuition',
+      'tuition_paid_label': 'Paid',
+      'tuition_unpaid_label': 'Unpaid',
+      'tuition_action_view': 'View payment details {semester}',
+      'tuition_action_pay': 'Pay tuition for {semester}',
+
+      // Training point descriptions
+      'training_point_additional_description': 'Training points are evaluated based on participation in school and class activities and other achievements. These scores affect scholarship eligibility and awards.',
+      // Training point (English translations missing previously)
+      'training_point_title': 'Training Points',
+      'training_point_total_label': 'Total Training Points',
+      'training_point_by_semester': 'Training points by semester',
+      'training_point_additional_info': 'Additional information',
+      'training_point_no_score': 'no score',
+      'loading_profile': 'Loading profile...',
     },
   };
 
