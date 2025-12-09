@@ -7,6 +7,7 @@ import '../theme/app_theme.dart';
 import '../utils/app_localizations.dart';
 import 'package:shimmer/shimmer.dart';
 import '../widgets/student_id_card.dart';
+import '../widgets/quick_actions_settings_modal.dart';
 import '../screens/search/studyresult_screen.dart';
 import '../screens/search/tuition_screen.dart';
 import '../screens/parking_monthly_screen.dart';
@@ -52,7 +53,6 @@ class _HomeScreenState extends State<HomeScreen>
   // GPA visibility state
   bool _isGpaVisible = false;
 
-
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -72,7 +72,10 @@ class _HomeScreenState extends State<HomeScreen>
               onRefresh: () async {
                 try {
                   // Refresh both quick GPA and next class when user pulls to refresh
-                  await Future.wait([provider.fetchQuickGpa(), provider.fetchNextClass()]);
+                  await Future.wait([
+                    provider.fetchQuickGpa(),
+                    provider.fetchNextClass(),
+                  ]);
                 } catch (_) {
                   // ignore network errors for UX continuity
                 }
@@ -109,28 +112,50 @@ class _HomeScreenState extends State<HomeScreen>
                     const SizedBox(height: 24),
 
                     // Notifications Section (show single item + View all)
-                    _buildSectionTitle(
-                      loc.t('new_notifications'),
-                      isDark,
-                    ),
+                    _buildSectionTitle(loc.t('new_notifications'), isDark),
                     const SizedBox(height: 12),
                     _buildNotificationsList(provider, isDark, loc, maxItems: 1),
                     const SizedBox(height: 16),
 
                     // Quick Actions Section (SQUIRCLE)
-                    _buildSectionTitle(loc.t('quick_actions'), isDark),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _buildSectionTitle(loc.t('quick_actions'), isDark),
+                        IconButton(
+                          icon: Icon(
+                            Icons.settings,
+                            color: isDark ? Colors.white : Colors.black87,
+                          ),
+                          tooltip: 'Tùy chỉnh thao tác nhanh',
+                          onPressed: () {
+                            showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              backgroundColor: Colors.transparent,
+                              builder: (_) => QuickActionsSettingsModal(
+                                enabledActions: provider.quickActions,
+                                allAvailableActions:
+                                    provider.allAvailableQuickActions,
+                                onSave: (updatedActions) async {
+                                  await provider.saveQuickActionsPreferences(
+                                    updatedActions,
+                                  );
+                                },
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 12),
                     _buildQuickActionsGrid(provider, isDark),
                     const SizedBox(height: 24),
-
                   ],
                 ),
               ),
             ),
           ),
-
-
-
         ],
       ),
     );
@@ -147,11 +172,16 @@ class _HomeScreenState extends State<HomeScreen>
     return ClipRRect(
       borderRadius: BorderRadius.circular(16),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6), // nhẹ, hiển thị nền động phía sau
+        filter: ImageFilter.blur(
+          sigmaX: 6,
+          sigmaY: 6,
+        ), // nhẹ, hiển thị nền động phía sau
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: isDark ? AppTheme.darkCard.withAlpha(160) : Colors.white.withAlpha(200),
+            color: isDark
+                ? AppTheme.darkCard.withAlpha(160)
+                : Colors.white.withAlpha(200),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: isDark ? Colors.white.withAlpha(18) : AppTheme.lightBorder,
@@ -190,7 +220,10 @@ class _HomeScreenState extends State<HomeScreen>
                         child: SvgPicture.asset(
                           'assets/icons/logo-uit.svg',
                           // Force the logo to render in the primary blue color
-                          colorFilter: const ColorFilter.mode(AppTheme.bluePrimary, BlendMode.srcIn),
+                          colorFilter: const ColorFilter.mode(
+                            AppTheme.bluePrimary,
+                            BlendMode.srcIn,
+                          ),
                         ),
                       ),
                     ),
@@ -210,7 +243,9 @@ class _HomeScreenState extends State<HomeScreen>
                       Text(
                         '${loc.t('id')}: ${provider.studentCard?.mssv?.toString()}',
                         style: TextStyle(
-                          color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                          color: isDark
+                              ? Colors.grey.shade400
+                              : Colors.grey.shade600,
                           fontSize: 12,
                         ),
                       ),
@@ -218,35 +253,94 @@ class _HomeScreenState extends State<HomeScreen>
                   ),
                 ],
               ),
-
               // Right: Chatbot + Notification
               Row(
                 children: [
-
-
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.pushNamed(context, '/chatbot');
+                      },
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.18),
+                            width: 1,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.blueAccent.withOpacity(0.25),
+                              blurRadius: 20,
+                              spreadRadius: 1,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: BackdropFilter(
+                            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    Colors.white.withOpacity(0.07),
+                                    Colors.white.withOpacity(0.02),
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                              ),
+                              child: const Center(
+                                child: Icon(
+                                  Icons.smart_toy,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                   Stack(
                     clipBehavior: Clip.none,
                     children: [
                       IconButton(
-                        onPressed: () => Navigator.pushNamed(context, '/notifications'),
+                        onPressed: () =>
+                            Navigator.pushNamed(context, '/notifications'),
                         icon: Icon(
                           Icons.notifications_outlined,
                           color: isDark ? Colors.white : Colors.black87,
                         ),
                       ),
-
                       if (unreadCount > 0)
                         Positioned(
                           top: 8,
                           right: 8,
                           child: Container(
                             padding: const EdgeInsets.all(4),
-                            decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
-                            constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+                            decoration: const BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                            ),
+                            constraints: const BoxConstraints(
+                              minWidth: 18,
+                              minHeight: 18,
+                            ),
                             child: Center(
                               child: Text(
                                 unreadCount > 9 ? '9+' : '$unreadCount',
-                                style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ),
@@ -307,9 +401,7 @@ class _HomeScreenState extends State<HomeScreen>
                   ),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: isDark
-                  ? AppTheme.bluePrimary.withAlpha(40) // reduced from 76 -> ~0.16
-                  : AppTheme.bluePrimary.withAlpha(30), // reduced from 51
+              color: isDark ? Colors.white.withAlpha(18) : AppTheme.lightBorder,
               width: 1,
             ),
             boxShadow: [
@@ -360,19 +452,21 @@ class _HomeScreenState extends State<HomeScreen>
                         const SizedBox(height: 6),
 
                         // Course name
-                        LayoutBuilder(builder: (context, constraints) {
-                          final courseStyle = TextStyle(
-                            color: isDark ? Colors.white : Colors.black87,
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                          );
-                          return _EllipsizeAtWord(
-                            text: schedule.courseName,
-                            style: courseStyle,
-                            maxLines: 2,
-                            maxWidth: constraints.maxWidth,
-                          );
-                        }),
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            final courseStyle = TextStyle(
+                              color: isDark ? Colors.white : Colors.black87,
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                            );
+                            return _EllipsizeAtWord(
+                              text: schedule.courseName,
+                              style: courseStyle,
+                              maxLines: 2,
+                              maxWidth: constraints.maxWidth,
+                            );
+                          },
+                        ),
                       ],
                     ),
                   ),
@@ -413,8 +507,14 @@ class _HomeScreenState extends State<HomeScreen>
                 runSpacing: 8,
                 children: [
                   // Localize
-                  _buildDetailChip('${loc.t('room')}: ${schedule.room}', isDark),
-                  _buildDetailChip('${loc.t('lecturer')}: ${schedule.lecturer}', isDark),
+                  _buildDetailChip(
+                    '${loc.t('room')}: ${schedule.room}',
+                    isDark,
+                  ),
+                  _buildDetailChip(
+                    '${loc.t('lecturer')}: ${schedule.lecturer}',
+                    isDark,
+                  ),
                 ],
               ),
               const SizedBox(height: 10), // Reduced space
@@ -423,8 +523,12 @@ class _HomeScreenState extends State<HomeScreen>
                 alignment: Alignment.centerLeft,
                 child: TextButton.icon(
                   onPressed: () {
-                    // Use parent page controller to switch to Schedule page (index 3)
-                    widget.onSelectPage?.call(3);
+                    // Always navigate to Schedule tab (index 3 in MainScreen)
+                    if (widget.onSelectPage != null) {
+                      widget.onSelectPage!(3);
+                    } else {
+                      Navigator.pushNamed(context, '/schedule');
+                    }
                   },
                   style: TextButton.styleFrom(
                     foregroundColor: AppTheme.bluePrimary,
@@ -467,21 +571,37 @@ class _HomeScreenState extends State<HomeScreen>
       spacing: 12,
       runSpacing: 16,
       children: actions.asMap().entries.map((entry) {
-        return _buildSquircleActionButton(entry.value, isDark, entry.key, widget.onSelectPage);
+        return _buildSquircleActionButton(
+          entry.value,
+          isDark,
+          entry.key,
+          widget.onSelectPage,
+        );
       }).toList(),
     );
   }
 
-  Widget _buildSquircleActionButton(dynamic action, bool isDark, int index, void Function(int)? onSelectPage) {
+  Widget _buildSquircleActionButton(
+    dynamic action,
+    bool isDark,
+    int index,
+    void Function(int)? onSelectPage,
+  ) {
     // Định nghĩa gradients cho từng action
     final gradients = [
-      [const Color(0xFF4D7FFF), const Color(0xFF2F6BFF)], // Kết quả - Xanh dương
+      [
+        const Color(0xFF4D7FFF),
+        const Color(0xFF2F6BFF),
+      ], // Kết quả - Xanh dương
       [const Color(0xFF60A5FA), const Color(0xFF3B82F6)], // TKB - Xanh nhạt
       [const Color(0xFFA855F7), const Color(0xFF9333EA)], // Học phí - Tím
       [const Color(0xFF22C55E), const Color(0xFF16A34A)], // Gửi xe - Xanh lá
       [const Color(0xFFF97316), const Color(0xFFEA580C)], // Phúc khảo - Cam
       [const Color(0xFFEC4899), const Color(0xFFDB2777)], // GXN - Hồng
-      [const Color(0xFF06B6D4), const Color(0xFF0891B2)], // Confirmation - Xanh lam
+      [
+        const Color(0xFF06B6D4),
+        const Color(0xFF0891B2),
+      ], // Confirmation - Xanh lam
       [
         const Color(0xFF14B8A6),
         const Color(0xFF0D9488),
@@ -537,7 +657,9 @@ class _HomeScreenState extends State<HomeScreen>
                 case 'results':
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const StudyResultScreen()),
+                    MaterialPageRoute(
+                      builder: (_) => const StudyResultScreen(),
+                    ),
                   );
                   break;
 
@@ -551,21 +673,27 @@ class _HomeScreenState extends State<HomeScreen>
                 case 'parking':
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const ParkingMonthlyScreen()),
+                    MaterialPageRoute(
+                      builder: (_) => const ParkingMonthlyScreen(),
+                    ),
                   );
                   break;
 
                 case 'reference':
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const StudentConfirmationScreen()),
+                    MaterialPageRoute(
+                      builder: (_) => const StudentConfirmationScreen(),
+                    ),
                   );
                   break;
 
                 case 'certificate':
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const CertificateConfirmationScreen()),
+                    MaterialPageRoute(
+                      builder: (_) => const CertificateConfirmationScreen(),
+                    ),
                   );
                   break;
 
@@ -640,7 +768,12 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   // Notifications List với BackdropFilter
-  Widget _buildNotificationsList(HomeProvider provider, bool isDark, AppLocalizations loc, {int maxItems = 3}) {
+  Widget _buildNotificationsList(
+    HomeProvider provider,
+    bool isDark,
+    AppLocalizations loc, {
+    int maxItems = 3,
+  }) {
     final all = provider.notifications;
     final notifications = all.take(maxItems).toList();
 
@@ -665,7 +798,9 @@ class _HomeScreenState extends State<HomeScreen>
                           : Colors.white.withAlpha(204),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: isDark ? Colors.white.withAlpha(13) : Colors.grey.shade100,
+                        color: isDark
+                            ? Colors.white.withAlpha(13)
+                            : Colors.grey.shade100,
                       ),
                     ),
                     child: ListTile(
@@ -675,19 +810,34 @@ class _HomeScreenState extends State<HomeScreen>
                         height: 44,
                         decoration: BoxDecoration(
                           gradient: notifications[0].isUnread
-                              ? const LinearGradient(colors: [AppTheme.bluePrimary, AppTheme.blueLight])
-                              : LinearGradient(colors: [Colors.grey.shade300, Colors.grey.shade200]),
+                              ? const LinearGradient(
+                                  colors: [
+                                    AppTheme.bluePrimary,
+                                    AppTheme.blueLight,
+                                  ],
+                                )
+                              : LinearGradient(
+                                  colors: [
+                                    Colors.grey.shade300,
+                                    Colors.grey.shade200,
+                                  ],
+                                ),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Icon(
                           Icons.notifications_outlined,
-                          color: notifications[0].isUnread ? Colors.white : Colors.grey.shade600,
+                          color: notifications[0].isUnread
+                              ? Colors.white
+                              : Colors.grey.shade600,
                           size: 22,
                         ),
                       ),
                       title: Text(
                         notifications[0].title,
-                        style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                          color: isDark ? Colors.white : Colors.black87,
+                          fontWeight: FontWeight.w600,
+                        ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -696,16 +846,29 @@ class _HomeScreenState extends State<HomeScreen>
                               padding: const EdgeInsets.only(top: 4),
                               child: Text(
                                 notifications[0].body!,
-                                style: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey.shade600, fontSize: 12),
+                                style: TextStyle(
+                                  color: isDark
+                                      ? Colors.grey.shade400
+                                      : Colors.grey.shade600,
+                                  fontSize: 12,
+                                ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
                             )
                           : null,
                       trailing: notifications[0].isUnread
-                          ? Container(width: 10, height: 10, decoration: const BoxDecoration(color: AppTheme.bluePrimary, shape: BoxShape.circle))
+                          ? Container(
+                              width: 10,
+                              height: 10,
+                              decoration: const BoxDecoration(
+                                color: AppTheme.bluePrimary,
+                                shape: BoxShape.circle,
+                              ),
+                            )
                           : null,
-                      onTap: () => Navigator.pushNamed(context, '/notifications'),
+                      onTap: () =>
+                          Navigator.pushNamed(context, '/notifications'),
                     ),
                   ),
                 ),
@@ -717,8 +880,18 @@ class _HomeScreenState extends State<HomeScreen>
             alignment: Alignment.centerLeft,
             child: TextButton.icon(
               onPressed: () => Navigator.pushNamed(context, '/notifications'),
-              icon: Icon(Icons.arrow_forward_rounded, size: 18, color: AppTheme.bluePrimary),
-              label: Text(loc.t('view_all'), style: TextStyle(color: AppTheme.bluePrimary, fontWeight: FontWeight.w600)),
+              icon: Icon(
+                Icons.arrow_forward_rounded,
+                size: 18,
+                color: AppTheme.bluePrimary,
+              ),
+              label: Text(
+                loc.t('view_all'),
+                style: TextStyle(
+                  color: AppTheme.bluePrimary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               style: TextButton.styleFrom(
                 foregroundColor: AppTheme.bluePrimary,
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -734,65 +907,117 @@ class _HomeScreenState extends State<HomeScreen>
     return Column(
       children: [
         // map each notification to a ListTile wrapped in blurred card
-        ...notifications.map((notification) => Container(
-              margin: const EdgeInsets.only(bottom: 12),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF1E293B).withAlpha(153) : Colors.white.withAlpha(204),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: isDark ? Colors.white.withAlpha(13) : Colors.grey.shade100),
+        ...notifications.map(
+          (notification) => Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? const Color(0xFF1E293B).withAlpha(153)
+                        : Colors.white.withAlpha(204),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: isDark
+                          ? Colors.white.withAlpha(13)
+                          : Colors.grey.shade100,
                     ),
-                    child: ListTile(
-                      contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                      leading: Container(
-                        width: 44,
-                        height: 44,
-                        decoration: BoxDecoration(
-                          gradient: notification.isUnread
-                              ? const LinearGradient(colors: [AppTheme.bluePrimary, AppTheme.blueLight])
-                              : LinearGradient(colors: [Colors.grey.shade300, Colors.grey.shade200]),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(
-                          Icons.notifications_outlined,
-                          color: notification.isUnread ? Colors.white : Colors.grey.shade600,
-                          size: 22,
-                        ),
+                  ),
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.symmetric(
+                      vertical: 8,
+                      horizontal: 16,
+                    ),
+                    leading: Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        gradient: notification.isUnread
+                            ? const LinearGradient(
+                                colors: [
+                                  AppTheme.bluePrimary,
+                                  AppTheme.blueLight,
+                                ],
+                              )
+                            : LinearGradient(
+                                colors: [
+                                  Colors.grey.shade300,
+                                  Colors.grey.shade200,
+                                ],
+                              ),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      title: Text(notification.title,
-                          style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.w600),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis),
-                      subtitle: notification.body != null
-                          ? Padding(
-                              padding: const EdgeInsets.only(top: 4),
-                              child: Text(notification.body!,
-                                  style: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey.shade600, fontSize: 12),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis),
-                            )
-                          : null,
-                      trailing: notification.isUnread
-                          ? Container(width: 10, height: 10, decoration: const BoxDecoration(color: AppTheme.bluePrimary, shape: BoxShape.circle))
-                          : null,
-                      onTap: () => {}
+                      child: Icon(
+                        Icons.notifications_outlined,
+                        color: notification.isUnread
+                            ? Colors.white
+                            : Colors.grey.shade600,
+                        size: 22,
+                      ),
                     ),
+                    title: Text(
+                      notification.title,
+                      style: TextStyle(
+                        color: isDark ? Colors.white : Colors.black87,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    subtitle: notification.body != null
+                        ? Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Text(
+                              notification.body!,
+                              style: TextStyle(
+                                color: isDark
+                                    ? Colors.grey.shade400
+                                    : Colors.grey.shade600,
+                                fontSize: 12,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          )
+                        : null,
+                    trailing: notification.isUnread
+                        ? Container(
+                            width: 10,
+                            height: 10,
+                            decoration: const BoxDecoration(
+                              color: AppTheme.bluePrimary,
+                              shape: BoxShape.circle,
+                            ),
+                          )
+                        : null,
+                    onTap: () => {},
                   ),
                 ),
               ),
-            )),
+            ),
+          ),
+        ),
 
         // View all button
         Align(
           alignment: Alignment.centerLeft,
           child: TextButton.icon(
             onPressed: () => Navigator.pushNamed(context, '/notifications'),
-            icon: const Icon(Icons.arrow_forward_rounded, size: 18, color: AppTheme.bluePrimary),
-            label: Text(loc.t('view_all'), style: const TextStyle(color: AppTheme.bluePrimary, fontWeight: FontWeight.w600)),
+            icon: const Icon(
+              Icons.arrow_forward_rounded,
+              size: 18,
+              color: AppTheme.bluePrimary,
+            ),
+            label: Text(
+              loc.t('view_all'),
+              style: const TextStyle(
+                color: AppTheme.bluePrimary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
             style: TextButton.styleFrom(
               foregroundColor: AppTheme.bluePrimary,
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -848,7 +1073,11 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   // Build 2 info cards (Student Card & GPA)
-  Widget _buildStudentInfoCards(AppLocalizations loc, bool isDark, HomeProvider provider) {
+  Widget _buildStudentInfoCards(
+    AppLocalizations loc,
+    bool isDark,
+    HomeProvider provider,
+  ) {
     // Always render 2 cards on one row (each takes half width)
     final card1 = _buildStudentCard(loc, isDark);
     final card2 = _buildGpaCard(loc, isDark, provider);
@@ -908,10 +1137,22 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  Widget _buildGpaCard(AppLocalizations loc, bool isDark, HomeProvider provider) {
+  Widget _buildGpaCard(
+    AppLocalizations loc,
+    bool isDark,
+    HomeProvider provider,
+  ) {
     final secondary = isDark ? Colors.grey.shade400 : Colors.grey.shade600;
-    final gpaText = _isGpaVisible ? (provider.gpa != null ? '${provider.gpa!.toStringAsFixed(2)}/10.0' : '0.00/10.0') : '••••/10.0';
-    final creditsText = _isGpaVisible ? (provider.soTinChiTichLuy != null ? '${loc.t('credits')}: ${provider.soTinChiTichLuy}' : '${loc.t('credits')}: 0') : '${loc.t('credits')}: •••';
+    final gpaText = _isGpaVisible
+        ? (provider.gpa != null
+              ? '${provider.gpa!.toStringAsFixed(2)}/10.0'
+              : '0.00/10.0')
+        : '••••/10.0';
+    final creditsText = _isGpaVisible
+        ? (provider.soTinChiTichLuy != null
+              ? '${loc.t('credits')}: ${provider.soTinChiTichLuy}'
+              : '${loc.t('credits')}: 0')
+        : '${loc.t('credits')}: •••';
 
     return _buildHoverCard(
       isDark: isDark,
@@ -1030,7 +1271,10 @@ class _HomeScreenState extends State<HomeScreen>
       builder: (context) {
         final screenWidth = MediaQuery.of(context).size.width;
         return Dialog(
-          insetPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 24),
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 24,
+          ),
           backgroundColor: Colors.transparent,
           child: ConstrainedBox(
             constraints: BoxConstraints(maxWidth: screenWidth - 24),
@@ -1045,7 +1289,11 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  void _showGpaDialog(AppLocalizations loc, bool isDark, HomeProvider provider) {
+  void _showGpaDialog(
+    AppLocalizations loc,
+    bool isDark,
+    HomeProvider provider,
+  ) {
     final gpa = provider.gpa;
     final credits = provider.soTinChiTichLuy;
 
@@ -1089,7 +1337,9 @@ class _HomeScreenState extends State<HomeScreen>
                 ),
               const SizedBox(height: 8),
               Text(
-                gpa != null ? '${loc.t('credits')}: ${credits ?? 0}' : loc.t('gpa_details_soon'),
+                gpa != null
+                    ? '${loc.t('credits')}: ${credits ?? 0}'
+                    : loc.t('gpa_details_soon'),
                 style: TextStyle(
                   color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
                   fontSize: 12,
@@ -1117,7 +1367,13 @@ class _EllipsizeAtWord extends StatelessWidget {
   final int maxLines;
   final double maxWidth;
 
-  const _EllipsizeAtWord({Key? key, required this.text, required this.style, required this.maxLines, required this.maxWidth}) : super(key: key);
+  const _EllipsizeAtWord({
+    Key? key,
+    required this.text,
+    required this.style,
+    required this.maxLines,
+    required this.maxWidth,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -1159,7 +1415,12 @@ class _EllipsizeAtWord extends StatelessWidget {
     }
 
     if (best.isNotEmpty) {
-      return Text(best, style: style, maxLines: maxLines, overflow: TextOverflow.clip);
+      return Text(
+        best,
+        style: style,
+        maxLines: maxLines,
+        overflow: TextOverflow.clip,
+      );
     }
 
     // Fallback: no whole word fits, do character-level binary search
@@ -1185,10 +1446,20 @@ class _EllipsizeAtWord extends StatelessWidget {
     }
 
     if (bestChar.isNotEmpty) {
-      return Text(bestChar, style: style, maxLines: maxLines, overflow: TextOverflow.clip);
+      return Text(
+        bestChar,
+        style: style,
+        maxLines: maxLines,
+        overflow: TextOverflow.clip,
+      );
     }
 
     // As a last resort, show original text with ellipsis overflow (shouldn't reach here)
-    return Text(text, style: style, maxLines: maxLines, overflow: TextOverflow.ellipsis);
+    return Text(
+      text,
+      style: style,
+      maxLines: maxLines,
+      overflow: TextOverflow.ellipsis,
+    );
   }
 }

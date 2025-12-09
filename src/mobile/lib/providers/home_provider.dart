@@ -26,10 +26,16 @@ class HomeProvider extends ChangeNotifier {
     _tokenListener = () {
       final tok = AuthService.tokenNotifier.value;
       if (tok == null || tok.isEmpty) {
-        developer.log('HomeProvider: token is null -> clearing data', name: 'HomeProvider');
+        developer.log(
+          'HomeProvider: token is null -> clearing data',
+          name: 'HomeProvider',
+        );
         clear();
       } else {
-        developer.log('HomeProvider: token available -> refreshing data', name: 'HomeProvider');
+        developer.log(
+          'HomeProvider: token available -> refreshing data',
+          name: 'HomeProvider',
+        );
         // Fire-and-forget background refresh
         fetchQuickGpa();
         fetchStudentCard();
@@ -57,14 +63,42 @@ class HomeProvider extends ChangeNotifier {
   );
   List<NotificationItem> _notifications = [];
   List<QuickAction> _quickActions = [
-    QuickAction(label: 'Kết quả học tập', type: 'results', iconName: 'school_outlined'),
-    QuickAction(label: 'Học phí', type: 'tuition', iconName: 'monetization_on_outlined'),
-    QuickAction(label: 'Lịch học', type: 'schedule', iconName: 'calendar_today_outlined'),
-    QuickAction(label: 'Gửi xe', type: 'parking', iconName: 'directions_car_outlined'),
+    QuickAction(
+      label: 'Kết quả học tập',
+      type: 'results',
+      iconName: 'school_outlined',
+    ),
+    QuickAction(
+      label: 'Học phí',
+      type: 'tuition',
+      iconName: 'monetization_on_outlined',
+    ),
+    QuickAction(
+      label: 'Lịch học',
+      type: 'schedule',
+      iconName: 'calendar_today_outlined',
+    ),
+    QuickAction(
+      label: 'Gửi xe',
+      type: 'parking',
+      iconName: 'directions_car_outlined',
+    ),
     QuickAction(label: 'Phúc khảo', type: 'regrade', iconName: 'edit_document'),
-    QuickAction(label: 'Đăng ký GXN', type: 'gxn', iconName: 'check_box_outlined'),
-    QuickAction(label: 'Giấy giới thiệu', type: 'reference', iconName: 'description_outlined'),
-    QuickAction(label: 'Chứng chỉ', type: 'certificate', iconName: 'workspace_premium_outlined'),
+    QuickAction(
+      label: 'Đăng ký GXN',
+      type: 'gxn',
+      iconName: 'check_box_outlined',
+    ),
+    QuickAction(
+      label: 'Giấy giới thiệu',
+      type: 'reference',
+      iconName: 'description_outlined',
+    ),
+    QuickAction(
+      label: 'Chứng chỉ',
+      type: 'certificate',
+      iconName: 'workspace_premium_outlined',
+    ),
   ];
 
   double? _gpa;
@@ -84,6 +118,46 @@ class HomeProvider extends ChangeNotifier {
   double? get gpa => _gpa;
   int? get soTinChiTichLuy => _soTinChiTichLuy;
 
+  /// Get all available quick actions (for customization modal)
+  List<QuickAction> get allAvailableQuickActions => [
+    QuickAction(
+      label: 'Kết quả học tập',
+      type: 'results',
+      iconName: 'school_outlined',
+    ),
+    QuickAction(
+      label: 'Học phí',
+      type: 'tuition',
+      iconName: 'monetization_on_outlined',
+    ),
+    QuickAction(
+      label: 'Lịch học',
+      type: 'schedule',
+      iconName: 'calendar_today_outlined',
+    ),
+    QuickAction(
+      label: 'Gửi xe',
+      type: 'parking',
+      iconName: 'directions_car_outlined',
+    ),
+    QuickAction(label: 'Phúc khảo', type: 'regrade', iconName: 'edit_document'),
+    QuickAction(
+      label: 'Đăng ký GXN',
+      type: 'gxn',
+      iconName: 'check_box_outlined',
+    ),
+    QuickAction(
+      label: 'Giấy giới thiệu',
+      type: 'reference',
+      iconName: 'description_outlined',
+    ),
+    QuickAction(
+      label: 'Chứng chỉ',
+      type: 'certificate',
+      iconName: 'workspace_premium_outlined',
+    ),
+  ];
+
   // NOTE: _loadMock() intentionally removed; providers must be prefetched via LoadingScreen.
 
   /// Setup realtime notification listeners from SignalR
@@ -91,15 +165,18 @@ class HomeProvider extends ChangeNotifier {
     // Kết quả học tập
     _subscriptions.add(
       _notificationService.onKetQuaHocTap.listen((notification) {
-        _addNotification(NotificationItem(
-          title: 'Cập nhật điểm: ${notification.tenMonHoc}',
-          body: 'QT: ${notification.diemQuaTrinh ?? "-"} | '
-              'GK: ${notification.diemGiuaKy ?? "-"} | '
-              'CK: ${notification.diemCuoiKy ?? "-"}',
-          time: 'Vừa xong',
-          isUnread: true,
-          category: NotificationCategory.ketQuaHocTap,
-        ));
+        _addNotification(
+          NotificationItem(
+            title: 'Cập nhật điểm: ${notification.tenMonHoc}',
+            body:
+                'QT: ${notification.diemQuaTrinh ?? "-"} | '
+                'GK: ${notification.diemGiuaKy ?? "-"} | '
+                'CK: ${notification.diemCuoiKy ?? "-"}',
+            time: 'Vừa xong',
+            isUnread: true,
+            category: NotificationCategory.ketQuaHocTap,
+          ),
+        );
       }),
     );
 
@@ -108,48 +185,58 @@ class HomeProvider extends ChangeNotifier {
       _notificationService.onBaoBu.listen((notification) {
         // Tạo danh sách tiết từ tiết bắt đầu đến tiết kết thúc
         final tietBatDau = int.tryParse(notification.tietBatDau) ?? 1;
-        final tietKetThuc = int.tryParse(notification.tietKetThuc) ?? tietBatDau;
+        final tietKetThuc =
+            int.tryParse(notification.tietKetThuc) ?? tietBatDau;
         final danhSachTiet = List.generate(
           tietKetThuc - tietBatDau + 1,
           (i) => (tietBatDau + i).toString(),
         ).join(', ');
 
-        _addNotification(NotificationItem(
-          title: 'Lịch học bù: ${notification.tenMonHoc}',
-          body: 'Ngày: ${_formatDate(notification.ngayBu)}\n'
-              'Tiết: $danhSachTiet\n'
-              'Phòng: ${notification.phongHoc}',
-          time: 'Vừa xong',
-          isUnread: true,
-          category: NotificationCategory.baoBu,
-        ));
+        _addNotification(
+          NotificationItem(
+            title: 'Lịch học bù: ${notification.tenMonHoc}',
+            body:
+                'Ngày: ${_formatDate(notification.ngayBu)}\n'
+                'Tiết: $danhSachTiet\n'
+                'Phòng: ${notification.phongHoc}',
+            time: 'Vừa xong',
+            isUnread: true,
+            category: NotificationCategory.baoBu,
+          ),
+        );
       }),
     );
 
     // Báo nghỉ
     _subscriptions.add(
       _notificationService.onBaoNghi.listen((notification) {
-        _addNotification(NotificationItem(
-          title: 'Nghỉ học: ${notification.tenMonHoc}',
-          body: 'Ngày: ${_formatDate(notification.ngayNghi)}\n'
-              'Lý do: ${notification.lyDo}',
-          time: 'Vừa xong',
-          isUnread: true,
-          category: NotificationCategory.baoNghi,
-        ));
+        _addNotification(
+          NotificationItem(
+            title: 'Nghỉ học: ${notification.tenMonHoc}',
+            body:
+                'Ngày: ${_formatDate(notification.ngayNghi)}\n'
+                'Lý do: ${notification.lyDo}',
+            time: 'Vừa xong',
+            isUnread: true,
+            category: NotificationCategory.baoNghi,
+          ),
+        );
       }),
     );
 
     // Điểm rèn luyện
     _subscriptions.add(
       _notificationService.onDiemRenLuyen.listen((notification) {
-        _addNotification(NotificationItem(
-          title: 'Điểm rèn luyện HK${notification.hocKy}',
-          body: 'Điểm: ${notification.diemRenLuyen} - ${notification.xepLoai}',
-          time: 'Vừa xong',
-          isUnread: true,
-          category: NotificationCategory.diemRenLuyen,
-        ));
+        _addNotification(
+          NotificationItem(
+            title: 'Điểm rèn luyện HK${notification.hocKy}',
+            body:
+                'Điểm: ${notification.diemRenLuyen} - ${notification.xepLoai}',
+            time: 'Vừa xong',
+            isUnread: true,
+            category: NotificationCategory.diemRenLuyen,
+          ),
+        );
       }),
     );
   }
@@ -175,12 +262,15 @@ class HomeProvider extends ChangeNotifier {
 
   /// Đánh dấu tất cả đã đọc
   void markAllNotificationsAsRead() {
-    _notifications = _notifications.map((n) => n.copyWith(isUnread: false)).toList();
+    _notifications = _notifications
+        .map((n) => n.copyWith(isUnread: false))
+        .toList();
     notifyListeners();
   }
 
   /// Số lượng notification chưa đọc
-  int get unreadNotificationCount => _notifications.where((n) => n.isUnread).length;
+  int get unreadNotificationCount =>
+      _notifications.where((n) => n.isUnread).length;
 
   /// Kết nối SignalR với MSSV
   Future<void> connectNotifications(String mssv) async {
@@ -250,7 +340,7 @@ class HomeProvider extends ChangeNotifier {
       // ApiClient handles jsonDecode, so body is Map<String, dynamic>
       _studentCard = StudentCardDto.fromJson(body);
       notifyListeners();
-      
+
       // Kết nối SignalR sau khi có MSSV
       if (_studentCard?.mssv != null) {
         connectNotifications(_studentCard!.mssv.toString());
@@ -274,15 +364,21 @@ class HomeProvider extends ChangeNotifier {
       int? tietBatDau;
       int? tietKetThuc;
       if (body['tietBatDau'] != null) {
-        tietBatDau = (body['tietBatDau'] is int) ? body['tietBatDau'] as int : int.tryParse(body['tietBatDau'].toString());
+        tietBatDau = (body['tietBatDau'] is int)
+            ? body['tietBatDau'] as int
+            : int.tryParse(body['tietBatDau'].toString());
       }
       if (body['tietKetThuc'] != null) {
-        tietKetThuc = (body['tietKetThuc'] is int) ? body['tietKetThuc'] as int : int.tryParse(body['tietKetThuc'].toString());
+        tietKetThuc = (body['tietKetThuc'] is int)
+            ? body['tietKetThuc'] as int
+            : int.tryParse(body['tietKetThuc'].toString());
       }
 
       String countdownStr = '';
       if (body['countdownMinutes'] != null) {
-        final cm = (body['countdownMinutes'] is int) ? body['countdownMinutes'] as int : int.tryParse(body['countdownMinutes'].toString()) ?? 0;
+        final cm = (body['countdownMinutes'] is int)
+            ? body['countdownMinutes'] as int
+            : int.tryParse(body['countdownMinutes'].toString()) ?? 0;
         countdownStr = _formatMinutesToHoursMinutes(cm);
       }
 
@@ -305,7 +401,11 @@ class HomeProvider extends ChangeNotifier {
         courseName: tenMonHoc,
         room: phongHoc,
         lecturer: tenGiangVien,
-        countdown: countdownStr.isNotEmpty ? countdownStr : (body['countdownMinutes'] != null ? '${body['countdownMinutes']} min' : ''),
+        countdown: countdownStr.isNotEmpty
+            ? countdownStr
+            : (body['countdownMinutes'] != null
+                  ? '${body['countdownMinutes']} min'
+                  : ''),
       );
 
       notifyListeners();
@@ -357,11 +457,7 @@ class HomeProvider extends ChangeNotifier {
 
   /// Refresh all backend-backed fields. Useful to call immediately after login.
   Future<void> refreshAll() async {
-    await Future.wait([
-      fetchQuickGpa(),
-      fetchStudentCard(),
-      fetchNextClass(),
-    ]);
+    await Future.wait([fetchQuickGpa(), fetchStudentCard(), fetchNextClass()]);
   }
 
   /// Prefetch commonly used home data. Used by LoadingScreen on app start/login.
@@ -380,6 +476,24 @@ class HomeProvider extends ChangeNotifier {
       notifyListeners();
       rethrow;
     }
+  }
+
+  /// Save quick actions preferences (customize which actions are shown and their order)
+  Future<void> saveQuickActionsPreferences(
+    List<QuickAction> updatedActions,
+  ) async {
+    _quickActions = updatedActions;
+    notifyListeners();
+
+    // TODO: Implement localStorage persistence using shared_preferences
+    // Example:
+    // final prefs = await SharedPreferences.getInstance();
+    // final actionTypes = updatedActions.map((a) => a.type).toList();
+    // await prefs.setStringList('quick_actions', actionTypes);
+    developer.log(
+      'Quick actions saved: ${updatedActions.map((a) => a.type).toList()}',
+      name: 'HomeProvider',
+    );
   }
 
   /// Clear sensitive data when logged out or token removed.
