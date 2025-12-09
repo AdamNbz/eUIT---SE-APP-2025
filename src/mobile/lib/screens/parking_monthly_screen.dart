@@ -26,12 +26,13 @@ class _ParkingMonthlyScreenState extends State<ParkingMonthlyScreen> {
 
   Future<void> _submit() async {
     final plate = _plateController.text.trim();
+    final loc = AppLocalizations.of(context);
     if (_selectedMonths == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Vui lòng chọn số tháng')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(loc.t('parking_monthly_select_months_required'))));
       return;
     }
     if (plate.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Vui lòng nhập biển số xe')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(loc.t('parking_monthly_plate_required'))));
       return;
     }
 
@@ -45,18 +46,18 @@ class _ParkingMonthlyScreenState extends State<ParkingMonthlyScreen> {
     await showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(AppLocalizations.of(context).t('success')),
+        title: Text(loc.t('submission_received')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Số tháng: $_selectedMonths'),
+            Text('${loc.t('parking_monthly_select_months_label')}: $_selectedMonths'),
             const SizedBox(height: 8),
-            Text('Biển số: $plate'),
+            Text('${loc.t('parking_monthly_plate_label')}: $plate'),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(), child: Text(AppLocalizations.of(context).t('close'))),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(), child: Text(loc.t('close'))),
         ],
       ),
     );
@@ -75,7 +76,7 @@ class _ParkingMonthlyScreenState extends State<ParkingMonthlyScreen> {
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
         title: Text(
-          'Đăng ký Vé tháng gửi xe máy',
+          AppLocalizations.of(context).t('parking_monthly_title'),
           style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600),
         ),
       ),
@@ -116,7 +117,7 @@ class _ParkingMonthlyScreenState extends State<ParkingMonthlyScreen> {
                               child: DropdownButton<int>(
                                 isExpanded: true,
                                 value: _selectedMonths,
-                                hint: Text('Chọn số tháng', style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontSize: 14)),
+                                hint: Text(AppLocalizations.of(context).t('parking_monthly_select_months_hint'), style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontSize: 14)),
                                 // dropdown background set to white with 0.8 opacity
                                 dropdownColor: const Color.fromRGBO(255, 255, 255, 0.8),
                                 icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
@@ -153,14 +154,14 @@ class _ParkingMonthlyScreenState extends State<ParkingMonthlyScreen> {
                       const SizedBox(height: 16),
 
                       // License plate label
-                      Text('Biển số xe đăng ký', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
+                      Text(AppLocalizations.of(context).t('parking_monthly_plate_label'), style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
                       const SizedBox(height: 8),
 
                       TextField(
                         controller: _plateController,
                         style: TextStyle(color: Colors.white, fontSize: 14),
                         decoration: InputDecoration(
-                          hintText: 'Biển số xe Đăng ký',
+                          hintText: AppLocalizations.of(context).t('parking_monthly_plate_hint'),
                           hintStyle: TextStyle(color: isDark ? Colors.white54 : Colors.black54),
                           filled: true,
                           fillColor: isDark ? Color.fromRGBO(0, 0, 0, 0.3) : Color.fromRGBO(0, 0, 0, 0.06),
@@ -170,7 +171,7 @@ class _ParkingMonthlyScreenState extends State<ParkingMonthlyScreen> {
                       ),
 
                       const SizedBox(height: 6),
-                      Text('Ví dụ: 47E1-123.45\nNếu là xe đạp thì nhập Mã số sinh viên', style: TextStyle(color: isDark ? Colors.white70 : Colors.black87, fontSize: 13, fontStyle: FontStyle.italic)),
+                      Text(AppLocalizations.of(context).t('parking_monthly_example'), style: TextStyle(color: isDark ? Colors.white70 : Colors.black87, fontSize: 13, fontStyle: FontStyle.italic)),
 
                       const SizedBox(height: 80), // space for fixed button
                     ],
@@ -186,7 +187,7 @@ class _ParkingMonthlyScreenState extends State<ParkingMonthlyScreen> {
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(backgroundColor: AppTheme.bluePrimary, padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)), elevation: 4),
                         onPressed: _isSubmitting ? null : _submit,
-                        child: _isSubmitting ? const CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Colors.white)) : const Text('Đăng ký', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white)),
+                        child: _isSubmitting ? const CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Colors.white)) : Text(AppLocalizations.of(context).t('register'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white)),
                       ),
                     ),
                   ),

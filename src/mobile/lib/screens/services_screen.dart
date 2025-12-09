@@ -5,6 +5,9 @@ import '../utils/app_localizations.dart';
 import 'student_confirmation_screen.dart';
 import 'parking_monthly_screen.dart';
 import 'certificate_confirmation_screen.dart';
+import 'introduction_letter_screen.dart';
+import 'transcript_registration_screen.dart';
+import 'regrade_screen.dart';
 
 class ServicesScreen extends StatelessWidget {
   const ServicesScreen({super.key});
@@ -92,8 +95,8 @@ class ServicesScreen extends StatelessWidget {
                           context,
                           isDark,
                           loc,
-                          title: 'Đăng ký giấy xác nhận sinh viên',
-                          subtitle: 'Phòng Công tác Sinh viên',
+                          title: loc.t('services_student_confirmation_title'),
+                          subtitle: loc.t('services_student_confirmation_subtitle'),
                           icon: Icons.description_outlined,
                           isLarge: true,
                           iconVariant: 0,
@@ -116,8 +119,8 @@ class ServicesScreen extends StatelessWidget {
                           context,
                           isDark,
                           loc,
-                          title: 'Đăng ký Vé tháng gửi xe máy',
-                          subtitle: 'Phòng Dữ liệu & Công nghệ thông tin',
+                          title: loc.t('services_parking_monthly_title'),
+                          subtitle: loc.t('services_parking_monthly_subtitle'),
                           icon: Icons.local_parking_rounded,
                           isLarge: true,
                           iconVariant: 0,
@@ -140,8 +143,8 @@ class ServicesScreen extends StatelessWidget {
                           context,
                           isDark,
                           loc,
-                          title: 'Đăng ký Xác nhận chứng chỉ',
-                          subtitle: 'Phòng Đào tạo Đại học / VPCCTĐB',
+                          title: loc.t('services_certificate_confirmation_title'),
+                          subtitle: loc.t('services_certificate_confirmation_subtitle'),
                           icon: Icons.document_scanner_outlined,
                           isLarge: true,
                           iconVariant: 0,
@@ -163,12 +166,19 @@ class ServicesScreen extends StatelessWidget {
                           context,
                           isDark,
                           loc,
-                          title: 'Đăng ký Phúc khảo',
-                          subtitle: 'Phòng Đào tạo Đại học / VPCCTĐB',
+                          title: loc.t('services_regrade_title'),
+                          subtitle: loc.t('services_regrade_subtitle'),
                           icon: Icons.edit_document,
                           isLarge: true,
                           iconVariant: 0,
                           orderIndex: index,
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => const RegradeScreen(),
+                              ),
+                            );
+                          },
                         ),
                       );
                     }
@@ -181,12 +191,15 @@ class ServicesScreen extends StatelessWidget {
                           context,
                           isDark,
                           loc,
-                          title: 'Đăng ký Bảng điểm',
-                          subtitle: 'Phòng Đào tạo Đại học / VPCCTĐB',
+                          title: loc.t('services_transcript_title'),
+                          subtitle: loc.t('services_transcript_subtitle'),
                           icon: Icons.receipt_long,
                           isLarge: true,
                           iconVariant: 0,
                           orderIndex: index,
+                          onTap: () {
+                            Navigator.of(context).push(MaterialPageRoute(builder: (_) => const TranscriptRegistrationScreen()));
+                          },
                         ),
                       );
                     }
@@ -199,12 +212,19 @@ class ServicesScreen extends StatelessWidget {
                           context,
                           isDark,
                           loc,
-                          title: 'Đăng ký Giấy giới thiệu',
-                          subtitle: 'Phòng Đào tạo Đại học / VPCCTĐB',
+                          title: loc.t('services_introduction_letter_title'),
+                          subtitle: loc.t('services_introduction_letter_subtitle'),
                           icon: Icons.assignment_ind,
                           isLarge: true,
                           iconVariant: 0,
                           orderIndex: index,
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => const IntroductionLetterScreen(),
+                              ),
+                            );
+                          },
                         ),
                       );
                     }

@@ -86,6 +86,7 @@ flutter:
   assets:
     - assets/icons/
     - ./env/.env
+    - assets/images/
     - assets/shaders/blackhole_interstellar.glsl
   # To add assets to your application, add an assets section, like this:
   # assets:
