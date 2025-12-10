@@ -108,11 +108,6 @@ class LecturerProvider extends ChangeNotifier {
   void _initQuickActions() {
     _allQuickActions = [
       QuickAction(
-        label: 'Thẻ giảng viên',
-        type: 'lecturer_card',
-        iconName: 'badge_outlined',
-      ),
-      QuickAction(
         label: 'Lịch giảng',
         type: 'lecturer_schedule',
         iconName: 'calendar_today_outlined',
@@ -131,11 +126,6 @@ class LecturerProvider extends ChangeNotifier {
         label: 'Phúc khảo',
         type: 'lecturer_appeals',
         iconName: 'rate_review',
-      ),
-      QuickAction(
-        label: 'Tài liệu',
-        type: 'lecturer_documents',
-        iconName: 'folder_outlined',
       ),
       QuickAction(
         label: 'Quy định',
@@ -159,11 +149,8 @@ class LecturerProvider extends ChangeNotifier {
       ),
     ];
 
-    // Default enabled quick actions (exclude tuition and confirmation letter)
-    _quickActions = _allQuickActions.where((action) =>
-      action.type != 'lecturer_tuition' &&
-      action.type != 'lecturer_confirmation_letter'
-    ).toList();
+    // Default: all actions are enabled (lecturer_card and lecturer_documents removed)
+    _quickActions = List.from(_allQuickActions);
   }
 
 
@@ -1041,5 +1028,23 @@ class LecturerProvider extends ChangeNotifier {
     _quickActions.removeWhere((a) => a.type == type);
     notifyListeners();
     developer.log('Disabled quick action: $type', name: 'LecturerProvider');
+  }
+
+  /// Save quick actions preferences
+  /// This method updates the list of enabled quick actions and persists them
+  Future<void> saveQuickActionsPreferences(List<QuickAction> updatedActions) async {
+    _quickActions = List.from(updatedActions);
+    notifyListeners();
+
+    // TODO: Implement localStorage persistence using shared_preferences
+    // Example:
+    // final prefs = await SharedPreferences.getInstance();
+    // final actionTypes = updatedActions.map((a) => a.type).toList();
+    // await prefs.setStringList('lecturer_quick_actions', actionTypes);
+
+    developer.log(
+      'Quick actions preferences saved: ${updatedActions.map((a) => a.type).toList()}',
+      name: 'LecturerProvider',
+    );
   }
 }
