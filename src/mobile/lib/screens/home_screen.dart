@@ -13,6 +13,8 @@ import '../screens/search/tuition_screen.dart';
 import '../screens/parking_monthly_screen.dart';
 import '../screens/student_confirmation_screen.dart';
 import '../screens/certificate_confirmation_screen.dart';
+import '../screens/regrade_screen.dart';
+import '../screens/introduction_letter_screen.dart';
 
 /// HomeScreen - Trang chủ Light Theme với bố cục mới
 class HomeScreen extends StatefulWidget {
@@ -177,7 +179,7 @@ class _HomeScreenState extends State<HomeScreen>
           sigmaY: 6,
         ), // nhẹ, hiển thị nền động phía sau
         child: Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: isDark
                 ? AppTheme.darkCard.withAlpha(160)
@@ -197,8 +199,8 @@ class _HomeScreenState extends State<HomeScreen>
                   GestureDetector(
                     onTap: () => Navigator.pushNamed(context, '/profile'),
                     child: Container(
-                      width: 48,
-                      height: 48,
+                      width: 42,
+                      height: 42,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         // White circular background with blue logo
@@ -381,7 +383,7 @@ class _HomeScreenState extends State<HomeScreen>
         filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
         child: Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             // Reduced opacity so animated background shows through
             gradient: isDark
@@ -445,7 +447,7 @@ class _HomeScreenState extends State<HomeScreen>
                           schedule.courseCode,
                           style: TextStyle(
                             color: isDark ? Colors.white : Colors.black87,
-                            fontSize: 18,
+                            fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -456,7 +458,7 @@ class _HomeScreenState extends State<HomeScreen>
                           builder: (context, constraints) {
                             final courseStyle = TextStyle(
                               color: isDark ? Colors.white : Colors.black87,
-                              fontSize: 22,
+                              fontSize: 18,
                               fontWeight: FontWeight.bold,
                             );
                             return _EllipsizeAtWord(
@@ -481,7 +483,7 @@ class _HomeScreenState extends State<HomeScreen>
                           color: isDark
                               ? Colors.grey.shade400
                               : Colors.grey.shade600,
-                          fontSize: 13,
+                          fontSize: 11,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -491,7 +493,7 @@ class _HomeScreenState extends State<HomeScreen>
                           color: isDark
                               ? AppTheme.bluePrimary
                               : AppTheme.bluePrimary,
-                          fontSize: 24,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -568,8 +570,8 @@ class _HomeScreenState extends State<HomeScreen>
     final actions = provider.quickActions;
 
     return Wrap(
-      spacing: 12,
-      runSpacing: 16,
+      spacing: 8,
+      runSpacing: 12,
       children: actions.asMap().entries.map((entry) {
         return _buildSquircleActionButton(
           entry.value,
@@ -587,6 +589,7 @@ class _HomeScreenState extends State<HomeScreen>
     int index,
     void Function(int)? onSelectPage,
   ) {
+    final loc = AppLocalizations.of(context);
     // Định nghĩa gradients cho từng action
     final gradients = [
       [
@@ -643,7 +646,9 @@ class _HomeScreenState extends State<HomeScreen>
     }
 
     return SizedBox(
-      width: 80,
+      width:
+          MediaQuery.of(context).size.width *
+          0.21, // Responsive width (~21% of screen)
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -686,7 +691,7 @@ class _HomeScreenState extends State<HomeScreen>
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => const StudentConfirmationScreen(),
+                      builder: (_) => const IntroductionLetterScreen(),
                     ),
                   );
                   break;
@@ -696,6 +701,22 @@ class _HomeScreenState extends State<HomeScreen>
                     context,
                     MaterialPageRoute(
                       builder: (_) => const CertificateConfirmationScreen(),
+                    ),
+                  );
+                  break;
+
+                case 'regrade':
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const RegradeScreen()),
+                  );
+                  break;
+
+                case 'gxn':
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const StudentConfirmationScreen(),
                     ),
                   );
                   break;
@@ -719,20 +740,20 @@ class _HomeScreenState extends State<HomeScreen>
             },
 
             child: Container(
-              width: 64,
-              height: 64,
+              width: 56,
+              height: 56,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: gradient,
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(14),
                 boxShadow: [
                   BoxShadow(
                     color: gradient[0].withAlpha(76),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
+                    blurRadius: 6,
+                    offset: const Offset(0, 3),
                   ),
                 ],
               ),
@@ -742,25 +763,25 @@ class _HomeScreenState extends State<HomeScreen>
                         action.textIcon!,
                         style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 24,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                         ),
                       )
-                    : Icon(icon, color: Colors.white, size: 28),
+                    : Icon(icon, color: Colors.white, size: 24),
               ),
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
 
           // Label
           Text(
-            action.label,
+            loc.t(action.label),
             textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               color: isDark ? Colors.grey.shade300 : Colors.black87,
-              fontSize: 11,
+              fontSize: 10,
               fontWeight: FontWeight.w600,
               height: 1.2,
             ),
@@ -1106,10 +1127,10 @@ class _HomeScreenState extends State<HomeScreen>
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            width: 48,
-            height: 48,
+            width: 40,
+            height: 40,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(10),
               color: isDark ? Colors.white.withAlpha(13) : AppTheme.lightCard,
               border: Border.all(
                 color: _hoverStudentCard
@@ -1122,15 +1143,16 @@ class _HomeScreenState extends State<HomeScreen>
             child: const Icon(
               Icons.badge_outlined,
               color: AppTheme.bluePrimary,
+              size: 22,
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 10),
           Expanded(
             child: Text(
               loc.t('student_card'),
               style: TextStyle(
                 color: isDark ? Colors.white : Colors.black87,
-                fontSize: 16,
+                fontSize: 14,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -1177,12 +1199,12 @@ class _HomeScreenState extends State<HomeScreen>
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 4),
                 Text(
                   gpaText,
                   style: TextStyle(
                     color: isDark ? Colors.white : Colors.black87,
-                    fontSize: 21,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 0.2,
                   ),
