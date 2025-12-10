@@ -4,6 +4,10 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../widgets/animated_background.dart';
 import '../../theme/app_theme.dart';
 
+// Backend configuration
+// Thay '`10.`0.2.2' bằng IP của máy chạy backend nếu cần (vd: '192.168.1.100')
+const String BACKEND_BASE_URL = String.fromEnvironment('API_URL', defaultValue: 'http://10.0.2.2:5000');
+
 // Normalize Vietnamese strings by removing diacritics for search matching
 String _stripDiacritics(String s) {
   if (s.isEmpty) return s;
@@ -395,7 +399,12 @@ class _TrainingRegulationsScreenState extends State<TrainingRegulationsScreen> {
   }
 
   Future<void> _openUrl(BuildContext context, String urlStr) async {
-    final uri = Uri.parse(urlStr);
+    // Replace localhost → emulator IP
+    String fixedUrl = urlStr.replaceFirst("http://localhost", BACKEND_BASE_URL);
+
+    // Encode space + unicode
+    final uri = Uri.parse(Uri.encodeFull(fixedUrl));
+
     try {
       final launched = await launchUrl(
         uri,
