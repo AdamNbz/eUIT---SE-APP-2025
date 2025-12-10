@@ -391,8 +391,19 @@ class HomeProvider extends ChangeNotifier {
       }
 
       String timeRange = '';
-      if (tietBatDau != null && tietKetThuc != null) {
-        // Map periods to actual time-of-day ranges using the school's schedule
+      if (tietBatDau != null && body['ngayHoc'] != null) {
+        try {
+          final dt = DateTime.parse(body['ngayHoc'].toString());
+          final dayNames = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+          final dayName = dayNames[dt.weekday % 7]; // weekday: 1=Monday, 7=Sunday
+
+          final startTime = _getPeriodStartTime(tietBatDau);
+          timeRange = '$dayName • $startTime';
+        } catch (_) {
+          timeRange = _periodsToTimeRange(tietBatDau, tietKetThuc ?? tietBatDau);
+        }
+      } else if (tietBatDau != null && tietKetThuc != null) {
+        // Fallback to old format if no date available
         timeRange = _periodsToTimeRange(tietBatDau, tietKetThuc);
       } else if (body['ngayHoc'] != null) {
         try {
@@ -423,12 +434,19 @@ class HomeProvider extends ChangeNotifier {
   }
 
   String _formatMinutesToHoursMinutes(int minutes) {
-    if (minutes <= 0) return '0m';
-    final h = minutes ~/ 60;
-    final m = minutes % 60;
-    if (h > 0 && m > 0) return '${h}h ${m}m';
-    if (h > 0) return '${h}h';
-    return '${m}m';
+    if (minutes <= 0) return '0s';
+
+    final days = minutes ~/ (24 * 60);
+    final hours = (minutes % (24 * 60)) ~/ 60;
+    final mins = minutes % 60;
+
+    if (days > 0) {
+      return '${days}d ${hours}h ${mins}m';
+    } else if (hours > 0) {
+      return '${hours}h ${mins}m 0s';
+    } else {
+      return '${mins}m 0s';
+    }
   }
 
   // Convert start/end period numbers to human-readable time range using school schedule
@@ -511,5 +529,21 @@ class HomeProvider extends ChangeNotifier {
     _studentCard = null;
     // leave mock schedule/notifications untouched or override as needed
     notifyListeners();
+  }
+
+  String _getPeriodStartTime(int period) {
+    const Map<int, String> startMap = {
+      1: '7:30',
+      2: '8:15',
+      3: '9:00',
+      4: '10:00',
+      5: '10:45',
+      6: '13:00',
+      7: '13:45',
+      8: '14:30',
+      9: '15:30',
+      0: '16:15',
+    };
+    return startMap[period] ?? '$period';
   }
 }

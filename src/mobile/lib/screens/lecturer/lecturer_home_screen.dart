@@ -522,10 +522,7 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          _periodsToTimeRange(
-                            int.tryParse(nextClass.tietBatDau ?? '1') ?? 1,
-                            int.tryParse(nextClass.tietKetThuc ?? '3') ?? 3,
-                          ),
+                          _formatDayAndTime(nextClass, provider),
                           style: TextStyle(
                             color: isDark
                                 ? AppTheme.bluePrimary
@@ -650,16 +647,19 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
 
       if (difference.isNegative) return 'Đã bắt đầu';
 
-      final hours = difference.inHours;
+      final days = difference.inDays;
+      final hours = difference.inHours % 24;
       final minutes = difference.inMinutes % 60;
+      final seconds = difference.inSeconds % 60;
 
-      if (hours > 24) {
-        final days = hours ~/ 24;
-        return '${days}d ${hours % 24}h';
+      if (days > 0) {
+        return '${days}d ${hours}h ${minutes}m';
       } else if (hours > 0) {
-        return minutes > 0 ? '${hours}h ${minutes}m' : '${hours}h';
+        return '${hours}h ${minutes}m ${seconds}s';
+      } else if (minutes > 0) {
+        return '${minutes}m ${seconds}s';
       } else {
-        return '${minutes}m';
+        return '${seconds}s';
       }
     } catch (e) {
       return '---';
@@ -1331,5 +1331,41 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
         );
       },
     );
+  }
+
+  String _formatDayAndTime(dynamic nextClass, LecturerProvider provider) {
+    final classDate = provider.nextClassDate;
+    if (classDate == null) {
+      return _periodsToTimeRange(
+        int.tryParse(nextClass.tietBatDau ?? '1') ?? 1,
+        int.tryParse(nextClass.tietKetThuc ?? '3') ?? 3,
+      );
+    }
+
+    // Format day of week
+    final dayNames = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+    final dayName = dayNames[classDate.weekday % 7]; // weekday: 1=Monday, 7=Sunday
+
+    // Get start time
+    final startPeriod = int.tryParse(nextClass.tietBatDau ?? '1') ?? 1;
+    final startTime = _getPeriodStartTime(startPeriod);
+
+    return '$dayName • $startTime';
+  }
+
+  String _getPeriodStartTime(int period) {
+    const Map<int, String> startMap = {
+      1: '7:30',
+      2: '8:15',
+      3: '9:00',
+      4: '10:00',
+      5: '10:45',
+      6: '13:00',
+      7: '13:45',
+      8: '14:30',
+      9: '15:30',
+      0: '16:15',
+    };
+    return startMap[period] ?? '$period';
   }
 }
