@@ -52,14 +52,21 @@ android {
     }
 
     buildTypes {
+        getByName("debug") {
+            // Use the same signing config as release for consistency
+            if (keystorePropertiesFile.exists()) {
+                signingConfig = signingConfigs.getByName("release")
+            }
+        }
+        
         getByName("release") {
             // Dùng keystore "release" mình tạo bên trên nếu có
             if (keystorePropertiesFile.exists()) {
                 signingConfig = signingConfigs.getByName("release")
             }
 
-            // isMinifyEnabled = false
-            // isShrinkResources = false
+            isMinifyEnabled = false
+            isShrinkResources = false
         }
     }
 }
