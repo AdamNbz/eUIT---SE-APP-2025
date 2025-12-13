@@ -54,24 +54,24 @@ eUIT---SE-APP-2025/
 ## ✨ Tính năng Chính
 
 ### 👨‍🎓 Dành cho Sinh viên
-- 📅 **Xem thời khóa biểu** - Lịch học cá nhân theo tuần/tháng
-- 📊 **Tra cứu điểm số** - Bảng điểm chi tiết theo học kỳ
-- 📝 **Đăng ký học phần** - Đăng ký môn học online
-- 💳 **Thanh toán học phí** - Xem và quản lý học phí
-- 📄 **Xin giấy xác nhận** - Đề xuất các loại giấy tờ
-- 🔔 **Thông báo realtime** - Nhận thông báo từ trường
-- 🤖 **Chatbot AI** - Hỏi đáp thông tin tự động
-- 📰 **Tin tức & Thông báo** - Cập nhật tin tức từ trường
+- **Xem thời khóa biểu** - Lịch học cá nhân theo tuần/tháng
+- **Tra cứu điểm số** - Bảng điểm chi tiết theo học kỳ
+- **Đăng ký học phần** - Đăng ký môn học online
+- **Thanh toán học phí** - Xem và quản lý học phí
+- **Xin giấy xác nhận** - Đề xuất các loại giấy tờ
+- **Thông báo realtime** - Nhận thông báo từ trường
+- **Chatbot AI** - Hỏi đáp thông tin tự động
+- **Tin tức & Thông báo** - Cập nhật tin tức từ trường
 
 ### 👨‍🏫 Dành cho Giảng viên
-- 📋 **Quản lý lớp học** - Xem danh sách lớp giảng dạy
-- ✅ **Nhập điểm** - Nhập và quản lý điểm sinh viên
-- 📅 **Lịch giảng dạy** - Xem lịch dạy cá nhân
+- **Quản lý lớp học** - Xem danh sách lớp giảng dạy
+- **Nhập điểm** - Nhập và quản lý điểm sinh viên
+- **Lịch giảng dạy** - Xem lịch dạy cá nhân
 
 ### 🔧 Dành cho Quản trị viên
-- 👥 **Quản lý người dùng** - Quản lý tài khoản SV/GV
-- 📢 **Đăng thông báo** - Gửi thông báo đến toàn trường
-- 📊 **Báo cáo thống kê** - Xem các báo cáo tổng hợp
+- **Quản lý người dùng** - Quản lý tài khoản SV/GV
+- **Đăng thông báo** - Gửi thông báo đến toàn trường
+- **Báo cáo thống kê** - Xem các báo cáo tổng hợp
 
 ## 🛠️ Công nghệ Sử dụng
 
@@ -86,7 +86,7 @@ eUIT---SE-APP-2025/
 | **Vector Store** | pgvector extension |
 | **Containerization** | Docker |
 
-## 🚀 Bắt đầu
+## Hướng dẫn sử dụng
 
 ### Yêu cầu Hệ thống
 
@@ -119,7 +119,7 @@ dotnet restore
 dotnet run
 ```
 
-API sẽ chạy tại: `http://localhost:5128`
+API sẽ chạy tại: `http://localhost:5128`\
 Swagger UI: `http://localhost:5128/swagger`
 
 ### 3️⃣ Cấu hình Socket Server
@@ -196,18 +196,7 @@ docker build -t euit-chatbot ./src/chatbot
 - `POST /api/service/certificate` - Yêu cầu giấy xác nhận
 - `GET /api/service/status` - Trạng thái yêu cầu
 
-> 📚 Xem thêm chi tiết API tại Swagger UI hoặc trong thư mục `docs/`
-
-## 🧪 Testing
-
-```bash
-# Chạy unit tests
-cd tests/MobileApp.API.Tests
-dotnet test
-
-cd tests/MobileApp.Core.Tests
-dotnet test
-```
+> Xem thêm chi tiết API tại Swagger UI hoặc trong thư mục `docs/`
 
 ## 📂 Tài liệu API
 
