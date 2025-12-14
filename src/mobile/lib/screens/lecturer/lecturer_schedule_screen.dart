@@ -489,6 +489,13 @@ class _LecturerScheduleScreenState extends State<LecturerScheduleScreen>
   }
 
   Widget _buildScheduleItem(TeachingScheduleItem item, bool isDark) {
+    final provider = context.watch<LecturerProvider>();
+    // Use siSo from item if available, otherwise fallback to provider map or 0
+    final classSize = item.siSo ?? 
+        ((item.maLop != null && provider.classSizeByClassCode.containsKey(item.maLop!))
+            ? provider.classSizeByClassCode[item.maLop!]
+            : 0);
+            
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -565,7 +572,7 @@ class _LecturerScheduleScreenState extends State<LecturerScheduleScreen>
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      '${item.siSo} SV',
+                      '${classSize ?? 0} SV',
                       style: AppTheme.bodySmall.copyWith(
                         color: isDark
                             ? Colors.grey.shade400

@@ -352,6 +352,11 @@ class LecturerProvider extends ChangeNotifier {
     }
   }
 
+  // Map to store class size (siSo) by class code (maLop)
+  final Map<String, int> _classSizeByClassCode = {};
+
+  Map<String, int> get classSizeByClassCode => _classSizeByClassCode;
+
   Future<void> fetchTeachingClasses({String? semester}) async {
     _isLoading = true;
     notifyListeners();
@@ -367,21 +372,33 @@ class LecturerProvider extends ChangeNotifier {
       _debugInfo = 'Calling classes API...';
       notifyListeners();
 
-      final data = await _client.get('/api/lecturer/courses', queryParameters: queryParams);
-      
-      if (data != null && data is List) {
-        developer.log('Teaching classes fetched successfully', name: 'LecturerProvider');
+      final data = await _client.get(
+        '/api/lecturer/courses',
+        queryParameters: queryParams,
+      );
+
+      if (data is List) {
         _teachingClasses = data
-            .map((item) => TeachingClass.fromJson(item))
+            .map((json) => TeachingClass.fromJson(json))
             .toList();
-        _debugInfo = 'Success: ${_teachingClasses.length} classes';
-        developer.log('Found ${_teachingClasses.length} classes', name: 'LecturerProvider');
-        notifyListeners();
+            
+        // Populate class size map
+        _classSizeByClassCode.clear();
+        for (var cls in _teachingClasses) {
+          if (cls.maLop.isNotEmpty && cls.siSo != null) {
+            _classSizeByClassCode[cls.maLop] = cls.siSo!;
+          }
+        }
       }
+
+      developer.log(
+        'Fetched ${_teachingClasses.length} classes',
+        name: 'LecturerProvider',
+      );
     } catch (e) {
-      _debugInfo = 'Error: $e';
       developer.log(
         'Error fetching teaching classes: $e',
+        error: e,
         name: 'LecturerProvider',
       );
     } finally {

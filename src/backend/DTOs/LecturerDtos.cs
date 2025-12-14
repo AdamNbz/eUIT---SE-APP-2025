@@ -72,6 +72,7 @@ public sealed record LecturerScheduleDto
     [Column("ma_mon_hoc")] public string? MaMonHoc { get; init; }
     [Column("ten_mon_hoc")] public string? TenMonHoc { get; init; }
     [Column("ma_lop")] public string MaLop { get; init; } = "";
+    [Column("si_so")] public int? SiSo { get; init; }
     [Column("thu")] public string? Thu { get; init; }
     [Column("tiet_bat_dau")] public int? TietBatDau { get; init; }
     [Column("tiet_ket_thuc")] public int? TietKetThuc { get; init; }
