@@ -48,6 +48,9 @@ class LecturerProvider extends ChangeNotifier {
   List<QuickAction> _quickActions = [];
   List<QuickAction> get quickActions => _quickActions;
 
+  List<QuickAction> _allQuickActions = [];
+  List<QuickAction> get allQuickActions => _allQuickActions;
+
   List<Appeal> _appeals = [];
   List<Appeal> get appeals => _appeals;
 
@@ -103,7 +106,7 @@ class LecturerProvider extends ChangeNotifier {
   }
 
   void _initQuickActions() {
-    _quickActions = [
+    _allQuickActions = [
       QuickAction(
         label: 'Lịch giảng',
         type: 'lecturer_schedule',
@@ -135,11 +138,6 @@ class LecturerProvider extends ChangeNotifier {
         iconName: 'event_note',
       ),
       QuickAction(
-        label: 'Dịch vụ',
-        type: 'lecturer_confirmation_letter',
-        iconName: 'verified',
-      ),
-      QuickAction(
         label: 'Báo nghỉ',
         type: 'lecturer_absences',
         iconName: 'event_busy',
@@ -149,12 +147,10 @@ class LecturerProvider extends ChangeNotifier {
         type: 'lecturer_makeup_classes',
         iconName: 'event_available',
       ),
-      QuickAction(
-        label: 'Học phí',
-        type: 'lecturer_tuition',
-        iconName: 'payment',
-      ),
     ];
+
+    // Default: all actions are enabled (lecturer_card and lecturer_documents removed)
+    _quickActions = List.from(_allQuickActions);
   }
 
 
@@ -770,23 +766,38 @@ class LecturerProvider extends ChangeNotifier {
   }
 
   // GET /api/lecturer/tuition - Thông tin học phí
-  Future<List<Map<String, dynamic>>> fetchTuition({String? studentId, String? semester}) async {
+  Future<List<Map<String, dynamic>>> fetchTuition({
+    String? studentId,
+    String? semester,
+  }) async {
     try {
       developer.log('Fetching tuition info...', name: 'LecturerProvider');
-      var queryParams = <String, String>{};
-      if (studentId != null) queryParams['studentId'] = studentId;
-      if (semester != null) queryParams['semester'] = semester;
-      
-      final data = await _client.get('/api/lecturer/tuition', queryParameters: queryParams);
 
-      if (data != null && data is List) {
+      var queryParams = <String, String>{};
+      if (studentId != null) queryParams['mssv'] = studentId;  // ✔ backend yêu cầu mssv
+      if (semester != null) queryParams['hocKy'] = semester;   // ✔ backend yêu cầu hocKy
+
+      final data = await _client.get(
+        '/api/lecturer/tuition',
+        queryParameters: queryParams,
+      );
+
+      // ✔ data phải là Map
+      if (data == null || data is! Map<String, dynamic>) return [];
+
+      // ✔ lấy danh sách chiTietHocPhi
+      final details = data['chiTietHocPhi'];
+
+      if (details is List) {
         developer.log('Tuition info fetched successfully', name: 'LecturerProvider');
-        return List<Map<String, dynamic>>.from(data);
+        return List<Map<String, dynamic>>.from(details.reversed);
       }
+
+      return [];
     } catch (e) {
       developer.log('Error fetching tuition: $e', name: 'LecturerProvider');
+      return [];
     }
-    return [];
   }
 
   // PUT /api/lecturer/notifications/{id}/read - Đánh dấu thông báo đã đọc
@@ -997,5 +1008,43 @@ class LecturerProvider extends ChangeNotifier {
       developer.log('LecturerProvider: prefetch error: $e', name: 'LecturerProvider');
       rethrow;
     }
+  }
+
+  // Enable a quick action
+  void enableQuickAction(String type) {
+    if (!_quickActions.any((a) => a.type == type)) {
+      final action = _allQuickActions.firstWhere(
+        (a) => a.type == type,
+        orElse: () => throw Exception('Quick action not found: $type'),
+      );
+      _quickActions.add(action);
+      notifyListeners();
+      developer.log('Enabled quick action: $type', name: 'LecturerProvider');
+    }
+  }
+
+  // Disable a quick action
+  void disableQuickAction(String type) {
+    _quickActions.removeWhere((a) => a.type == type);
+    notifyListeners();
+    developer.log('Disabled quick action: $type', name: 'LecturerProvider');
+  }
+
+  /// Save quick actions preferences
+  /// This method updates the list of enabled quick actions and persists them
+  Future<void> saveQuickActionsPreferences(List<QuickAction> updatedActions) async {
+    _quickActions = List.from(updatedActions);
+    notifyListeners();
+
+    // TODO: Implement localStorage persistence using shared_preferences
+    // Example:
+    // final prefs = await SharedPreferences.getInstance();
+    // final actionTypes = updatedActions.map((a) => a.type).toList();
+    // await prefs.setStringList('lecturer_quick_actions', actionTypes);
+
+    developer.log(
+      'Quick actions preferences saved: ${updatedActions.map((a) => a.type).toList()}',
+      name: 'LecturerProvider',
+    );
   }
 }

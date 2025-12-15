@@ -10,6 +10,7 @@ import '../../theme/app_theme.dart';
 import '../../utils/app_localizations.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../widgets/lecturer_id_card.dart';
+import '../../widgets/lecturer_quick_actions_settings_modal.dart';
 import 'regulations_list_screen.dart';
 import '../../utils/app_localizations.dart';
 import '../../theme/app_theme.dart';
@@ -47,11 +48,6 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
 
   void _handleQuickAction(String actionType) {
     switch (actionType) {
-      case 'lecturer_card':
-        final loc = AppLocalizations.of(context);
-        final isDark = Theme.of(context).brightness == Brightness.dark;
-        _showLecturerCardDialog(loc, isDark);
-        break;
       case 'lecturer_classes':
         Navigator.pushNamed(context, '/lecturer_class_list');
         break;
@@ -64,20 +60,11 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
       case 'lecturer_appeals':
         Navigator.pushNamed(context, '/lecturer_appeals');
         break;
-      case 'lecturer_documents':
-        Navigator.pushNamed(context, '/lecturer_documents');
-        break;
       case 'lecturer_regulations':
         Navigator.pushNamed(context, '/lecturer_regulations');
         break;
       case 'lecturer_exam_schedule':
         Navigator.pushNamed(context, '/lecturer_exam_schedule');
-        break;
-      case 'lecturer_confirmation_letter':
-        Navigator.pushNamed(context, '/lecturer_confirmation_letter');
-        break;
-      case 'lecturer_tuition':
-        Navigator.pushNamed(context, '/lecturer_tuition');
         break;
       case 'lecturer_absences':
         Navigator.pushNamed(context, '/lecturer_absences');
@@ -89,6 +76,7 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
         break;
     }
   }
+
 
   Future<void> _tryOpenRegulationsOrShowDialog() async {
     final urlStr = 'https://daa.uit.edu.vn/qui-che-qui-dinh-qui-trinh';
@@ -251,7 +239,7 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
                       const SizedBox(height: 16),
 
                       // Quick Actions
-                      _buildSectionTitle('Truy cập nhanh', isDark),
+                      _buildSectionTitleWithCustomize('Truy cập nhanh', isDark),
                       const SizedBox(height: 12),
                       _buildQuickActionsGrid(provider, isDark),
                       const SizedBox(height: 24),
@@ -410,6 +398,34 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
     );
   }
 
+  Widget _buildSectionTitleWithCustomize(String title, bool isDark) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            color: isDark ? Colors.white : Colors.black87,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        GestureDetector(
+          onTap: _openCustomizeQuickActions,
+          child: Text(
+            'Tùy chỉnh',
+            style: TextStyle(
+              color: AppTheme.bluePrimary,
+              fontWeight: FontWeight.w600,
+              fontSize: 14,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+
   Widget _buildNextClassCard(
     LecturerProvider provider,
     AppLocalizations loc,
@@ -499,10 +515,7 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          _periodsToTimeRange(
-                            int.tryParse(nextClass.tietBatDau ?? '1') ?? 1,
-                            int.tryParse(nextClass.tietKetThuc ?? '3') ?? 3,
-                          ),
+                          _formatDayAndTime(nextClass, provider),
                           style: TextStyle(
                             color: isDark
                                 ? AppTheme.bluePrimary
@@ -627,16 +640,19 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
 
       if (difference.isNegative) return 'Đã bắt đầu';
 
-      final hours = difference.inHours;
+      final days = difference.inDays;
+      final hours = difference.inHours % 24;
       final minutes = difference.inMinutes % 60;
+      final seconds = difference.inSeconds % 60;
 
-      if (hours > 24) {
-        final days = hours ~/ 24;
-        return '${days}d ${hours % 24}h';
+      if (days > 0) {
+        return '${days}d ${hours}h ${minutes}m';
       } else if (hours > 0) {
-        return minutes > 0 ? '${hours}h ${minutes}m' : '${hours}h';
+        return '${hours}h ${minutes}m ${seconds}s';
+      } else if (minutes > 0) {
+        return '${minutes}m ${seconds}s';
       } else {
-        return '${minutes}m';
+        return '${seconds}s';
       }
     } catch (e) {
       return '---';
@@ -736,16 +752,17 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
   }
 
   Widget _buildQuickActionsGrid(LecturerProvider provider, bool isDark) {
-    final actions = provider.quickActions;
-
-    return Wrap(
-      spacing: 12,
-      runSpacing: 16,
-      children: actions.asMap().entries.map((entry) {
-        return _buildSquircleActionButton(entry.value, isDark, entry.key);
-      }).toList(),
+    return Center(
+      child: Wrap(
+        spacing: 12,
+        runSpacing: 16,
+        children: provider.quickActions.asMap().entries.map((entry) {
+          return _buildSquircleActionButton(entry.value, isDark, entry.key);
+        }).toList(),
+      ),
     );
   }
+
 
   Widget _buildSquircleActionButton(dynamic action, bool isDark, int index) {
     final gradients = [
@@ -767,9 +784,6 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
 
     IconData icon;
     switch (action.iconName) {
-      case 'badge_outlined':
-        icon = Icons.badge_outlined;
-        break;
       case 'calendar_today_outlined':
         icon = Icons.calendar_today_outlined;
         break;
@@ -788,17 +802,11 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
       case 'event_note':
         icon = Icons.event_note;
         break;
-      case 'verified':
-        icon = Icons.verified;
-        break;
       case 'event_busy':
         icon = Icons.event_busy;
         break;
       case 'event_available':
         icon = Icons.event_available;
-        break;
-      case 'payment':
-        icon = Icons.payment;
         break;
       default:
         icon = Icons.circle_outlined;
@@ -1210,5 +1218,76 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen>
         ),
       ),
     );
+  }
+
+  void _openCustomizeQuickActions() {
+    final provider = context.read<LecturerProvider>();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => LecturerQuickActionsSettingsModal(
+        enabledActions: provider.quickActions,
+        allAvailableActions: provider.allQuickActions,
+        onSave: (updatedActions) async {
+          await provider.saveQuickActionsPreferences(updatedActions);
+        },
+      ),
+    );
+  }
+
+  String _formatDayAndTime(dynamic nextClass, LecturerProvider provider) {
+    final classDate = provider.nextClassDate;
+    if (classDate == null) {
+      return _periodsToTimeRange(
+        int.tryParse(nextClass.tietBatDau ?? '1') ?? 1,
+        int.tryParse(nextClass.tietKetThuc ?? '3') ?? 3,
+      );
+    }
+
+    // Format day of week
+    final dayNames = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+    final dayName = dayNames[classDate.weekday % 7]; // weekday: 1=Monday, 7=Sunday
+
+    // Get start and end time
+    final startPeriod = int.tryParse(nextClass.tietBatDau ?? '1') ?? 1;
+    final endPeriod = int.tryParse(nextClass.tietKetThuc ?? '3') ?? 3;
+    final startTime = _getPeriodStartTime(startPeriod);
+    final endTime = _getPeriodEndTime(endPeriod);
+
+    return '$dayName $startTime - $endTime';
+  }
+
+  String _getPeriodStartTime(int period) {
+    const Map<int, String> startMap = {
+      1: '7:30',
+      2: '8:15',
+      3: '9:00',
+      4: '10:00',
+      5: '10:45',
+      6: '13:00',
+      7: '13:45',
+      8: '14:30',
+      9: '15:30',
+      0: '16:15',
+    };
+    return startMap[period] ?? '$period';
+  }
+
+  String _getPeriodEndTime(int period) {
+    const Map<int, String> endMap = {
+      1: '8:15',
+      2: '9:00',
+      3: '9:45',
+      4: '10:45',
+      5: '11:30',
+      6: '13:45',
+      7: '14:30',
+      8: '15:15',
+      9: '16:15',
+      0: '17:00',
+    };
+    return endMap[period] ?? '$period';
   }
 }
